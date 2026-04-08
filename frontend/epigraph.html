@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои цитаты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root, [data-theme="light"] {
+  --color-bg:             #f5f2ec;
+  --color-surface:        #faf8f4;
+  --color-surface-2:      #fffefb;
+  --color-surface-offset: #ede9e1;
+  --color-surface-dynamic:#e5e0d7;
+  --color-divider:        #d8d3c9;
+  --color-border:         #cdc7bb;
+  --color-text:           #2a2420;
+  --color-text-muted:     #7a7068;
+  --color-text-faint:     #b0a89e;
+  --color-text-inverse:   #faf8f4;
+  --color-primary:        #8b5e3c;
+  --color-primary-hover:  #6e4a2d;
+  --color-primary-active: #523620;
+  --color-primary-highlight: #e8ddd4;
+  --color-accent:         #c8956c;
+  --color-gold:           #c9a227;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl:   clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl:  clamp(2rem, 1.4rem + 2vw, 3rem);
+  --text-quote: clamp(1.4rem, 1rem + 2vw, 2.6rem);
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --space-16: 4rem; --space-20: 5rem;
+  --radius-sm: 0.375rem; --radius-md: 0.5rem;
+  --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+  --shadow-sm: 0 1px 3px oklch(0.2 0.02 50 / 0.06);
+  --shadow-md: 0 4px 16px oklch(0.2 0.02 50 / 0.09);
+  --shadow-lg: 0 12px 40px oklch(0.2 0.02 50 / 0.13);
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --content-narrow: 640px; --content-default: 960px; --content-wide: 1200px;
+}
+
+[data-theme="dark"] {
+  --color-bg:             #18160f;
+  --color-surface:        #1e1c15;
+  --color-surface-2:      #232119;
+  --color-surface-offset: #1a1811;
+  --color-surface-dynamic:#2b2820;
+  --color-divider:        #2e2b22;
+  --color-border:         #3a3729;
+  --color-text:           #e8e3d8;
+  --color-text-muted:     #8a8272;
+  --color-text-faint:     #5a5446;
+  --color-text-inverse:   #18160f;
+  --color-primary:        #d4956a;
+  --color-primary-hover:  #e8a87a;
+  --color-primary-active: #f0b888;
+  --color-primary-highlight: #3a2d22;
+  --color-accent:         #c8956c;
+  --color-gold:           #d4a830;
+  --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.25);
+  --shadow-md: 0 4px 16px oklch(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.45);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg:#18160f;--color-surface:#1e1c15;--color-surface-2:#232119;
+    --color-surface-offset:#1a1811;--color-surface-dynamic:#2b2820;
+    --color-divider:#2e2b22;--color-border:#3a3729;
+    --color-text:#e8e3d8;--color-text-muted:#8a8272;--color-text-faint:#5a5446;
+    --color-text-inverse:#18160f;--color-primary:#d4956a;
+    --color-primary-hover:#e8a87a;--color-primary-active:#f0b888;
+    --color-primary-highlight:#3a2d22;--color-accent:#c8956c;--color-gold:#d4a830;
+    --shadow-sm:0 1px 3px oklch(0 0 0/.25);
+    --shadow-md:0 4px 16px oklch(0 0 0/.35);
+    --shadow-lg:0 12px 40px oklch(0 0 0/.45);
+  }
+}
+
+/* ===== BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust:none; text-size-adjust:none; -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+body { min-height:100dvh; font-family:var(--font-body); font-size:var(--text-base); color:var(--color-text); background:var(--color-bg); line-height:1.6; }
+img { display:block; max-width:100%; height:auto; }
+button { cursor:pointer; background:none; border:none; font:inherit; color:inherit; }
+a, button, [role="button"] { transition: color var(--transition), background var(--transition), border-color var(--transition), box-shadow var(--transition), opacity var(--transition); }
+:focus-visible { outline:2px solid var(--color-primary); outline-offset:3px; border-radius:var(--radius-sm); }
+::selection { background: oklch(from var(--color-primary) l c h / 0.2); color: var(--color-text); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:0.01ms!important; transition-duration:0.01ms!important; } }
+
+/* ===== LAYOUT ===== */
+.app { display:flex; flex-direction:column; min-height:100dvh; }
+
+/* ===== HEADER ===== */
+header {
+  position:sticky; top:0; z-index:100;
+  background: oklch(from var(--color-bg) l c h / 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-divider);
+  padding: var(--space-3) var(--space-6);
+  display:flex; align-items:center; justify-content:space-between; gap:var(--space-4);
+}
+.logo {
+  display:flex; align-items:center; gap:var(--space-2);
+  font-family:var(--font-display); font-size:var(--text-lg);
+  font-weight:600; color:var(--color-text); text-decoration:none; letter-spacing:0.01em;
+}
+.logo svg { color:var(--color-primary); flex-shrink:0; }
+.header-actions { display:flex; align-items:center; gap:var(--space-2); }
+
+/* ===== NAV TABS ===== */
+.nav-tabs {
+  display:flex; gap:var(--space-1);
+  background:var(--color-surface-offset);
+  border-radius:var(--radius-full);
+  padding:var(--space-1);
+}
+.nav-tab {
+  padding:var(--space-1) var(--space-4);
+  border-radius:var(--radius-full);
+  font-size:var(--text-sm); font-weight:500;
+  color:var(--color-text-muted); cursor:pointer;
+  white-space:nowrap;
+}
+.nav-tab.active {
+  background:var(--color-surface-2);
+  color:var(--color-text);
+  box-shadow:var(--shadow-sm);
+}
+.nav-tab:hover:not(.active) { color:var(--color-text); }
+
+.btn-icon {
+  width:36px; height:36px; border-radius:var(--radius-full);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--color-text-muted);
+}
+.btn-icon:hover { background:var(--color-surface-offset); color:var(--color-text); }
+
+/* ===== MAIN ===== */
+main { flex:1; }
+
+/* ===== VIEWS ===== */
+.view { display:none; }
+.view.active { display:block; }
+
+/* ===== QUOTE OF THE DAY ===== */
+.qod-section {
+  min-height: calc(100dvh - 57px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding: var(--space-12) var(--space-6);
+  text-align:center; position:relative; overflow:hidden;
+}
+.qod-bg-ornament {
+  position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+  width:min(600px, 90vw); height:min(600px, 90vw);
+  background: radial-gradient(ellipse, oklch(from var(--color-primary) l c h / 0.06) 0%, transparent 70%);
+  pointer-events:none;
+}
+.qod-date {
+  font-size:var(--text-xs); font-weight:500; letter-spacing:0.12em;
+  text-transform:uppercase; color:var(--color-primary);
+  margin-bottom:var(--space-6);
+}
+.qod-card {
+  max-width:680px; width:100%;
+  background:var(--color-surface);
+  border:1px solid var(--color-border);
+  border-radius:var(--radius-xl);
+  padding:var(--space-10) var(--space-12);
+  box-shadow:var(--shadow-lg);
+  position:relative;
+}
+.qod-card::before {
+  content:'"';
+  position:absolute; top:calc(-1 * var(--space-8)); left:var(--space-8);
+  font-family:var(--font-display); font-size:10rem; line-height:1;
+  color:var(--color-primary); opacity:0.15; pointer-events:none;
+  user-select:none;
+}
+.qod-quote {
+  font-family:var(--font-display);
+  font-size:var(--text-quote);
+  font-style:italic; font-weight:400; line-height:1.5;
+  color:var(--color-text); margin-bottom:var(--space-6);
+}
+.qod-author {
+  font-size:var(--text-sm); font-weight:500;
+  letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--color-primary);
+}
+.qod-source {
+  font-size:var(--text-xs); color:var(--color-text-muted);
+  margin-top:var(--space-1); font-style:italic;
+}
+.qod-actions {
+  display:flex; align-items:center; gap:var(--space-3);
+  justify-content:center; margin-top:var(--space-8);
+}
+.btn-primary {
+  display:flex; align-items:center; gap:var(--space-2);
+  padding:var(--space-2) var(--space-5);
+  background:var(--color-primary); color:var(--color-text-inverse);
+  border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500;
+}
+.btn-primary:hover { background:var(--color-primary-hover); }
+.btn-secondary {
+  display:flex; align-items:center; gap:var(--space-2);
+  padding:var(--space-2) var(--space-5);
+  background:var(--color-surface-offset); color:var(--color-text);
+  border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500;
+  border: 1px solid var(--color-border);
+}
+.btn-secondary:hover { background:var(--color-surface-dynamic); }
+.qod-progress {
+  margin-top:var(--space-6);
+  font-size:var(--text-xs); color:var(--color-text-faint);
+}
+
+/* ===== QUOTES LIST ===== */
+.list-section { padding:var(--space-8) var(--space-6); max-width:var(--content-default); margin:0 auto; }
+.list-header {
+  display:flex; align-items:center; gap:var(--space-4);
+  margin-bottom:var(--space-6); flex-wrap:wrap;
+}
+.list-header h2 { font-family:var(--font-display); font-size:var(--text-xl); font-weight:500; flex:1; }
+.search-wrap { position:relative; flex:1; min-width:200px; max-width:360px; }
+.search-wrap svg { position:absolute; left:var(--space-3); top:50%; transform:translateY(-50%); color:var(--color-text-muted); pointer-events:none; }
+.search-input {
+  width:100%; padding:var(--space-2) var(--space-3) var(--space-2) 2.4rem;
+  background:var(--color-surface); border:1px solid var(--color-border);
+  border-radius:var(--radius-full); font-size:var(--text-sm); color:var(--color-text);
+  font-family:var(--font-body);
+}
+.search-input:focus { outline:2px solid var(--color-primary); border-color:transparent; }
+.search-input::placeholder { color:var(--color-text-faint); }
+.quotes-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap:var(--space-4);
+}
+.quote-card {
+  background:var(--color-surface); border:1px solid var(--color-border);
+  border-radius:var(--radius-lg); padding:var(--space-6);
+  box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
+  cursor:default;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.quote-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); }
+.quote-card-num {
+  position:absolute; top:var(--space-3); right:var(--space-4);
+  font-size:var(--text-xs); color:var(--color-text-faint);
+  font-variant-numeric:tabular-nums;
+}
+.quote-card-text {
+  font-family:var(--font-display); font-style:italic;
+  font-size:var(--text-lg); line-height:1.55; color:var(--color-text);
+  margin-bottom:var(--space-4);
+}
+.quote-card-meta { display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); }
+.quote-card-author { font-size:var(--text-xs); font-weight:500; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-primary); }
+.quote-card-source { font-size:var(--text-xs); color:var(--color-text-faint); font-style:italic; }
+.quote-card-actions { display:flex; gap:var(--space-1); opacity:0; transition:opacity var(--transition); }
+.quote-card:hover .quote-card-actions { opacity:1; }
+.card-btn { width:28px; height:28px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; color:var(--color-text-muted); }
+.card-btn:hover { background:var(--color-surface-offset); color:var(--color-primary); }
+.card-btn.fav.active { color:var(--color-gold); }
+.empty-state {
+  grid-column:1/-1; padding:var(--space-20) var(--space-8);
+  text-align:center; color:var(--color-text-muted);
+}
+.empty-state p { margin-top:var(--space-2); font-size:var(--text-sm); }
+.stats-bar {
+  display:flex; gap:var(--space-6); margin-bottom:var(--space-6);
+  font-size:var(--text-xs); color:var(--color-text-muted);
+  flex-wrap:wrap;
+}
+.stats-bar span strong { color:var(--color-text); font-weight:600; }
+.filter-tabs { display:flex; gap:var(--space-2); margin-bottom:var(--space-4); flex-wrap:wrap; }
+.filter-tab {
+  padding:var(--space-1) var(--space-3);
+  border-radius:var(--radius-full);
+  font-size:var(--text-xs); font-weight:500; cursor:pointer;
+  border:1px solid var(--color-border); color:var(--color-text-muted);
+}
+.filter-tab.active { background:var(--color-primary); color:var(--color-text-inverse); border-color:var(--color-primary); }
+.filter-tab:hover:not(.active) { border-color:var(--color-primary); color:var(--color-primary); }
+
+/* ===== ADD QUOTE ===== */
+.add-section { padding:var(--space-8) var(--space-6); max-width:680px; margin:0 auto; }
+.add-section h2 { font-family:var(--font-display); font-size:var(--text-xl); font-weight:500; margin-bottom:var(--space-2); }
+.add-section .subtitle { font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-8); }
+.form-group { margin-bottom:var(--space-5); }
+.form-label { display:block; font-size:var(--text-sm); font-weight:500; margin-bottom:var(--space-2); color:var(--color-text); }
+.form-label span { color:var(--color-text-faint); font-weight:400; }
+.form-input, .form-textarea {
+  width:100%; padding:var(--space-3) var(--space-4);
+  background:var(--color-surface); border:1px solid var(--color-border);
+  border-radius:var(--radius-md); font-size:var(--text-base);
+  color:var(--color-text); font-family:var(--font-body);
+  transition:border-color var(--transition), box-shadow var(--transition);
+}
+.form-textarea { font-family:var(--font-display); font-style:italic; font-size:var(--text-lg); min-height:140px; resize:vertical; line-height:1.6; }
+.form-input:focus, .form-textarea:focus { outline:none; border-color:var(--color-primary); box-shadow:0 0 0 3px oklch(from var(--color-primary) l c h / 0.15); }
+.form-input::placeholder, .form-textarea::placeholder { color:var(--color-text-faint); font-style:italic; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
+.form-actions { display:flex; gap:var(--space-3); margin-top:var(--space-6); }
+.form-divider { border:none; border-top:1px solid var(--color-divider); margin:var(--space-10) 0; }
+.import-area {
+  border:2px dashed var(--color-border); border-radius:var(--radius-lg);
+  padding:var(--space-8); text-align:center; cursor:pointer;
+  transition:border-color var(--transition), background var(--transition);
+}
+.import-area:hover { border-color:var(--color-primary); background:var(--color-primary-highlight); }
+.import-area p { font-size:var(--text-sm); color:var(--color-text-muted); margin-top:var(--space-2); }
+.import-area strong { color:var(--color-text); }
+.tag-input-wrap { display:flex; flex-wrap:wrap; gap:var(--space-2); align-items:center; }
+.tag { display:flex; align-items:center; gap:var(--space-1); padding:var(--space-1) var(--space-3) var(--space-1) var(--space-3); background:var(--color-primary-highlight); color:var(--color-primary); border-radius:var(--radius-full); font-size:var(--text-xs); font-weight:500; }
+.tag button { display:flex; align-items:center; color:inherit; opacity:0.6; }
+.tag button:hover { opacity:1; }
+
+/* ===== SETTINGS ===== */
+.settings-section { padding:var(--space-8) var(--space-6); max-width:680px; margin:0 auto; }
+.settings-section h2 { font-family:var(--font-display); font-size:var(--text-xl); font-weight:500; margin-bottom:var(--space-8); }
+.settings-group { margin-bottom:var(--space-8); }
+.settings-group-title { font-size:var(--text-xs); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-text-muted); margin-bottom:var(--space-4); padding-bottom:var(--space-2); border-bottom:1px solid var(--color-divider); }
+.settings-item { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); padding:var(--space-4) 0; border-bottom:1px solid var(--color-divider); }
+.settings-item:last-child { border-bottom:none; }
+.settings-item-info h4 { font-size:var(--text-base); font-weight:500; }
+.settings-item-info p { font-size:var(--text-sm); color:var(--color-text-muted); margin-top:var(--space-1); }
+.export-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) var(--space-5); border:1px solid var(--color-border); border-radius:var(--radius-full); font-size:var(--text-sm); color:var(--color-text); background:var(--color-surface); white-space:nowrap; }
+.export-btn:hover { border-color:var(--color-primary); color:var(--color-primary); }
+.danger-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) var(--space-5); border:1px solid #e05555; border-radius:var(--radius-full); font-size:var(--text-sm); color:#e05555; background:transparent; }
+.danger-btn:hover { background:#e0555515; }
+
+/* ===== TOAST ===== */
+.toast-wrap { position:fixed; bottom:var(--space-6); right:var(--space-6); display:flex; flex-direction:column; gap:var(--space-2); z-index:999; pointer-events:none; }
+.toast { padding:var(--space-3) var(--space-5); background:var(--color-text); color:var(--color-bg); border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500; box-shadow:var(--shadow-lg); opacity:0; transform:translateY(8px); transition:opacity 0.25s, transform 0.25s; }
+.toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
+
+/* ===== MODAL ===== */
+.modal-overlay { position:fixed; inset:0; background:oklch(0.1 0 0 / 0.5); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:center; justify-content:center; padding:var(--space-4); opacity:0; pointer-events:none; transition:opacity 0.2s; }
+.modal-overlay.open { opacity:1; pointer-events:auto; }
+.modal { background:var(--color-surface-2); border-radius:var(--radius-xl); padding:var(--space-8); max-width:480px; width:100%; box-shadow:var(--shadow-lg); transform:scale(0.96); transition:transform 0.2s; }
+.modal-overlay.open .modal { transform:scale(1); }
+.modal h3 { font-family:var(--font-display); font-size:var(--text-xl); font-weight:500; margin-bottom:var(--space-2); }
+.modal p { font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-6); line-height:1.7; }
+.modal-actions { display:flex; gap:var(--space-3); justify-content:flex-end; }
+.modal .btn-primary { background:var(--color-primary); color:var(--color-text-inverse); }
+.modal-quote-text { font-family:var(--font-display); font-style:italic; font-size:var(--text-lg); line-height:1.6; color:var(--color-text); background:var(--color-surface-offset); border-radius:var(--radius-md); padding:var(--space-5); margin-bottom:var(--space-4); }
+.modal-quote-author { font-size:var(--text-sm); font-weight:500; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-primary); margin-bottom:var(--space-6); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  header { padding:var(--space-3) var(--space-4); gap:var(--space-2); flex-wrap:wrap; }
+  .nav-tabs { order:3; flex:1 0 100%; justify-content:center; }
+  .logo { font-size:var(--text-base); }
+  .qod-card { padding:var(--space-6) var(--space-6); }
+  .form-row { grid-template-columns:1fr; }
+  .qod-actions { flex-wrap:wrap; }
+  .list-header { flex-direction:column; align-items:stretch; }
+  .search-wrap { max-width:100%; }
+}
+@media (max-width: 380px) {
+  .nav-tab { padding:var(--space-1) var(--space-2); font-size:0.75rem; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#" onclick="switchView('qod');return false;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+      <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+    </svg>
+    Мои цитаты
+  </a>
+
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" role="tab" onclick="switchView('qod')" id="tab-qod">На сегодня</button>
+    <button class="nav-tab" role="tab" onclick="switchView('list')" id="tab-list">Все цитаты</button>
+    <button class="nav-tab" role="tab" onclick="switchView('add')" id="tab-add">Добавить</button>
+    <button class="nav-tab" role="tab" onclick="switchView('settings')" id="tab-settings">Настройки</button>
+  </nav>
+
+  <div class="header-actions">
+    <button class="btn-icon" data-theme-toggle aria-label="Переключить тему">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- QUOTE OF THE DAY -->
+  <div class="view active" id="view-qod">
+    <section class="qod-section">
+      <div class="qod-bg-ornament"></div>
+      <div class="qod-date" id="qod-date"></div>
+      <div class="qod-card">
+        <p class="qod-quote" id="qod-text"></p>
+        <div class="qod-author" id="qod-author"></div>
+        <div class="qod-source" id="qod-source"></div>
+      </div>
+      <div class="qod-actions">
+        <button class="btn-primary" onclick="randomQuote()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Случайная
+        </button>
+        <button class="btn-secondary" onclick="copyQod()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Копировать
+        </button>
+        <button class="btn-secondary" onclick="favQod()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          В избранное
+        </button>
+      </div>
+      <p class="qod-progress" id="qod-progress"></p>
+    </section>
+  </div>
+
+  <!-- ALL QUOTES -->
+  <div class="view" id="view-list">
+    <section class="list-section">
+      <div class="list-header">
+        <h2>Все цитаты</h2>
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" type="search" placeholder="Поиск по цитатам..." id="search-input" oninput="renderList()" aria-label="Поиск">
+        </div>
+      </div>
+      <div class="stats-bar" id="stats-bar"></div>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">Все</button>
+        <button class="filter-tab" onclick="setFilter('fav', this)">⭐ Избранные</button>
+      </div>
+      <div class="quotes-grid" id="quotes-grid"></div>
+    </section>
+  </div>
+
+  <!-- ADD QUOTE -->
+  <div class="view" id="view-add">
+    <section class="add-section">
+      <h2>Добавить цитату</h2>
+      <p class="subtitle">Добавляйте цитаты вручную или импортируйте сразу несколько через JSON-файл.</p>
+
+      <form onsubmit="addQuote(event)">
+        <div class="form-group">
+          <label class="form-label" for="q-text">Текст цитаты</label>
+          <textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="q-author">Автор <span>(необязательно)</span></label>
+            <input class="form-input" type="text" id="q-author" placeholder="Имя автора">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="q-source">Источник <span>(необязательно)</span></label>
+            <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="q-tags">Теги <span>(необязательно)</span></label>
+          <div class="tag-input-wrap" id="tags-wrap">
+            <input class="form-input" type="text" id="q-tags" placeholder="Введите тег и нажмите Enter" onkeydown="addTag(event)" style="flex:1;min-width:150px;">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Добавить цитату
+          </button>
+          <button type="button" class="btn-secondary" onclick="resetForm()">Очистить</button>
+        </div>
+      </form>
+
+      <hr class="form-divider">
+
+      <h3 style="font-family:var(--font-display);font-size:var(--text-lg);font-weight:500;margin-bottom:var(--space-2)">Импорт из JSON</h3>
+      <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)">Загрузите файл формата <code style="background:var(--color-surface-offset);padding:2px 6px;border-radius:4px;font-size:0.85em">.json</code> со списком цитат.</p>
+      <label class="import-area" for="import-file">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto var(--space-3);color:var(--color-text-muted)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <strong>Выберите файл или перетащите сюда</strong>
+        <p>Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code></p>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+      </label>
+
+      <div style="margin-top:var(--space-4)">
+        <p style="font-size:var(--text-xs);color:var(--color-text-faint);margin-bottom:var(--space-2)">Пример структуры JSON:</p>
+        <pre style="background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-4);font-size:0.78rem;overflow-x:auto;color:var(--color-text-muted);line-height:1.7">[
+  {
+    "text": "Текст цитаты",
+    "author": "Имя автора",
+    "source": "Название книги"
+  }
+]</pre>
+      </div>
+    </section>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="view" id="view-settings">
+    <section class="settings-section">
+      <h2>Настройки</h2>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Данные</div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>Экспорт в JSON</h4>
+            <p>Скачайте все ваши цитаты для резервного копирования или переноса.</p>
+          </div>
+          <button class="export-btn" onclick="exportJSON()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Экспорт
+          </button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>Копировать всё как текст</h4>
+            <p>Скопируйте все цитаты в буфер обмена в текстовом формате.</p>
+          </div>
+          <button class="export-btn" onclick="copyAll()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Копировать
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Опасная зона</div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>Удалить все цитаты</h4>
+            <p>Безвозвратное удаление всех цитат из приложения.</p>
+          </div>
+          <button class="danger-btn" onclick="confirmClear()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Удалить всё
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">О приложении</div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>Как добавить цитаты из Яндекс Книг</h4>
+            <p>Перейдите в раздел «Добавить» → «Импорт из JSON». Нужно создать файл со списком цитат в формате JSON. Подробная инструкция на экране импорта.</p>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <h4>Хранение данных</h4>
+            <p>Все цитаты хранятся в браузере (localStorage). Используйте экспорт для резервных копий.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="closeModal(event)">
+  <div class="modal">
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ===== DATA =====
+const STORAGE_KEY = 'myquotes_v1';
+let quotes = [];
+let currentFilter = 'all';
+let currentQodIndex = -1;
+let pendingTags = [];
+let editingId = null;
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes)); } catch(e) {}
+}
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { quotes = JSON.parse(raw); return; }
+  } catch(e) {}
+  quotes = DEMO_QUOTES.map((q, i) => ({ ...q, id: Date.now() + i, fav: false, added: Date.now() }));
+  saveData();
+}
+
+// ===== DEMO QUOTES =====
+const DEMO_QUOTES = [
+  { text: "Не говори мало, не пиши много. Скажи всё одним словом.", author: "Лев Толстой", source: "" },
+  { text: "Человек должен быть непременно фанатиком хоть чего-нибудь.", author: "Антон Чехов", source: "" },
+  { text: "Счастье — это когда тебя понимают.", author: "Лев Толстой", source: "Война и мир" },
+  { text: "Жизнь прожить — не поле перейти.", author: "Народная мудрость", source: "" },
+  { text: "Верить в людей — значит любить их.", author: "Максим Горький", source: "" },
+  { text: "Трудно в учении — легко в бою.", author: "Александр Суворов", source: "" },
+  { text: "Безмолвие — ответ на ложь.", author: "Народная мудрость", source: "" },
+  { text: "Человек — это звучит гордо.", author: "Максим Горький", source: "На дне" },
+  { text: "Всё течёт, всё меняется.", author: "Гераклит", source: "" },
+  { text: "Познай самого себя.", author: "Сократ", source: "" },
+];
+
+// ===== THEME =====
+(function(){
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  try { const s = localStorage.getItem('theme'); if(s) d = s; } catch(e){}
+  r.setAttribute('data-theme', d);
+  updateThemeIcon(t, d);
+  t && t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d);
+    try { localStorage.setItem('theme', d); } catch(e){}
+    updateThemeIcon(t, d);
+  });
+  function updateThemeIcon(btn, mode) {
+    if (!btn) return;
+    if (mode === 'dark') {
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+      btn.setAttribute('aria-label', 'Переключить на светлую тему');
+    } else {
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      btn.setAttribute('aria-label', 'Переключить на тёмную тему');
+    }
+  }
+})();
+
+// ===== NAVIGATION =====
+function switchView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+  if (id === 'list') renderList();
+  if (id === 'qod') renderQod();
+}
+
+// ===== QUOTE OF THE DAY =====
+function getDayIndex() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const day = Math.floor(diff / oneDay);
+  return quotes.length ? (day % quotes.length) : 0;
+}
+
+function renderQod(overrideIdx) {
+  if (!quotes.length) {
+    document.getElementById('qod-text').textContent = 'Добавьте первую цитату в разделе «Добавить»';
+    document.getElementById('qod-author').textContent = '';
+    document.getElementById('qod-source').textContent = '';
+    document.getElementById('qod-progress').textContent = '';
+    return;
+  }
+  const idx = overrideIdx !== undefined ? overrideIdx : getDayIndex();
+  currentQodIndex = idx;
+  const q = quotes[idx];
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ru-RU', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('qod-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  const textEl = document.getElementById('qod-text');
+  textEl.style.opacity = '0'; textEl.style.transform = 'translateY(6px)';
+  setTimeout(() => {
+    textEl.textContent = q.text;
+    document.getElementById('qod-author').textContent = q.author || '';
+    document.getElementById('qod-source').textContent = q.source || '';
+    textEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)';
+  }, 60);
+  document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
+}
+
+function randomQuote() {
+  if (!quotes.length) return;
+  let idx;
+  do { idx = Math.floor(Math.random() * quotes.length); } while (idx === currentQodIndex && quotes.length > 1);
+  renderQod(idx);
+}
+
+function copyQod() {
+  const q = quotes[currentQodIndex];
+  if (!q) return;
+  let text = q.text;
+  if (q.author) text += '\n— ' + q.author;
+  if (q.source) text += ', «' + q.source + '»';
+  navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка копирования'));
+}
+
+function favQod() {
+  const q = quotes[currentQodIndex];
+  if (!q) return;
+  q.fav = !q.fav;
+  saveData();
+  toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
+}
+
+// ===== LIST =====
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+  let filtered = quotes.filter(q => {
+    if (currentFilter === 'fav' && !q.fav) return false;
+    if (!query) return true;
+    return (q.text + ' ' + (q.author||'') + ' ' + (q.source||'')).toLowerCase().includes(query);
+  });
+
+  const grid = document.getElementById('quotes-grid');
+  const total = quotes.length;
+  const favCount = quotes.filter(q => q.fav).length;
+  document.getElementById('stats-bar').innerHTML = `
+    <span>Всего: <strong>${total}</strong></span>
+    <span>Избранных: <strong>${favCount}</strong></span>
+    <span>Показано: <strong>${filtered.length}</strong></span>
+  `;
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin:0 auto var(--space-4);color:var(--color-text-faint)"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg><h3>${query ? 'Ничего не найдено' : 'Нет цитат'}</h3><p>${query ? 'Попробуйте другой запрос' : 'Перейдите в «Добавить», чтобы добавить первую цитату'}</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((q, i) => `
+    <article class="quote-card" tabindex="0">
+      <span class="quote-card-num">${quotes.indexOf(q) + 1}</span>
+      <p class="quote-card-text">${escHtml(q.text)}</p>
+      <div class="quote-card-meta">
+        <div>
+          <div class="quote-card-author">${escHtml(q.author || '')}</div>
+          ${q.source ? `<div class="quote-card-source">${escHtml(q.source)}</div>` : ''}
+        </div>
+        <div class="quote-card-actions">
+          <button class="card-btn fav${q.fav?' active':''}" onclick="toggleFav('${q.id}')" aria-label="${q.fav?'Убрать из избранного':'В избранное'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${q.fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+          <button class="card-btn" onclick="copyQuote('${q.id}')" aria-label="Копировать">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="card-btn" onclick="deleteQuote('${q.id}')" aria-label="Удалить" style="color:var(--color-text-faint)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function toggleFav(id) {
+  const q = quotes.find(x => String(x.id) === String(id));
+  if (!q) return;
+  q.fav = !q.fav;
+  saveData();
+  renderList();
+  toast(q.fav ? '⭐ В избранное' : 'Убрано из избранного');
+}
+
+function copyQuote(id) {
+  const q = quotes.find(x => String(x.id) === String(id));
+  if (!q) return;
+  let text = q.text;
+  if (q.author) text += '\n— ' + q.author;
+  if (q.source) text += ', «' + q.source + '»';
+  navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка'));
+}
+
+function deleteQuote(id) {
+  const q = quotes.find(x => String(x.id) === String(id));
+  if (!q) return;
+  showModal(
+    'Удалить цитату?',
+    `«${q.text.substring(0, 80)}${q.text.length > 80 ? '…' : ''}»`,
+    [
+      { label: 'Отмена', cls: 'btn-secondary', action: closeModalFn },
+      { label: 'Удалить', cls: 'btn-primary', style: 'background:#e05555', action: () => { quotes = quotes.filter(x => String(x.id) !== String(id)); saveData(); renderList(); closeModalFn(); toast('Цитата удалена'); } }
+    ]
+  );
+}
+
+// ===== ADD FORM =====
+function addTag(e) {
+  if (e.key !== 'Enter' && e.key !== ',') return;
+  e.preventDefault();
+  const val = e.target.value.trim();
+  if (!val || pendingTags.includes(val)) { e.target.value = ''; return; }
+  pendingTags.push(val);
+  e.target.value = '';
+  renderTags();
+}
+function renderTags() {
+  const wrap = document.getElementById('tags-wrap');
+  const input = document.getElementById('q-tags');
+  wrap.innerHTML = '';
+  pendingTags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.innerHTML = `${escHtml(tag)} <button type="button" aria-label="Удалить тег" onclick="removeTag('${escHtml(tag)}')">&times;</button>`;
+    wrap.appendChild(span);
+  });
+  wrap.appendChild(input);
+}
+function removeTag(tag) {
+  pendingTags = pendingTags.filter(t => t !== tag);
+  renderTags();
+}
+
+function addQuote(e) {
+  e.preventDefault();
+  const text = document.getElementById('q-text').value.trim();
+  const author = document.getElementById('q-author').value.trim();
+  const source = document.getElementById('q-source').value.trim();
+  if (!text) return;
+  const q = { id: Date.now(), text, author, source, tags: [...pendingTags], fav: false, added: Date.now() };
+  quotes.push(q);
+  saveData();
+  resetForm();
+  toast('✓ Цитата добавлена!');
+}
+
+function resetForm() {
+  document.getElementById('q-text').value = '';
+  document.getElementById('q-author').value = '';
+  document.getElementById('q-source').value = '';
+  pendingTags = [];
+  renderTags();
+}
+
+// ===== IMPORT/EXPORT =====
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Ожидается массив');
+      let count = 0;
+      data.forEach(item => {
+        if (!item.text) return;
+        quotes.push({ id: Date.now() + Math.random(), text: item.text, author: item.author || '', source: item.source || '', tags: item.tags || [], fav: false, added: Date.now() });
+        count++;
+      });
+      saveData();
+      toast(`✓ Импортировано ${count} цитат`);
+      e.target.value = '';
+    } catch(err) {
+      toast('Ошибка: неверный формат файла');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportJSON() {
+  const data = JSON.stringify(quotes.map(q => ({ text: q.text, author: q.author, source: q.source, tags: q.tags })), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'epigraph.json';
+  a.click();
+  toast('Экспорт готов');
+}
+
+function copyAll() {
+  const text = quotes.map((q, i) => {
+    let line = `${i+1}. ${q.text}`;
+    if (q.author) line += `\n   — ${q.author}`;
+    if (q.source) line += `, «${q.source}»`;
+    return line;
+  }).join('\n\n');
+  navigator.clipboard.writeText(text).then(() => toast('Все цитаты скопированы!')).catch(() => toast('Ошибка'));
+}
+
+function confirmClear() {
+  showModal(
+    'Удалить все цитаты?',
+    'Это действие нельзя отменить. Все ваши цитаты будут удалены. Рекомендуем сначала сделать экспорт.',
+    [
+      { label: 'Отмена', cls: 'btn-secondary', action: closeModalFn },
+      { label: 'Удалить всё', cls: 'btn-primary', style: 'background:#e05555', action: () => { quotes = []; saveData(); closeModalFn(); toast('Все цитаты удалены'); } }
+    ]
+  );
+}
+
+// ===== MODAL =====
+function showModal(title, body, actions) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = body;
+  const actionsEl = document.getElementById('modal-actions');
+  actionsEl.innerHTML = '';
+  actions.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = a.cls;
+    btn.textContent = a.label;
+    if (a.style) btn.style.cssText = a.style + ';color:#fff';
+    btn.onclick = a.action;
+    actionsEl.appendChild(btn);
+  });
+  document.getElementById('modal').classList.add('open');
+}
+function closeModalFn() { document.getElementById('modal').classList.remove('open'); }
+function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalFn(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalFn(); });
+
+// ===== TOAST =====
+function toast(msg, duration = 2600) {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(() => { requestAnimationFrame(() => el.classList.add('show')); });
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+// ===== HELPERS =====
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== INIT =====
+loadData();
+renderQod();
+</script>
+</body>
+</html>
