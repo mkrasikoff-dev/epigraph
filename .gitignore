@@ -1,1 +1,11 @@
-.idea
+# IntelliJ
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+**/build/
+
+# OS
+.DS_Store
