@@ -12,10 +12,24 @@ import lombok.Data;
 @Data
 public class Quote {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String text;
+
     private String author;
+
     private String source;
+
+    private boolean fav;
+
+    /**
+     * Хранится как "tag1,tag2" (строка)
+     */
+    private String tags;
+
+    /**
+     * Unix timestamp в миллисекундах
+     */
+    private Long added;
 }

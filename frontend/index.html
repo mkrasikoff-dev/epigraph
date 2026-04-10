@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Мои цитаты</title>
+<title>Epigraph</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -384,7 +384,7 @@ main { flex:1; }
       <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
       <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
     </svg>
-    Мои цитаты
+    Epigraph
   </a>
 
   <nav class="nav-tabs" role="tablist">
@@ -589,23 +589,22 @@ main { flex:1; }
 
 <script>
 // ===== DATA =====
-const STORAGE_KEY = 'myquotes_v1';
+const API = 'http://localhost:8080/api/quotes';
 let quotes = [];
 let currentFilter = 'all';
 let currentQodIndex = -1;
 let pendingTags = [];
 let editingId = null;
 
-function saveData() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes)); } catch(e) {}
-}
-function loadData() {
+async function loadData() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { quotes = JSON.parse(raw); return; }
-  } catch(e) {}
-  quotes = DEMO_QUOTES.map((q, i) => ({ ...q, id: Date.now() + i, fav: false, added: Date.now() }));
-  saveData();
+    const res = await fetch(API);
+    const raw = await res.json();
+    quotes = raw.map(q => ({ ...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : [] }));
+  } catch(e) {
+    console.error('Ошибка загрузки:', e);
+    quotes = [];
+  }
 }
 
 // ===== DEMO QUOTES =====
@@ -710,12 +709,18 @@ function copyQod() {
   navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка копирования'));
 }
 
-function favQod() {
+async function favQod() {
   const q = quotes[currentQodIndex];
   if (!q) return;
   q.fav = !q.fav;
-  saveData();
-  toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
+  try {
+    await fetch(`${API}/${q.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
+    });
+    toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
+  } catch(e) { q.fav = !q.fav; toast('Ошибка'); }
 }
 
 // ===== LIST =====
@@ -773,13 +778,19 @@ function renderList() {
   `).join('');
 }
 
-function toggleFav(id) {
+async function toggleFav(id) {
   const q = quotes.find(x => String(x.id) === String(id));
   if (!q) return;
   q.fav = !q.fav;
-  saveData();
-  renderList();
-  toast(q.fav ? '⭐ В избранное' : 'Убрано из избранного');
+  try {
+    await fetch(`${API}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
+    });
+    renderList();
+    toast(q.fav ? '⭐ В избранное' : 'Убрано из избранного');
+  } catch(e) { q.fav = !q.fav; toast('Ошибка'); } // откатываем при ошибке
 }
 
 function copyQuote(id) {
@@ -795,12 +806,18 @@ function deleteQuote(id) {
   const q = quotes.find(x => String(x.id) === String(id));
   if (!q) return;
   showModal(
-    'Удалить цитату?',
-    `«${q.text.substring(0, 80)}${q.text.length > 80 ? '…' : ''}»`,
-    [
-      { label: 'Отмена', cls: 'btn-secondary', action: closeModalFn },
-      { label: 'Удалить', cls: 'btn-primary', style: 'background:#e05555', action: () => { quotes = quotes.filter(x => String(x.id) !== String(id)); saveData(); renderList(); closeModalFn(); toast('Цитата удалена'); } }
-    ]
+          'Удалить цитату?',
+          `«${q.text.substring(0, 80)}${q.text.length > 80 ? '…' : ''}»`,
+          [
+            { label: 'Отмена', cls: 'btn-secondary', action: closeModalFn },
+            { label: 'Удалить', cls: 'btn-primary', style: 'background:#e05555', action: async () => {
+                try {
+                  await fetch(`${API}/${id}`, { method: 'DELETE' });
+                  quotes = quotes.filter(x => String(x.id) !== String(id));
+                  renderList(); closeModalFn(); toast('Цитата удалена');
+                } catch(e) { toast('Ошибка удаления'); }
+              }}
+          ]
   );
 }
 
@@ -831,17 +848,24 @@ function removeTag(tag) {
   renderTags();
 }
 
-function addQuote(e) {
+async function addQuote(e) {
   e.preventDefault();
   const text = document.getElementById('q-text').value.trim();
   const author = document.getElementById('q-author').value.trim();
   const source = document.getElementById('q-source').value.trim();
   if (!text) return;
-  const q = { id: Date.now(), text, author, source, tags: [...pendingTags], fav: false, added: Date.now() };
-  quotes.push(q);
-  saveData();
-  resetForm();
-  toast('✓ Цитата добавлена!');
+  const q = { text, author, source, tags: pendingTags.join(','), fav: false, added: Date.now() };
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(q)
+    });
+    const saved = await res.json();
+    quotes.push({ ...saved, tags: saved.tags ? saved.tags.split(',').filter(Boolean) : [] });
+    resetForm();
+    toast('✓ Цитата добавлена!');
+  } catch(e) { toast('Ошибка при сохранении'); }
 }
 
 function resetForm() {
@@ -857,22 +881,23 @@ function importJSON(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = ev => {
+  reader.onload = async ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (!Array.isArray(data)) throw new Error('Ожидается массив');
+      if (!Array.isArray(data)) throw new Error();
       let count = 0;
-      data.forEach(item => {
-        if (!item.text) return;
-        quotes.push({ id: Date.now() + Math.random(), text: item.text, author: item.author || '', source: item.source || '', tags: item.tags || [], fav: false, added: Date.now() });
+      for (const item of data) {
+        if (!item.text) continue;
+        const q = { text: item.text, author: item.author || '', source: item.source || '',
+          tags: (item.tags || []).join(','), fav: false, added: Date.now() };
+        const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(q) });
+        const saved = await res.json();
+        quotes.push({ ...saved, tags: saved.tags ? saved.tags.split(',').filter(Boolean) : [] });
         count++;
-      });
-      saveData();
+      }
       toast(`✓ Импортировано ${count} цитат`);
       e.target.value = '';
-    } catch(err) {
-      toast('Ошибка: неверный формат файла');
-    }
+    } catch(err) { toast('Ошибка: неверный формат файла'); }
   };
   reader.readAsText(file);
 }
@@ -899,12 +924,17 @@ function copyAll() {
 
 function confirmClear() {
   showModal(
-    'Удалить все цитаты?',
-    'Это действие нельзя отменить. Все ваши цитаты будут удалены. Рекомендуем сначала сделать экспорт.',
-    [
-      { label: 'Отмена', cls: 'btn-secondary', action: closeModalFn },
-      { label: 'Удалить всё', cls: 'btn-primary', style: 'background:#e05555', action: () => { quotes = []; saveData(); closeModalFn(); toast('Все цитаты удалены'); } }
-    ]
+          'Удалить все цитаты?',
+          'Это действие нельзя отменить. Все ваши цитаты будут удалены.',
+          [
+            { label: 'Отмена', cls: 'btn-secondary', action: closeModalFn },
+            { label: 'Удалить всё', cls: 'btn-primary', style: 'background:#e05555', action: async () => {
+                try {
+                  await fetch(API, { method: 'DELETE' });
+                  quotes = []; renderList(); closeModalFn(); toast('Все цитаты удалены');
+                } catch(e) { toast('Ошибка'); }
+              }}
+          ]
   );
 }
 
@@ -948,8 +978,7 @@ function escHtml(str) {
 }
 
 // ===== INIT =====
-loadData();
-renderQod();
+loadData().then(() => renderQod());
 </script>
 </body>
 </html>
