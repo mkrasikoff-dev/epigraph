@@ -4,8 +4,12 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
+tasks.bootJar {
+	archiveFileName.set("app.jar")
+}
+
 group = "com.mkrasikoff"
-version = "0.0.1-SNAPSHOT"
+version = "1.0.0"
 description = "backend"
 
 java {
