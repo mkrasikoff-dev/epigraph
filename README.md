@@ -1,13 +1,13 @@
 # Epigraph
 
-Приложение для хранения цитат с постоянным хранилищем на PostgreSQL.
+Личное приложение для хранения любимых цитат. Открываешь — видишь цитату дня. Добавляешь вручную или импортируешь из JSON. Цитаты сохраняются в PostgreSQL и не теряются при перезапуске.
 
 ## Структура проекта
 
 ```
 epigraph/
 ├── backend/        — Spring Boot + Gradle (REST API)
-├── frontend/       — Статический HTML/CSS/JS
+├── frontend/       — Статический HTML/CSS/JS (также раздаётся Spring Boot из resources/static)
 ├── README.md
 └── .gitignore
 ```
@@ -18,8 +18,8 @@ epigraph/
 |------------|----------------------------------------|
 | Java       | 21+                                    |
 | Gradle     | 8.14 (через враппер, `./gradlew`)      |
-| PostgreSQL | 14+                                    |
-| Python     | 3.x (для локального сервера фронтенда) |
+| PostgreSQL  | 14+                                    |
+| Python     | 3.x (опционально, для отдельного dev-сервера фронтенда) |
 
 ## Локальная разработка
 
@@ -42,17 +42,17 @@ cd backend
 ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
-Приложение запустится на **http://localhost:8080**.
+Приложение запустится на **http://localhost:8080** — фронтенд уже включён и открывается по этому же адресу.
 
-Проверка:
+Проверка API:
 ```bash
 curl http://localhost:8080/api/quotes
 # Ответ: [] (пустой массив — всё работает)
 ```
 
-### 3. Фронтенд
+### 3. Фронтенд (опционально, для разработки с hot-reload)
 
-Открой отдельный терминал:
+Если нужно редактировать `index.html` и сразу видеть изменения без пересборки:
 
 ```bash
 cd frontend
@@ -62,6 +62,8 @@ python3 -m http.server 3000
 Открой браузер: **http://localhost:3000**
 
 > ⚠️ Открывай именно через `http://localhost:3000`, а не как `file://` — браузер блокирует API-запросы из файловой системы.
+
+> ℹ️ 404 для `/favicon.ico` в логах Python-сервера — это нормально, браузер запрашивает его автоматически.
 
 ***
 
@@ -129,21 +131,12 @@ cors.allowed-origins=http://localhost:3000
 4. В настройках сервиса укажи переменную: `SPRING_PROFILES_ACTIVE=prod`
 5. Railway автоматически обнаружит `build.gradle` и соберёт проект
 
-После деплоя обнови `API` в `frontend/index.html`:
-```js
-const API = 'https://your-app.up.railway.app/api/quotes';
-```
-
 ***
 
-## Быстрый старт (краткая версия)
+## Быстрый старт
 
 ```bash
-# Терминал 1 — бекенд
 cd backend && ./gradlew bootRun --args='--spring.profiles.active=local'
-
-# Терминал 2 — фронтенд
-cd frontend && python3 -m http.server 3000
 ```
 
-Открой **http://localhost:3000** 
+Открой **http://localhost:8080**
