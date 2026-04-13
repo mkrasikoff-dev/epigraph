@@ -1,31 +1,41 @@
 # Epigraph
 
-Личное приложение для хранения любимых цитат. Открываешь — видишь цитату дня. Добавляешь вручную или импортируешь из JSON. Цитаты сохраняются в PostgreSQL и не теряются при перезапуске.
+Epigraph is a personal app for collecting and keeping quotes you love - from books, articles, conversations, or anywhere else. Open it and see a quote of the day. Add new ones, mark favourites, search by author or keyword, and export your collection any time.
 
-## Структура проекта
+Your quotes are stored in a database and never lost between sessions.
+
+## Live app
+
+→ [epigraph.up.railway.app](https://epigraph.up.railway.app)
+
+---
+
+## For developers
+
+### Project structure
 
 ```
 epigraph/
-├── backend/        — Spring Boot + Gradle (REST API)
-├── frontend/       — Статический HTML/CSS/JS (также раздаётся Spring Boot из resources/static)
+├── backend/ - contains backend-logic and frontend static resources
 ├── README.md
+├── RELEASE_POLICY.md
 └── .gitignore
 ```
 
-## Требования
+### Requirements
 
-| Инструмент | Версия                                 |
-|------------|----------------------------------------|
-| Java       | 21+                                    |
-| Gradle     | 8.14 (через враппер, `./gradlew`)      |
-| PostgreSQL  | 14+                                    |
-| Python     | 3.x (опционально, для отдельного dev-сервера фронтенда) |
+| Tool       | Version                                         |
+|------------|-------------------------------------------------|
+| Java       | 21+                                             |
+| Gradle     | 8.14 (via wrapper, `./gradlew`)                 |
+| PostgreSQL | 14+                                             |
+| Python     | 3.x *(optional - only for frontend dev server)* |
 
-## Локальная разработка
+### Local development
 
-### 1. База данных
+#### 1. Database
 
-Запусти **Postgres.app** (иконка в menubar → Start) и создай базу:
+Start **Postgres.app** (menubar icon → Start) and create the database:
 
 ```bash
 psql -U postgres
@@ -33,110 +43,64 @@ CREATE DATABASE epigraph;
 \q
 ```
 
-База данных будет доступна на `localhost:5432`.
-
-### 2. Бекенд
+#### 2. Backend + Frontend
 
 ```bash
 cd backend
 ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
-Приложение запустится на **http://localhost:8080** — фронтенд уже включён и открывается по этому же адресу.
+The app starts at **http://localhost:8080** - frontend is included and served at the same address.
 
-Проверка API:
+Verify the API is running:
 ```bash
 curl http://localhost:8080/api/quotes
-# Ответ: [] (пустой массив — всё работает)
+# Expected: [] (empty array - all good)
 ```
 
-### 3. Фронтенд (опционально, для разработки с hot-reload)
+#### Production (Railway environment variables)
 
-Если нужно редактировать `index.html` и сразу видеть изменения без пересборки:
+| Variable                 | Value                              |
+|--------------------------|------------------------------------|
+| `DATABASE_URL`           | set automatically by Railway       |
+| `DB_USER`                | set automatically by Railway       |
+| `DB_PASSWORD`            | set automatically by Railway       |
+| `SPRING_PROFILES_ACTIVE` | `prod`                             |
 
-```bash
-cd frontend
-python3 -m http.server 3000
-```
+---
 
-Открой браузер: **http://localhost:3000**
+### API
 
-> ⚠️ Открывай именно через `http://localhost:3000`, а не как `file://` — браузер блокирует API-запросы из файловой системы.
+Base URL: `http://localhost:8080/api`
 
-> ℹ️ 404 для `/favicon.ico` в логах Python-сервера — это нормально, браузер запрашивает его автоматически.
+| Method   | Path           | Description              |
+|----------|----------------|--------------------------|
+| `GET`    | `/quotes`      | Get all quotes           |
+| `POST`   | `/quotes`      | Add a quote              |
+| `PUT`    | `/quotes/{id}` | Update a quote           |
+| `DELETE` | `/quotes/{id}` | Delete a single quote    |
+| `DELETE` | `/quotes`      | Delete all quotes        |
 
-***
-
-## Конфигурация
-
-### Переменные окружения (локально)
-
-Настройки для локальной разработки задаются в `backend/src/main/resources/application-local.properties`:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/epigraph
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-cors.allowed-origins=http://localhost:3000
-```
-
-> Этот файл добавлен в `.gitignore` — не попадает в репозиторий.
-
-### Переменные окружения (продакшн, Railway)
-
-Задаются в панели Variables на Railway:
-
-| Переменная               | Значение                          |
-|--------------------------|-----------------------------------|
-| `DATABASE_URL`           | автоматически от Railway Postgres |
-| `DB_USER`                | автоматически от Railway Postgres |
-| `DB_PASSWORD`            | автоматически от Railway Postgres |
-| `SPRING_PROFILES_ACTIVE` | `prod`                            |
-
-***
-
-## API
-
-Базовый URL: `http://localhost:8080/api`
-
-| Метод    | Путь           | Описание                           |
-|----------|----------------|------------------------------------|
-| `GET`    | `/quotes`      | Получить все цитаты                |
-| `POST`   | `/quotes`      | Добавить цитату                    |
-| `PUT`    | `/quotes/{id}` | Обновить цитату (в т.ч. избранное) |
-| `DELETE` | `/quotes/{id}` | Удалить одну цитату                |
-| `DELETE` | `/quotes`      | Удалить все цитаты                 |
-
-### Формат цитаты (JSON)
+#### Quote format (JSON)
 
 ```json
 {
   "id": 1,
-  "text": "Текст цитаты",
-  "author": "Имя автора",
-  "source": "Название книги",
+  "text": "Quote text",
+  "author": "Author name",
+  "source": "Book title",
   "fav": false,
-  "tags": "философия,мотивация",
+  "tags": "philosophy,motivation",
   "added": 1712760000000
 }
 ```
 
-***
+---
 
-## Деплой на Railway
-
-1. Зарегистрируйся на [railway.app](https://railway.app) через GitHub
-2. **New Project → Deploy from GitHub repo** → выбери `epigraph`, папка `backend`
-3. **Add Service → Database → PostgreSQL** — Railway сам создаст `DATABASE_URL`
-4. В настройках сервиса укажи переменную: `SPRING_PROFILES_ACTIVE=prod`
-5. Railway автоматически обнаружит `build.gradle` и соберёт проект
-
-***
-
-## Быстрый старт
+### Quick start
 
 ```bash
 cd backend && ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
 
-Открой **http://localhost:8080**
+Open **http://localhost:8080**
