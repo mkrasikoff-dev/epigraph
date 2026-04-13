@@ -579,7 +579,7 @@ main { flex:1; }
 </div>
 
 <!-- MODAL -->
-<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="closeModal(event)">
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="handleModalOverlayClick(event)">
   <div class="modal">
     <h3 id="modal-title"></h3>
     <p id="modal-body"></p>
@@ -932,16 +932,27 @@ function showModal(title, body, actions) {
     const btn = document.createElement('button');
     btn.className = a.cls;
     btn.textContent = a.label;
-    btn.onclick = a.action;
+    // bind action directly so closeModal() is called without a MouseEvent argument, bypassing the overlay-click guard
+    btn.addEventListener('click', a.action);
     actEl.appendChild(btn);
   });
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal(e) {
-  if (e && e.target !== document.getElementById('modal')) return;
+// Close modal (Cancel button)
+function closeModal() {
   document.getElementById('modal').classList.remove('open');
 }
+
+// Close modal (Overlay)
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+// Close modal (Escape button)
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
 
 // ===== TOAST =====
 function toast(msg) {
