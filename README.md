@@ -6,7 +6,7 @@ Your quotes are stored in a database and never lost between sessions.
 
 ## Live app
 
-→ [epigraph.up.railway.app](https://epigraph.up.railway.app)
+→ [epigraph-production.up.railway.app](https://epigraph-production.up.railway.app)
 
 ---
 
