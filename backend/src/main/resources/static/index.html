@@ -222,6 +222,11 @@ main { flex:1; }
   border: 1px solid var(--color-border);
 }
 .btn-secondary:hover { background:var(--color-surface-dynamic); }
+/* Active fav state on QoD button */
+.btn-secondary.fav-active {
+  color:var(--color-gold);
+  border-color:var(--color-gold);
+}
 .qod-progress {
   margin-top:var(--space-6);
   font-size:var(--text-xs); color:var(--color-text-faint);
@@ -426,7 +431,7 @@ main { flex:1; }
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Копировать
         </button>
-        <button class="btn-secondary" onclick="favQod()">
+        <button class="btn-secondary" id="qod-fav-btn" onclick="favQod()" aria-label="В избранное">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           В избранное
         </button>
@@ -656,12 +661,27 @@ function getDayIndex() {
   return quotes.length ? (day % quotes.length) : 0;
 }
 
+function updateQodFavBtn() {
+  const btn = document.getElementById('qod-fav-btn');
+  if (!btn) return;
+  const q = quotes[currentQodIndex];
+  const isFav = q && q.fav;
+  btn.classList.toggle('fav-active', !!isFav);
+  btn.innerHTML = `
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+    ${isFav ? 'В избранном' : 'В избранное'}
+  `;
+}
+
 function renderQod(overrideIdx) {
   if (!quotes.length) {
     document.getElementById('qod-text').textContent = 'Добавьте первую цитату в разделе «Добавить»';
     document.getElementById('qod-author').textContent = '';
     document.getElementById('qod-source').textContent = '';
     document.getElementById('qod-progress').textContent = '';
+    updateQodFavBtn();
     return;
   }
   const idx = overrideIdx !== undefined ? overrideIdx : getDayIndex();
@@ -680,6 +700,7 @@ function renderQod(overrideIdx) {
     textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)';
   }, 60);
   document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
+  updateQodFavBtn();
 }
 
 function randomQuote() {
@@ -709,7 +730,8 @@ async function favQod() {
       body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
     });
     toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
-  } catch(e) { q.fav = !q.fav; toast('Ошибка'); }
+    updateQodFavBtn();
+  } catch(e) { q.fav = !q.fav; updateQodFavBtn(); toast('Ошибка'); }
 }
 
 // ===== LIST =====
@@ -932,7 +954,6 @@ function showModal(title, body, actions) {
     const btn = document.createElement('button');
     btn.className = a.cls;
     btn.textContent = a.label;
-    // bind action directly so closeModal() is called without a MouseEvent argument, bypassing the overlay-click guard
     btn.addEventListener('click', a.action);
     actEl.appendChild(btn);
   });
