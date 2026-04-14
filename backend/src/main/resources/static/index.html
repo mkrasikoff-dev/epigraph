@@ -222,6 +222,11 @@ main { flex:1; }
   border: 1px solid var(--color-border);
 }
 .btn-secondary:hover { background:var(--color-surface-dynamic); }
+/* Active fav state on QoD button */
+.btn-secondary.fav-active {
+  color:var(--color-gold);
+  border-color:var(--color-gold);
+}
 .qod-progress {
   margin-top:var(--space-6);
   font-size:var(--text-xs); color:var(--color-text-faint);
@@ -426,7 +431,7 @@ main { flex:1; }
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Копировать
         </button>
-        <button class="btn-secondary" onclick="favQod()">
+        <button class="btn-secondary" id="qod-fav-btn" onclick="favQod()" aria-label="В избранное">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           В избранное
         </button>
@@ -656,12 +661,29 @@ function getDayIndex() {
   return quotes.length ? (day % quotes.length) : 0;
 }
 
+// TASK-21: sync fav button appearance with actual fav state
+function updateQodFavBtn() {
+  const btn = document.getElementById('qod-fav-btn');
+  if (!btn) return;
+  const q = quotes[currentQodIndex];
+  const isFav = q ? !!q.fav : false;
+  btn.classList.toggle('fav-active', isFav);
+  btn.innerHTML = `
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+    ${isFav ? 'В избранном' : 'В избранное'}
+  `;
+}
+
 function renderQod(overrideIdx) {
   if (!quotes.length) {
     document.getElementById('qod-text').textContent = 'Добавьте первую цитату в разделе «Добавить»';
     document.getElementById('qod-author').textContent = '';
     document.getElementById('qod-source').textContent = '';
     document.getElementById('qod-progress').textContent = '';
+    currentQodIndex = -1;
+    updateQodFavBtn();
     return;
   }
   const idx = overrideIdx !== undefined ? overrideIdx : getDayIndex();
@@ -680,6 +702,8 @@ function renderQod(overrideIdx) {
     textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)';
   }, 60);
   document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
+  // TASK-21: always sync button state after index change
+  updateQodFavBtn();
 }
 
 function randomQuote() {
@@ -701,15 +725,23 @@ function copyQod() {
 async function favQod() {
   const q = quotes[currentQodIndex];
   if (!q) return;
-  q.fav = !q.fav;
+  const newFav = !q.fav;
+  q.fav = newFav;
+  // TASK-21: update button immediately for instant feedback
+  updateQodFavBtn();
   try {
     await fetch(`${API}/${q.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
     });
-    toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
-  } catch(e) { q.fav = !q.fav; toast('Ошибка'); }
+    toast(newFav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
+  } catch(e) {
+    // revert on error
+    q.fav = !newFav;
+    updateQodFavBtn();
+    toast('Ошибка');
+  }
 }
 
 // ===== LIST =====
@@ -849,17 +881,19 @@ async function deleteQuote(id) {
   if (!q) return;
   showModal(
     'Удалить цитату?',
-    `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author||'')}</div>Это действие нельзя отменить.`,
-    [{ label:'Удалить', cls:'btn-primary', action: async () => {
-      try {
-        await fetch(`${API}/${id}`, { method:'DELETE' });
-        quotes = quotes.filter(q => q.id !== id);
-        renderList();
-        closeModal();
-        toast('Цитата удалена');
-      } catch(e) { toast('Ошибка удаления'); }
-    }},
-    { label:'Отмена', cls:'btn-secondary', action: closeModal }]
+    `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author || '')}</div>Это действие нельзя отменить.`,
+    [
+      { label: 'Удалить', cls: 'btn-primary', style: 'background:var(--color-error,#e05555)', action: async () => {
+        try {
+          await fetch(`${API}/${id}`, { method:'DELETE' });
+          quotes = quotes.filter(q => q.id !== id);
+          closeModal();
+          renderList();
+          toast('Цитата удалена');
+        } catch(e) { toast('Ошибка удаления'); }
+      }},
+      { label: 'Отмена', cls: 'btn-secondary', action: closeModal }
+    ]
   );
 }
 
@@ -870,28 +904,28 @@ async function importJSON(e) {
   try {
     const text = await file.text();
     const data = JSON.parse(text);
-    if (!Array.isArray(data)) throw new Error('Ожидается массив');
-    let added = 0;
+    if (!Array.isArray(data)) { toast('Неверный формат JSON'); return; }
+    let count = 0;
     for (const item of data) {
       if (!item.text) continue;
-      const payload = { text: item.text, author: item.author||'', source: item.source||'', tags: Array.isArray(item.tags) ? item.tags.join(',') : (item.tags||''), fav: false, added: Date.now() };
+      const payload = { text: item.text, author: item.author || '', source: item.source || '', tags: (item.tags||[]).join ? (item.tags||[]).join(',') : (item.tags||''), fav: false, added: Date.now() };
       const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
       const saved = await res.json();
       saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
       quotes.push(saved);
-      added++;
+      count++;
     }
-    toast(`Импортировано: ${added} цитат`);
-    e.target.value = '';
-  } catch(err) { toast('Ошибка импорта: ' + err.message); }
+    toast(`Импортировано: ${count} цитат`);
+  } catch(err) { toast('Ошибка импорта'); }
+  e.target.value = '';
 }
 
 function exportJSON() {
-  const data = quotes.map(q => ({ text: q.text, author: q.author, source: q.source, tags: q.tags, fav: q.fav }));
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const data = quotes.map(q => ({ text: q.text, author: q.author, source: q.source, tags: q.tags }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `epigraph-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = 'epigraph-quotes.json';
   a.click();
 }
 
@@ -901,73 +935,72 @@ function copyAll() {
     if (q.author) s += '\n— ' + q.author;
     if (q.source) s += ', «' + q.source + '»';
     return s;
-  }).join('\n\n');
+  }).join('\n\n---\n\n');
   navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка'));
 }
 
-function confirmClear() {
+async function confirmClear() {
   showModal(
     'Удалить все цитаты?',
-    `Вы собираетесь удалить все ${quotes.length} цитат. Это действие нельзя отменить.`,
-    [{ label:'Удалить всё', cls:'btn-primary', action: async () => {
-      try {
-        await fetch(API, { method:'DELETE' });
-        quotes = [];
-        renderList();
-        closeModal();
-        toast('Все цитаты удалены');
-      } catch(e) { toast('Ошибка'); }
-    }},
-    { label:'Отмена', cls:'btn-secondary', action: closeModal }]
+    'Это действие безвозвратно удалит все ваши цитаты из базы данных.',
+    [
+      { label: 'Удалить всё', cls: 'btn-primary', style: 'background:var(--color-error,#e05555)', action: async () => {
+        try {
+          await Promise.all(quotes.map(q => fetch(`${API}/${q.id}`, { method:'DELETE' })));
+          quotes = [];
+          closeModal();
+          renderList();
+          toast('Все цитаты удалены');
+        } catch(e) { toast('Ошибка'); }
+      }},
+      { label: 'Отмена', cls: 'btn-secondary', action: closeModal }
+    ]
   );
 }
 
 // ===== MODAL =====
-function showModal(title, body, actions) {
+function showModal(title, bodyHtml, buttons) {
   document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').innerHTML = body;
-  const actEl = document.getElementById('modal-actions');
-  actEl.innerHTML = '';
-  actions.forEach(a => {
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  const actions = document.getElementById('modal-actions');
+  actions.innerHTML = '';
+  buttons.forEach(b => {
     const btn = document.createElement('button');
-    btn.className = a.cls;
-    btn.textContent = a.label;
-    // bind action directly so closeModal() is called without a MouseEvent argument, bypassing the overlay-click guard
-    btn.addEventListener('click', a.action);
-    actEl.appendChild(btn);
+    btn.className = b.cls;
+    btn.textContent = b.label;
+    if (b.style) btn.setAttribute('style', b.style);
+    btn.onclick = b.action;
+    actions.appendChild(btn);
   });
   document.getElementById('modal').classList.add('open');
 }
 
-// Close modal (Cancel button)
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
 }
 
-// Close modal (Overlay)
 function handleModalOverlayClick(e) {
   if (e.target === document.getElementById('modal')) closeModal();
 }
 
-// Close modal (Escape button)
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
-});
-
 // ===== TOAST =====
-function toast(msg) {
+function toast(msg, duration = 2800) {
   const wrap = document.getElementById('toast-wrap');
   const el = document.createElement('div');
   el.className = 'toast';
   el.textContent = msg;
   wrap.appendChild(el);
-  requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2500);
+  requestAnimationFrame(() => { requestAnimationFrame(() => { el.classList.add('show'); }); });
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
 }
 
 // ===== UTILS =====
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ===== INIT =====
