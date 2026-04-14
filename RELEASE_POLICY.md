@@ -13,6 +13,11 @@ This document describes the branching model, versioning, and release process for
 | `feature/TASK-*` | One branch per task, created from `develop`. | ❌         |
 | `hotfix/*`       | Urgent production fix, created from `trunk`. | ❌         |
 
+> **Note:** After each release, `develop` will always show as *N commits ahead of trunk*
+> in GitHub. This is expected behaviour when using squash-merge: original feature commits
+> remain in `develop` history but are collapsed into a single squash commit on `trunk`.
+> The branch is considered in sync once `trunk → develop` merge is completed (Step 3).
+
 **Rules:**
 - Direct push to `trunk` and `develop` is blocked — only via PR.
 - `trunk` requires at least one approval (owner may self-merge).
@@ -58,7 +63,14 @@ When `develop` is ready:
 - PR title: `Release v0.2.0`
 - Squash merge commit message: `Release v0.2.0`
 
-### Step 3 — Merge and tag
+### Step 3 — Sync develop from trunk
+After the release PR is merged into trunk, open a PR: `trunk → develop`
+- Title: `Sync develop from trunk after Release v{version}`
+- Merge method: **regular merge** (не squash — нужно сохранить граф истории)
+
+This prevents diverged branches on the next release. 
+
+### Step 4 — Merge and tag trunk
 ```bash
 # After PR is merged into trunk:
 git checkout trunk
@@ -67,7 +79,7 @@ git tag -a v0.2.0 -m "Release v0.2.0"
 git push origin v0.2.0
 ```
 
-### Step 4 — Publish GitHub Release
+### Step 5 — Publish GitHub Release
 - Go to GitHub → Releases → Draft a new release
 - Tag: `v0.2.0` (select existing tag)
 - Title: `Release v0.2.0`
@@ -80,12 +92,15 @@ Railway deploys automatically on merge to `trunk` — the tag and GitHub Release
 
 ## Naming Conventions
 
-| Entity               | Format                    | Example                              |
-|----------------------|---------------------------|--------------------------------------|
-| Feature branch       | `feature/TASK-{n}`        | `feature/TASK-42`                    |
-| Release PR title     | `Release v{version}`      | `Release v0.2.0`                     |
-| Squash commit        | `Release v{version}`      | `Release v0.2.0`                     |
-| Git tag              | `v{version}`              | `v0.2.0`                             |
-| GitHub Release title | `Release v{version}`      | `Release v0.2.0`                     |
-| Feature commit       | `TASK-{n}: {description}` | `TASK-42: add favourites filter`     |
-| Fix commit           | `TASK-{n}: {description}` | `TASK-42: handle empty author field` |
+| Entity                | Format                     | Example                               |
+|-----------------------|----------------------------|---------------------------------------|
+| Feature branch        | `feature/TASK-{n}`         | `feature/TASK-42`                     |
+| Feature PR title      | `[TASK-{n}] {description}` | `[TASK-42] add favourites filter`     |
+| Feature commit        | `[TASK-{n}] {description}` | `[TASK-42] add favourites filter`     |
+|                       |                            |                                       |
+| Release PR title      | `Release v{version}`       | `Release v0.2.0`                      |
+| Release squash commit | `Release v{version}`       | `Release v0.2.0`                      |
+| Release tag           | `v{version}`               | `v0.2.0`                              |
+| GitHub Release title  | `Release v{version}`       | `Release v0.2.0`                      |
+|                       |                            |                                       |
+| Fix commit            | `[TASK-{n}] {description}` | `[TASK-42] handle empty author field` |
