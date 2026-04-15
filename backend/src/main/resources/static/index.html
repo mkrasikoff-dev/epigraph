@@ -29,6 +29,7 @@
   --color-primary-highlight: #e8ddd4;
   --color-accent:         #c8956c;
   --color-gold:           #c9a227;
+  --color-error:          #c0392b;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
@@ -69,6 +70,7 @@
   --color-primary-highlight: #3a2d22;
   --color-accent:         #c8956c;
   --color-gold:           #d4a830;
+  --color-error:          #e05555;
   --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.25);
   --shadow-md: 0 4px 16px oklch(0 0 0 / 0.35);
   --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.45);
@@ -82,6 +84,7 @@
     --color-text-inverse:#18160f;--color-primary:#d4956a;
     --color-primary-hover:#e8a87a;--color-primary-active:#f0b888;
     --color-primary-highlight:#3a2d22;--color-accent:#c8956c;--color-gold:#d4a830;
+    --color-error:#e05555;
     --shadow-sm:0 1px 3px oklch(0 0 0/.25);
     --shadow-md:0 4px 16px oklch(0 0 0/.35);
     --shadow-lg:0 12px 40px oklch(0 0 0/.45);
@@ -222,7 +225,6 @@ main { flex:1; }
   border: 1px solid var(--color-border);
 }
 .btn-secondary:hover { background:var(--color-surface-dynamic); }
-/* Active fav state on QoD button */
 .btn-secondary.fav-active {
   color:var(--color-gold);
   border-color:var(--color-gold);
@@ -321,6 +323,23 @@ main { flex:1; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
 .form-actions { display:flex; gap:var(--space-3); margin-top:var(--space-6); }
 .form-divider { border:none; border-top:1px solid var(--color-divider); margin:var(--space-10) 0; }
+
+/* ===== FIELD ERROR (TASK-22) ===== */
+.form-input.is-invalid,
+.form-textarea.is-invalid {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px oklch(from var(--color-error) l c h / 0.15);
+}
+.field-error {
+  display: none;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-error);
+}
+.field-error.visible {
+  display: block;
+}
+
 .import-area {
   border:2px dashed var(--color-border); border-radius:var(--radius-lg);
   padding:var(--space-8); text-align:center; cursor:pointer;
@@ -465,10 +484,11 @@ main { flex:1; }
       <h2>Добавить цитату</h2>
       <p class="subtitle">Добавляйте цитаты вручную или импортируйте сразу несколько через JSON-файл.</p>
 
-      <form onsubmit="addQuote(event)">
+      <form id="add-quote-form" onsubmit="addQuote(event)" novalidate>
         <div class="form-group">
           <label class="form-label" for="q-text">Текст цитаты</label>
-          <textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…" required></textarea>
+          <textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…"></textarea>
+          <span class="field-error" id="q-text-error">Заполните поле</span>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -661,7 +681,6 @@ function getDayIndex() {
   return quotes.length ? (day % quotes.length) : 0;
 }
 
-// TASK-21: sync fav button appearance with actual fav state
 function updateQodFavBtn() {
   const btn = document.getElementById('qod-fav-btn');
   if (!btn) return;
@@ -702,7 +721,6 @@ function renderQod(overrideIdx) {
     textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)';
   }, 60);
   document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
-  // TASK-21: always sync button state after index change
   updateQodFavBtn();
 }
 
@@ -727,7 +745,6 @@ async function favQod() {
   if (!q) return;
   const newFav = !q.fav;
   q.fav = newFav;
-  // TASK-21: update button immediately for instant feedback
   updateQodFavBtn();
   try {
     await fetch(`${API}/${q.id}`, {
@@ -737,7 +754,6 @@ async function favQod() {
     });
     toast(newFav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
   } catch(e) {
-    // revert on error
     q.fav = !newFav;
     updateQodFavBtn();
     toast('Ошибка');
@@ -826,10 +842,42 @@ function renderTags() {
   wrap.appendChild(input);
 }
 
+// ===== VALIDATION (TASK-22) =====
+function showFieldError(fieldId, errorId) {
+  const field = document.getElementById(fieldId);
+  const error = document.getElementById(errorId);
+  field.classList.add('is-invalid');
+  error.classList.add('visible');
+  field.setAttribute('aria-invalid', 'true');
+  field.setAttribute('aria-describedby', errorId);
+}
+
+function clearFieldError(fieldId, errorId) {
+  const field = document.getElementById(fieldId);
+  const error = document.getElementById(errorId);
+  field.classList.remove('is-invalid');
+  error.classList.remove('visible');
+  field.removeAttribute('aria-invalid');
+  field.removeAttribute('aria-describedby');
+}
+
+// Clear error on input
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('q-text').addEventListener('input', () => {
+    clearFieldError('q-text', 'q-text-error');
+  });
+});
+
 async function addQuote(e) {
   e.preventDefault();
   const text = document.getElementById('q-text').value.trim();
-  if (!text) return;
+
+  if (!text) {
+    showFieldError('q-text', 'q-text-error');
+    document.getElementById('q-text').focus();
+    return;
+  }
+
   const payload = {
     text,
     author: document.getElementById('q-author').value.trim(),
@@ -854,6 +902,7 @@ function resetForm() {
   document.getElementById('q-source').value = '';
   currentTags = [];
   renderTags();
+  clearFieldError('q-text', 'q-text-error');
 }
 
 async function toggleFav(id) {
