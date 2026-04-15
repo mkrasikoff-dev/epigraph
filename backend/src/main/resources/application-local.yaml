@@ -1,0 +1,22 @@
+# ===== LOCAL PROFILE =====
+
+spring:
+  # Postgres
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/epigraph}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  # JPA: allow Hibernate to auto-update schema in local dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# Logging: verbose for local development
+logging:
+  level:
+    root: INFO
+    com.mkrasikoff.epigraph: DEBUG
+    org.springframework.web: DEBUG
