@@ -29,7 +29,6 @@
   --color-primary-highlight: #e8ddd4;
   --color-accent:         #c8956c;
   --color-gold:           #c9a227;
-  --color-error:          #c0392b;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
@@ -70,7 +69,6 @@
   --color-primary-highlight: #3a2d22;
   --color-accent:         #c8956c;
   --color-gold:           #d4a830;
-  --color-error:          #e05555;
   --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.25);
   --shadow-md: 0 4px 16px oklch(0 0 0 / 0.35);
   --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.45);
@@ -84,7 +82,6 @@
     --color-text-inverse:#18160f;--color-primary:#d4956a;
     --color-primary-hover:#e8a87a;--color-primary-active:#f0b888;
     --color-primary-highlight:#3a2d22;--color-accent:#c8956c;--color-gold:#d4a830;
-    --color-error:#e05555;
     --shadow-sm:0 1px 3px oklch(0 0 0/.25);
     --shadow-md:0 4px 16px oklch(0 0 0/.35);
     --shadow-lg:0 12px 40px oklch(0 0 0/.45);
@@ -225,10 +222,6 @@ main { flex:1; }
   border: 1px solid var(--color-border);
 }
 .btn-secondary:hover { background:var(--color-surface-dynamic); }
-.btn-secondary.fav-active {
-  color:var(--color-gold);
-  border-color:var(--color-gold);
-}
 .qod-progress {
   margin-top:var(--space-6);
   font-size:var(--text-xs); color:var(--color-text-faint);
@@ -323,23 +316,6 @@ main { flex:1; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
 .form-actions { display:flex; gap:var(--space-3); margin-top:var(--space-6); }
 .form-divider { border:none; border-top:1px solid var(--color-divider); margin:var(--space-10) 0; }
-
-/* ===== FIELD ERROR (TASK-22) ===== */
-.form-input.is-invalid,
-.form-textarea.is-invalid {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 3px oklch(from var(--color-error) l c h / 0.15);
-}
-.field-error {
-  display: none;
-  margin-top: var(--space-1);
-  font-size: var(--text-xs);
-  color: var(--color-error);
-}
-.field-error.visible {
-  display: block;
-}
-
 .import-area {
   border:2px dashed var(--color-border); border-radius:var(--radius-lg);
   padding:var(--space-8); text-align:center; cursor:pointer;
@@ -450,7 +426,7 @@ main { flex:1; }
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Копировать
         </button>
-        <button class="btn-secondary" id="qod-fav-btn" onclick="favQod()" aria-label="В избранное">
+        <button class="btn-secondary" onclick="favQod()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           В избранное
         </button>
@@ -484,11 +460,10 @@ main { flex:1; }
       <h2>Добавить цитату</h2>
       <p class="subtitle">Добавляйте цитаты вручную или импортируйте сразу несколько через JSON-файл.</p>
 
-      <form id="add-quote-form" onsubmit="addQuote(event)" novalidate>
+      <form onsubmit="addQuote(event)">
         <div class="form-group">
           <label class="form-label" for="q-text">Текст цитаты</label>
           <textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…"></textarea>
-          <span class="field-error" id="q-text-error">Заполните поле</span>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -681,28 +656,12 @@ function getDayIndex() {
   return quotes.length ? (day % quotes.length) : 0;
 }
 
-function updateQodFavBtn() {
-  const btn = document.getElementById('qod-fav-btn');
-  if (!btn) return;
-  const q = quotes[currentQodIndex];
-  const isFav = q ? !!q.fav : false;
-  btn.classList.toggle('fav-active', isFav);
-  btn.innerHTML = `
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-    ${isFav ? 'В избранном' : 'В избранное'}
-  `;
-}
-
 function renderQod(overrideIdx) {
   if (!quotes.length) {
     document.getElementById('qod-text').textContent = 'Добавьте первую цитату в разделе «Добавить»';
     document.getElementById('qod-author').textContent = '';
     document.getElementById('qod-source').textContent = '';
     document.getElementById('qod-progress').textContent = '';
-    currentQodIndex = -1;
-    updateQodFavBtn();
     return;
   }
   const idx = overrideIdx !== undefined ? overrideIdx : getDayIndex();
@@ -721,7 +680,6 @@ function renderQod(overrideIdx) {
     textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)';
   }, 60);
   document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
-  updateQodFavBtn();
 }
 
 function randomQuote() {
@@ -743,21 +701,15 @@ function copyQod() {
 async function favQod() {
   const q = quotes[currentQodIndex];
   if (!q) return;
-  const newFav = !q.fav;
-  q.fav = newFav;
-  updateQodFavBtn();
+  q.fav = !q.fav;
   try {
     await fetch(`${API}/${q.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
     });
-    toast(newFav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
-  } catch(e) {
-    q.fav = !newFav;
-    updateQodFavBtn();
-    toast('Ошибка');
-  }
+    toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
+  } catch(e) { q.fav = !q.fav; toast('Ошибка'); }
 }
 
 // ===== LIST =====
@@ -842,38 +794,13 @@ function renderTags() {
   wrap.appendChild(input);
 }
 
-// ===== VALIDATION (TASK-22) =====
-function showFieldError(fieldId, errorId) {
-  const field = document.getElementById(fieldId);
-  const error = document.getElementById(errorId);
-  field.classList.add('is-invalid');
-  error.classList.add('visible');
-  field.setAttribute('aria-invalid', 'true');
-  field.setAttribute('aria-describedby', errorId);
-}
-
-function clearFieldError(fieldId, errorId) {
-  const field = document.getElementById(fieldId);
-  const error = document.getElementById(errorId);
-  field.classList.remove('is-invalid');
-  error.classList.remove('visible');
-  field.removeAttribute('aria-invalid');
-  field.removeAttribute('aria-describedby');
-}
-
-// Clear error on input
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('q-text').addEventListener('input', () => {
-    clearFieldError('q-text', 'q-text-error');
-  });
-});
-
 async function addQuote(e) {
   e.preventDefault();
   const text = document.getElementById('q-text').value.trim();
 
+  // Клиентская валидация — показываем ошибку явно
   if (!text) {
-    showFieldError('q-text', 'q-text-error');
+    toast('Текст цитаты обязателен', 'error');
     document.getElementById('q-text').focus();
     return;
   }
@@ -886,14 +813,29 @@ async function addQuote(e) {
     fav: false,
     added: Date.now()
   };
+
   try {
-    const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      const message = err.text || err.error || 'Ошибка валидации';
+      toast(message, 'error');
+      return;
+    }
+
     const saved = await res.json();
     saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
     quotes.push(saved);
     toast('Цитата добавлена!');
     resetForm();
-  } catch(e) { toast('Ошибка сохранения'); }
+  } catch (e) {
+    toast('Ошибка сохранения');
+  }
 }
 
 function resetForm() {
@@ -902,7 +844,6 @@ function resetForm() {
   document.getElementById('q-source').value = '';
   currentTags = [];
   renderTags();
-  clearFieldError('q-text', 'q-text-error');
 }
 
 async function toggleFav(id) {
@@ -930,19 +871,17 @@ async function deleteQuote(id) {
   if (!q) return;
   showModal(
     'Удалить цитату?',
-    `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author || '')}</div>Это действие нельзя отменить.`,
-    [
-      { label: 'Удалить', cls: 'btn-primary', style: 'background:var(--color-error,#e05555)', action: async () => {
-        try {
-          await fetch(`${API}/${id}`, { method:'DELETE' });
-          quotes = quotes.filter(q => q.id !== id);
-          closeModal();
-          renderList();
-          toast('Цитата удалена');
-        } catch(e) { toast('Ошибка удаления'); }
-      }},
-      { label: 'Отмена', cls: 'btn-secondary', action: closeModal }
-    ]
+    `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author||'')}</div>Это действие нельзя отменить.`,
+    [{ label:'Удалить', cls:'btn-primary', action: async () => {
+      try {
+        await fetch(`${API}/${id}`, { method:'DELETE' });
+        quotes = quotes.filter(q => q.id !== id);
+        renderList();
+        closeModal();
+        toast('Цитата удалена');
+      } catch(e) { toast('Ошибка удаления'); }
+    }},
+    { label:'Отмена', cls:'btn-secondary', action: closeModal }]
   );
 }
 
@@ -953,28 +892,28 @@ async function importJSON(e) {
   try {
     const text = await file.text();
     const data = JSON.parse(text);
-    if (!Array.isArray(data)) { toast('Неверный формат JSON'); return; }
-    let count = 0;
+    if (!Array.isArray(data)) throw new Error('Ожидается массив');
+    let added = 0;
     for (const item of data) {
       if (!item.text) continue;
-      const payload = { text: item.text, author: item.author || '', source: item.source || '', tags: (item.tags||[]).join ? (item.tags||[]).join(',') : (item.tags||''), fav: false, added: Date.now() };
+      const payload = { text: item.text, author: item.author||'', source: item.source||'', tags: Array.isArray(item.tags) ? item.tags.join(',') : (item.tags||''), fav: false, added: Date.now() };
       const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
       const saved = await res.json();
       saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
       quotes.push(saved);
-      count++;
+      added++;
     }
-    toast(`Импортировано: ${count} цитат`);
-  } catch(err) { toast('Ошибка импорта'); }
-  e.target.value = '';
+    toast(`Импортировано: ${added} цитат`);
+    e.target.value = '';
+  } catch(err) { toast('Ошибка импорта: ' + err.message); }
 }
 
 function exportJSON() {
-  const data = quotes.map(q => ({ text: q.text, author: q.author, source: q.source, tags: q.tags }));
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const data = quotes.map(q => ({ text: q.text, author: q.author, source: q.source, tags: q.tags, fav: q.fav }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'epigraph-quotes.json';
+  a.download = `epigraph-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
 }
 
@@ -984,72 +923,73 @@ function copyAll() {
     if (q.author) s += '\n— ' + q.author;
     if (q.source) s += ', «' + q.source + '»';
     return s;
-  }).join('\n\n---\n\n');
+  }).join('\n\n');
   navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка'));
 }
 
-async function confirmClear() {
+function confirmClear() {
   showModal(
     'Удалить все цитаты?',
-    'Это действие безвозвратно удалит все ваши цитаты из базы данных.',
-    [
-      { label: 'Удалить всё', cls: 'btn-primary', style: 'background:var(--color-error,#e05555)', action: async () => {
-        try {
-          await Promise.all(quotes.map(q => fetch(`${API}/${q.id}`, { method:'DELETE' })));
-          quotes = [];
-          closeModal();
-          renderList();
-          toast('Все цитаты удалены');
-        } catch(e) { toast('Ошибка'); }
-      }},
-      { label: 'Отмена', cls: 'btn-secondary', action: closeModal }
-    ]
+    `Вы собираетесь удалить все ${quotes.length} цитат. Это действие нельзя отменить.`,
+    [{ label:'Удалить всё', cls:'btn-primary', action: async () => {
+      try {
+        await fetch(API, { method:'DELETE' });
+        quotes = [];
+        renderList();
+        closeModal();
+        toast('Все цитаты удалены');
+      } catch(e) { toast('Ошибка'); }
+    }},
+    { label:'Отмена', cls:'btn-secondary', action: closeModal }]
   );
 }
 
 // ===== MODAL =====
-function showModal(title, bodyHtml, buttons) {
+function showModal(title, body, actions) {
   document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').innerHTML = bodyHtml;
-  const actions = document.getElementById('modal-actions');
-  actions.innerHTML = '';
-  buttons.forEach(b => {
+  document.getElementById('modal-body').innerHTML = body;
+  const actEl = document.getElementById('modal-actions');
+  actEl.innerHTML = '';
+  actions.forEach(a => {
     const btn = document.createElement('button');
-    btn.className = b.cls;
-    btn.textContent = b.label;
-    if (b.style) btn.setAttribute('style', b.style);
-    btn.onclick = b.action;
-    actions.appendChild(btn);
+    btn.className = a.cls;
+    btn.textContent = a.label;
+    // bind action directly so closeModal() is called without a MouseEvent argument, bypassing the overlay-click guard
+    btn.addEventListener('click', a.action);
+    actEl.appendChild(btn);
   });
   document.getElementById('modal').classList.add('open');
 }
 
+// Close modal (Cancel button)
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
 }
 
+// Close modal (Overlay)
 function handleModalOverlayClick(e) {
   if (e.target === document.getElementById('modal')) closeModal();
 }
 
+// Close modal (Escape button)
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
 // ===== TOAST =====
-function toast(msg, duration = 2800) {
+function toast(msg) {
   const wrap = document.getElementById('toast-wrap');
   const el = document.createElement('div');
   el.className = 'toast';
   el.textContent = msg;
   wrap.appendChild(el);
-  requestAnimationFrame(() => { requestAnimationFrame(() => { el.classList.add('show'); }); });
-  setTimeout(() => {
-    el.classList.remove('show');
-    setTimeout(() => el.remove(), 300);
-  }, duration);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2500);
 }
 
 // ===== UTILS =====
-function escHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ===== INIT =====
