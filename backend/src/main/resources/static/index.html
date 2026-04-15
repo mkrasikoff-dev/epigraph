@@ -426,8 +426,10 @@ main { flex:1; }
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Копировать
         </button>
-        <button class="btn-secondary" onclick="favQod()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <button class="btn-secondary" id="btn-fav-qod" onclick="favQod()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
           В избранное
         </button>
       </div>
@@ -678,6 +680,7 @@ function renderQod(overrideIdx) {
     document.getElementById('qod-source').textContent = q.source || '';
     textEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)';
+    updateFavQodButton();
   }, 60);
   document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
 }
@@ -708,7 +711,7 @@ async function favQod() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
     });
-    toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
+    updateFavQodButton();
   } catch(e) { q.fav = !q.fav; toast('Ошибка'); }
 }
 
@@ -851,10 +854,54 @@ async function toggleFav(id) {
   if (!q) return;
   q.fav = !q.fav;
   try {
-    await fetch(`${API}/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...q, tags: (q.tags||[]).join(',') }) });
-    toast(q.fav ? '⭐ Добавлено в избранное' : 'Убрано из избранного');
-    renderList();
-  } catch(e) { q.fav = !q.fav; toast('Ошибка'); }
+    await fetch(`${API}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
+    });
+
+    // Точечно обновляем только кнопку в карточке — без перерисовки грида
+    const btn = document.querySelector(`.card-btn.fav[onclick="toggleFav(${id})"]`);
+    if (btn) {
+      btn.classList.toggle('active', q.fav);
+      btn.querySelector('svg').setAttribute('fill', q.fav ? 'currentColor' : 'none');
+    }
+
+    // Обновляем счётчик в stats-bar
+    const favCount = quotes.filter(q => q.fav).length;
+    const statsBar = document.getElementById('stats-bar');
+    if (statsBar) {
+      statsBar.innerHTML = `<span><strong>${quotes.length}</strong> цитат всего</span><span><strong>${favCount}</strong> в избранном</span>`;
+    }
+
+    // Если активен фильтр "fav" — убираем карточку из грида плавно
+    if (currentFilter === 'fav' && !q.fav) {
+      const card = btn.closest('.quote-card');
+      if (card) {
+        card.style.transition = 'opacity 0.2s, transform 0.2s';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.97)';
+        setTimeout(() => renderList(), 220);
+      }
+    }
+  } catch(e) {
+    q.fav = !q.fav;
+    toast('Ошибка');
+  }
+}
+
+function updateFavQodButton() {
+  const q = quotes[currentQodIndex];
+  const btn = document.getElementById('btn-fav-qod');
+  if (!btn || !q) return;
+  const isFav = !!q.fav;
+  btn.innerHTML = `
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" style="color:${isFav ? 'var(--color-gold)' : 'inherit'}">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+    ${isFav ? 'В избранном' : 'В избранное'}
+  `;
+  btn.style.color = isFav ? 'var(--color-gold)' : '';
 }
 
 function copyQuote(id) {
