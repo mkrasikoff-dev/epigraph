@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface QuoteRepository extends JpaRepository<Quote, Long> {
-    // Spring Data сам реализует findAll(), save(), deleteById() и др.
 }
