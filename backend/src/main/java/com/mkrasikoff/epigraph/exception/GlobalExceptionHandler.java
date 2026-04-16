@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -38,5 +39,11 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleBadJson(HttpMessageNotReadableException ex) {
 
         return Map.of("error", "Malformed JSON request");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleDataIntegrity(DataIntegrityViolationException ex) {
+        return Map.of("error", "Value too long for one of the fields");
     }
 }
