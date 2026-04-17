@@ -7,11 +7,13 @@ spring:
     username: ${PGUSER}
     password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:db/db-changelog.yaml
 
   # JPA: validate schema only, never auto-alter in prod
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: false
 
 # Logging: suppress noise, keep app-level INFO and above
