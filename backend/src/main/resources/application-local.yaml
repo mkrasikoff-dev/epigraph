@@ -22,4 +22,4 @@ logging:
     root: INFO
     com.mkrasikoff.epigraph: DEBUG
     org.springframework.web: DEBUG
-    liquibase: DEBUG
+    liquibase: INFO
