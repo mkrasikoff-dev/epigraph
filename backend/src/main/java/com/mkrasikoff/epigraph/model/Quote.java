@@ -20,7 +20,7 @@ public class Quote {
     private Long id;
 
     @NotBlank(message = "Quote text must not be empty")
-    @Size(max = 3000, message = "Quote text must not exceed 3000 characters")
+    @Size(max = 3000, message = "Размер цитаты не должен превышать 3000 символов")
     @Column(length = 3000)
     private String text;
 
@@ -28,6 +28,8 @@ public class Quote {
     @Column(length = 255)
     private String author;
 
+    @Size(max = 500, message = "Source must not exceed 500 characters")
+    @Column(length = 500)
     private String source;
 
     private boolean fav;
@@ -35,6 +37,8 @@ public class Quote {
     /**
      * Хранится как "tag1,tag2" (строка)
      */
+    @Size(max = 500, message = "Tags must not exceed 500 characters")
+    @Column(length = 500)
     private String tags;
 
     /**

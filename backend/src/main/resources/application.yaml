@@ -4,6 +4,8 @@ spring:
     name: epigraph
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    enabled: true
 
 # Railway port: Railway injects PORT automatically, fallback 8080 for local
 server:

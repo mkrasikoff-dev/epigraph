@@ -7,11 +7,13 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:db/db-changelog.yaml
 
   # JPA: allow Hibernate to auto-update schema in local dev
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
 
 # Logging: verbose for local development
@@ -20,3 +22,4 @@ logging:
     root: INFO
     com.mkrasikoff.epigraph: DEBUG
     org.springframework.web: DEBUG
+    liquibase: INFO
