@@ -352,13 +352,13 @@ main { flex:1; }
 /* ===== MODAL ===== */
 .modal-overlay { position:fixed; inset:0; background:oklch(0.1 0 0 / 0.5); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:center; justify-content:center; padding:var(--space-4); opacity:0; pointer-events:none; transition:opacity 0.2s; }
 .modal-overlay.open { opacity:1; pointer-events:auto; }
-.modal { background:var(--color-surface-2); border-radius:var(--radius-xl); padding:var(--space-8); max-width:480px; width:100%; box-shadow:var(--shadow-lg); transform:scale(0.96); transition:transform 0.2s; }
+.modal { background:var(--color-surface-2); border-radius:var(--radius-xl); padding:var(--space-8); max-width:480px; width:100%; box-shadow:var(--shadow-lg); transform:scale(0.96); transition:transform 0.2s; max-height:90dvh; overflow-y:auto; }
 .modal-overlay.open .modal { transform:scale(1); }
 .modal h3 { font-family:var(--font-display); font-size:var(--text-xl); font-weight:500; margin-bottom:var(--space-2); }
 .modal p { font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-6); line-height:1.7; }
 .modal-actions { display:flex; gap:var(--space-3); justify-content:flex-end; }
 .modal .btn-primary { background:var(--color-primary); color:var(--color-text-inverse); }
-.modal-quote-text { font-family:var(--font-display); font-style:italic; font-size:var(--text-lg); line-height:1.6; color:var(--color-text); background:var(--color-surface-offset); border-radius:var(--radius-md); padding:var(--space-5); margin-bottom:var(--space-4); }
+.modal-quote-text { font-family:var(--font-display); font-style:italic; font-size:var(--text-lg); line-height:1.6; color:var(--color-text); background:var(--color-surface-offset); border-radius:var(--radius-md); padding:var(--space-5); margin-bottom:var(--space-4); max-height:160px; overflow-y:auto; scrollbar-width:thin; scrollbar-color: var(--color-border) transparent; }
 .modal-quote-author { font-size:var(--text-sm); font-weight:500; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-primary); margin-bottom:var(--space-6); }
 
 /* ===== RESPONSIVE ===== */
@@ -917,9 +917,9 @@ async function deleteQuote(id) {
   const q = quotes.find(q => q.id === id);
   if (!q) return;
   showModal(
-    'Удалить цитату?',
-    `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author||'')}</div>Это действие нельзя отменить.`,
-    [{ label:'Удалить', cls:'btn-primary', action: async () => {
+          'Удалить цитату?',
+          `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author||'')}</div>Это действие нельзя отменить.`,
+          [{ label:'Удалить', cls:'btn-primary', action: async () => {
       try {
         await fetch(`${API}/${id}`, { method:'DELETE' });
         quotes = quotes.filter(q => q.id !== id);
