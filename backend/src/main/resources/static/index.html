@@ -153,13 +153,14 @@ main { flex:1; }
 /* ===== VIEWS ===== */
 .view { display:none; }
 .view.active { display:block; }
+body.no-scroll { overflow:hidden; height:100dvh; }
 
 /* ===== QUOTE OF THE DAY ===== */
 .qod-section {
   min-height: calc(100dvh - 57px);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   padding: var(--space-12) var(--space-6);
-  text-align:center; position:relative; overflow:hidden;
+  text-align:center; position:relative;
 }
 .qod-bg-ornament {
   position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
@@ -644,6 +645,7 @@ function switchView(id) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
   document.getElementById('tab-' + id).classList.add('active');
+  if (id !== 'qod') document.body.classList.remove('no-scroll');
   if (id === 'list') renderList();
   if (id === 'qod') renderQod();
 }
@@ -681,6 +683,11 @@ function renderQod(overrideIdx) {
     textEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     textEl.style.opacity = '1'; textEl.style.transform = 'translateY(0)';
     updateFavQodButton();
+    document.fonts.ready.then(() => {
+      const section = document.querySelector('.qod-section');
+      const fits = section.getBoundingClientRect().height <= (window.innerHeight - 57) + 2;
+      document.body.classList.toggle('no-scroll', fits);
+    });
   }, 60);
   document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
 }
