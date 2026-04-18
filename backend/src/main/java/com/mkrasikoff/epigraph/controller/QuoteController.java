@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,46 +32,50 @@ public class QuoteController {
     }
 
     @GetMapping
-    public List<Quote> getAll() {
-        List<Quote> quotes = service.findAll();
+    public List<Quote> getAll(@AuthenticationPrincipal Long userId) {
+        List<Quote> quotes = service.findAll(userId);
 
-        log.info("GET /api/quotes - returning {} quotes", quotes.size());
+        log.info("GET /api/quotes - userId={}, returning {} quotes", userId, quotes.size());
 
         return quotes;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Quote create(@Valid @RequestBody Quote quote) {
-        Quote saved = service.save(quote);
+    public Quote create(@Valid @RequestBody Quote quote,
+                        @AuthenticationPrincipal Long userId) {
+        Quote saved = service.save(quote, userId);
 
-        log.info("POST /api/quotes - created quote id = {}, author = '{}'", saved.getId(), saved.getAuthor());
+        log.info("POST /api/quotes - userId={}, created quote id={}", userId, saved.getId());
 
         return saved;
     }
 
     @PutMapping("/{id}")
-    public Quote update(@PathVariable Long id, @Valid @RequestBody Quote quote) {
-        Quote updated = service.update(id, quote);
+    public Quote update(@PathVariable Long id,
+                        @Valid @RequestBody Quote quote,
+                        @AuthenticationPrincipal Long userId) {
+        Quote updated = service.update(id, quote, userId);
 
-        log.info("PUT /api/quotes/{} - updated quote, fav = {}", id, updated.isFav());
+        log.info("PUT /api/quotes/{} - userId={}, fav={}", id, userId, updated.isFav());
 
         return updated;
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        service.deleteById(id);
+    public void delete(@PathVariable Long id,
+                       @AuthenticationPrincipal Long userId) {
+        service.deleteById(id, userId);
 
-        log.info("DELETE /api/quotes/{} - deleted", id);
+        log.info("DELETE /api/quotes/{} - userId={}", id, userId);
     }
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAll() {
-        service.deleteAll();
+    public void deleteAll(@AuthenticationPrincipal Long userId) {
+        service.deleteAll(userId);
 
-        log.info("DELETE /api/quotes - ALL quotes deleted");
+        log.info("DELETE /api/quotes - ALL deleted for userId={}", userId);
     }
 }
