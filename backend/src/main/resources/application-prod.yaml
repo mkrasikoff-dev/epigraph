@@ -7,6 +7,8 @@ spring:
     username: ${PGUSER}
     password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
+
+  # Liquibase
   liquibase:
     change-log: classpath:db/db-changelog.yaml
 
@@ -25,6 +27,10 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: email, profile
+
+# http -> https requests
+server:
+  forward-headers-strategy: framework
 
 # Logging: suppress noise, keep app-level INFO and above
 logging:
