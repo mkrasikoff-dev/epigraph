@@ -431,9 +431,179 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 @media (max-width: 380px) {
   .nav-tab { padding:var(--space-1) var(--space-2); font-size:0.75rem; }
 }
+
+/* =============================================================================
+   AUTH
+   Login / register screen shown before the main app.
+   ============================================================================= */
+.auth-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+.auth-screen.visible { display: flex; }
+
+.auth-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.auth-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: calc(-1 * var(--space-3));
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.auth-field label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.auth-field input {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-family: var(--font-body);
+  transition: border-color 0.15s;
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.auth-error {
+  font-size: var(--text-sm);
+  color: #c0392b;
+  text-align: center;
+  min-height: 1.2em;
+}
+
+.auth-switch {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.auth-switch button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-faint);
+  font-size: var(--text-sm);
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-divider);
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-google:hover { background: var(--color-surface-offset); border-color: var(--color-primary); }
+
+.auth-logout-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 0;
+}
+.auth-logout-btn:hover { color: var(--color-text); }
 </style>
 </head>
 <body>
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-card">
+    <h1 class="auth-title">Epigraph</h1>
+    <p class="auth-subtitle" id="auth-subtitle">Войдите, чтобы продолжить</p>
+
+    <div class="auth-field">
+      <label for="auth-email">Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label for="auth-password">Пароль</label>
+      <input type="password" id="auth-password" placeholder="Минимум 6 символов" autocomplete="current-password">
+    </div>
+
+    <p class="auth-error" id="auth-error"></p>
+
+    <button class="btn-primary" id="auth-submit-btn" onclick="authSubmit()">Войти</button>
+
+    <div class="auth-divider">или</div>
+
+    <button class="btn-google" onclick="loginWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Войти через Google
+    </button>
+
+    <p class="auth-switch">
+      <span id="auth-switch-text">Нет аккаунта?</span>
+      <button onclick="toggleAuthMode()">Зарегистрироваться</button>
+    </p>
+  </div>
+</div>
+
 <div class="app">
 
 <!-- HEADER -->
@@ -459,6 +629,7 @@ body.no-scroll { overflow:hidden; height:100dvh; }
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       </svg>
     </button>
+    <button class="auth-logout-btn" id="logout-btn" onclick="logout()" style="display:none">Выйти</button>
   </div>
 </header>
 
@@ -653,58 +824,114 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 // CONSTANTS & STATE
 // Application-wide constants, API endpoint, and mutable module-level state.
 // =============================================================================
-const API = '/api/quotes';
+const API       = '/api/quotes';
+const AUTH_API  = '/api/auth';
 
-const TOAST_DISPLAY_DURATION_MS = 2500;
-const TOAST_FADE_DURATION_MS = 300;
-const QOD_ANIMATION_DEBOUNCE_MS = 60;
-const FAVORITE_RERENDER_DELAY_MS = 220;
+const TOAST_DISPLAY_DURATION_MS   = 2500;
+const TOAST_FADE_DURATION_MS      = 300;
+const QOD_ANIMATION_DEBOUNCE_MS   = 60;
+const FAVORITE_RERENDER_DELAY_MS  = 220;
 
-let quotes = [];
+let quotes        = [];
 let currentFilter = 'all';
 let currentQodIndex = -1;
-let editingId = null;
-let currentTags = [];
+let editingId     = null;
+let currentTags   = [];
+
+// =============================================================================
+// AUTH STATE
+// JWT token stored in localStorage, helpers to read/write/clear it.
+// =============================================================================
+
+function getToken()        { try { return localStorage.getItem('epigraph_token'); } catch(e) { return null; } }
+function setToken(t)       { try { localStorage.setItem('epigraph_token', t); } catch(e) {} }
+function clearToken()      { try { localStorage.removeItem('epigraph_token'); } catch(e) {} }
+
+function authHeaders() {
+  const t = getToken();
+  return t ? { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t }
+          : { 'Content-Type': 'application/json' };
+}
+
+// =============================================================================
+// AUTH UI
+// Show/hide auth screen, toggle between login and register modes.
+// =============================================================================
+
+let authMode = 'login'; // 'login' | 'register'
+
+function showAuthScreen() {
+  document.getElementById('auth-screen').classList.add('visible');
+  document.getElementById('logout-btn').style.display = 'none';
+}
+
+function hideAuthScreen() {
+  document.getElementById('auth-screen').classList.remove('visible');
+  document.getElementById('logout-btn').style.display = '';
+}
+
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'register' : 'login';
+  const isRegister = authMode === 'register';
+  document.getElementById('auth-subtitle').textContent    = isRegister ? 'Создайте аккаунт' : 'Войдите, чтобы продолжить';
+  document.getElementById('auth-submit-btn').textContent  = isRegister ? 'Зарегистрироваться' : 'Войти';
+  document.getElementById('auth-switch-text').textContent = isRegister ? 'Уже есть аккаунт?' : 'Нет аккаунта?';
+  document.querySelector('#auth-screen .auth-switch button').textContent = isRegister ? 'Войти' : 'Зарегистрироваться';
+  document.getElementById('auth-error').textContent = '';
+}
+
+async function authSubmit() {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errorEl  = document.getElementById('auth-error');
+  errorEl.textContent = '';
+
+  if (!email || !password) { errorEl.textContent = 'Заполните все поля'; return; }
+
+  const endpoint = authMode === 'login' ? '/login' : '/register';
+
+  try {
+    const res = await fetch(AUTH_API + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) { errorEl.textContent = data.message || 'Ошибка'; return; }
+
+    setToken(data.token);
+    hideAuthScreen();
+    await loadData();
+    renderQod();
+
+  } catch(e) {
+    errorEl.textContent = 'Ошибка соединения';
+  }
+}
+
+function loginWithGoogle() {
+  window.location.href = '/oauth2/authorization/google';
+}
+
+function logout() {
+  clearToken();
+  quotes = [];
+  showAuthScreen();
+}
 
 // =============================================================================
 // DATA / API
 // Backend communication layer and initial data loading.
 // =============================================================================
 
-/**
- * Thin wrapper around the quotes REST API. Centralises fetch calls so the rest
- * of the app does not deal with HTTP details.
- */
 const Api = {
-  /**
-   * Fetches all quotes from the backend.
-   * @returns {Promise<Array>} Promise resolving to the raw quotes array.
-   */
-  getAll: () => fetch(API).then(r => r.json()),
-  /**
-   * Creates a new quote on the backend.
-   * @param {Object} payload - Quote payload to persist.
-   * @returns {Promise<Response>} Raw fetch Response.
-   */
-  create: (payload) => fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }),
-  /**
-   * Updates an existing quote by id.
-   * @param {number|string} id - Quote identifier.
-   * @param {Object} payload - Updated quote payload.
-   * @returns {Promise<Response>} Raw fetch Response.
-   */
-  update: (id, payload) => fetch(`${API}/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }),
-  /**
-   * Deletes a single quote by id.
-   * @param {number|string} id - Quote identifier.
-   * @returns {Promise<Response>} Raw fetch Response.
-   */
-  delete: (id) => fetch(`${API}/${id}`, { method: 'DELETE' }),
-  /**
-   * Deletes all quotes.
-   * @returns {Promise<Response>} Raw fetch Response.
-   */
-  deleteAll: () => fetch(API, { method: 'DELETE' })
+  getAll:    ()           => fetch(API,           { headers: authHeaders() }).then(r => r.json()),
+  create:    (payload)    => fetch(API,           { method: 'POST',   headers: authHeaders(), body: JSON.stringify(payload) }),
+  update:    (id, payload)=> fetch(`${API}/${id}`,{ method: 'PUT',    headers: authHeaders(), body: JSON.stringify(payload) }),
+  delete:    (id)         => fetch(`${API}/${id}`,{ method: 'DELETE', headers: authHeaders() }),
+  deleteAll: ()           => fetch(API,           { method: 'DELETE', headers: authHeaders() })
 };
 
 /**
@@ -1310,7 +1537,32 @@ function escHtml(s) {
 // Application bootstrap — loads data then renders the initial QoD view.
 // =============================================================================
 (async () => {
-  await loadData();
+  // If Google OAuth — token inside query-param
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlToken = urlParams.get('token');
+  if (urlToken) {
+    setToken(urlToken);
+    // Remove token from URL
+    window.history.replaceState({}, document.title, '/');
+  }
+
+  const token = getToken();
+
+  if (!token) {
+    showAuthScreen();
+    return;
+  }
+
+  const res = await fetch(API, { headers: authHeaders() });
+  if (res.status === 401 || res.status === 403) {
+    clearToken();
+    showAuthScreen();
+    return;
+  }
+
+  const rawQuotes = await res.json();
+  quotes = rawQuotes.map(q => ({ ...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : [] }));
+  hideAuthScreen();
   renderQod();
 })();
 </script>

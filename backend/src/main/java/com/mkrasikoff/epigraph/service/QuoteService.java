@@ -18,22 +18,24 @@ public class QuoteService {
     }
 
     @Transactional(readOnly = true)
-    public List<Quote> findAll() {
-        return repo.findAll();
+    public List<Quote> findAll(Long userId) {
+        return repo.findByUserId(userId);
     }
 
     @Transactional
-    public Quote save(Quote quote) {
+    public Quote save(Quote quote, Long userId) {
         if (quote.getAdded() == null) {
             quote.setAdded(System.currentTimeMillis());
         }
+
+        quote.setUserId(userId);
 
         return repo.save(quote);
     }
 
     @Transactional
-    public Quote update(Long id, Quote incoming) {
-        Quote existing = repo.findById(id).orElseThrow(() -> new QuoteNotFoundException(id));
+    public Quote update(Long id, Quote incoming, Long userId) {
+        Quote existing = repo.findByIdAndUserId(id, userId).orElseThrow(() -> new QuoteNotFoundException(id));
 
         existing.setText(incoming.getText());
         existing.setAuthor(incoming.getAuthor());
@@ -45,13 +47,14 @@ public class QuoteService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        if (!repo.existsById(id)) throw new QuoteNotFoundException(id);
-        repo.deleteById(id);
+    public void deleteById(Long id, Long userId) {
+        if (!repo.existsByIdAndUserId(id, userId)) throw new QuoteNotFoundException(id);
+
+        repo.deleteByIdAndUserId(id, userId);
     }
 
     @Transactional
-    public void deleteAll() {
-        repo.deleteAll();
+    public void deleteAll(Long userId) {
+        repo.findByUserId(userId).forEach(q -> repo.deleteById(q.getId()));
     }
 }

@@ -19,6 +19,9 @@ public class Quote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @NotBlank(message = "Quote text must not be empty")
     @Size(max = 3000, message = "Размер цитаты не должен превышать 3000 символов")
     @Column(length = 3000)
