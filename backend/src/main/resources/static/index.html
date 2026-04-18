@@ -10,7 +10,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ===== DESIGN TOKENS ===== */
+/* =============================================================================
+   DESIGN TOKENS
+   CSS custom properties for colors, typography, spacing, shadows, and layout.
+   ============================================================================= */
 :root, [data-theme="light"] {
   --color-bg:             #f5f2ec;
   --color-surface:        #faf8f4;
@@ -88,7 +91,10 @@
   }
 }
 
-/* ===== BASE ===== */
+/* =============================================================================
+   BASE RESET
+   Global element resets, default typography, focus styles, and motion prefs.
+   ============================================================================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust:none; text-size-adjust:none; -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
 body { min-height:100dvh; font-family:var(--font-body); font-size:var(--text-base); color:var(--color-text); background:var(--color-bg); line-height:1.6; }
@@ -99,10 +105,17 @@ a, button, [role="button"] { transition: color var(--transition), background var
 ::selection { background: oklch(from var(--color-primary) l c h / 0.2); color: var(--color-text); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:0.01ms!important; transition-duration:0.01ms!important; } }
 
-/* ===== LAYOUT ===== */
+/* =============================================================================
+   LAYOUT
+   Top-level application shell containers.
+   ============================================================================= */
 .app { display:flex; flex-direction:column; min-height:100dvh; }
+main { flex:1; }
 
-/* ===== HEADER ===== */
+/* =============================================================================
+   HEADER
+   Sticky top header with logo and theme toggle.
+   ============================================================================= */
 header {
   position:sticky; top:0; z-index:100;
   background: oklch(from var(--color-bg) l c h / 0.92);
@@ -118,8 +131,17 @@ header {
 }
 .logo svg { color:var(--color-primary); flex-shrink:0; }
 .header-actions { display:flex; align-items:center; gap:var(--space-2); }
+.btn-icon {
+  width:36px; height:36px; border-radius:var(--radius-full);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--color-text-muted);
+}
+.btn-icon:hover { background:var(--color-surface-offset); color:var(--color-text); }
 
-/* ===== NAV TABS ===== */
+/* =============================================================================
+   NAVIGATION TABS
+   Pill-style tabs for switching between main views.
+   ============================================================================= */
 .nav-tabs {
   display:flex; gap:var(--space-1);
   background:var(--color-surface-offset);
@@ -140,22 +162,38 @@ header {
 }
 .nav-tab:hover:not(.active) { color:var(--color-text); }
 
-.btn-icon {
-  width:36px; height:36px; border-radius:var(--radius-full);
-  display:flex; align-items:center; justify-content:center;
-  color:var(--color-text-muted);
+/* =============================================================================
+   BUTTONS (shared)
+   Primary / secondary button styles reused across views.
+   ============================================================================= */
+.btn-primary {
+  display:flex; align-items:center; gap:var(--space-2);
+  padding:var(--space-2) var(--space-5);
+  background:var(--color-primary); color:var(--color-text-inverse);
+  border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500;
 }
-.btn-icon:hover { background:var(--color-surface-offset); color:var(--color-text); }
+.btn-primary:hover { background:var(--color-primary-hover); }
+.btn-secondary {
+  display:flex; align-items:center; gap:var(--space-2);
+  padding:var(--space-2) var(--space-5);
+  background:var(--color-surface-offset); color:var(--color-text);
+  border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500;
+  border: 1px solid var(--color-border);
+}
+.btn-secondary:hover { background:var(--color-surface-dynamic); }
 
-/* ===== MAIN ===== */
-main { flex:1; }
-
-/* ===== VIEWS ===== */
+/* =============================================================================
+   VIEWS
+   View visibility toggle and scroll locking helper.
+   ============================================================================= */
 .view { display:none; }
 .view.active { display:block; }
 body.no-scroll { overflow:hidden; height:100dvh; }
 
-/* ===== QUOTE OF THE DAY ===== */
+/* =============================================================================
+   QUOTE OF THE DAY
+   Hero card that displays today's quote with actions.
+   ============================================================================= */
 .qod-section {
   min-height: calc(100dvh - 57px);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -208,27 +246,15 @@ body.no-scroll { overflow:hidden; height:100dvh; }
   display:flex; align-items:center; gap:var(--space-3);
   justify-content:center; margin-top:var(--space-8);
 }
-.btn-primary {
-  display:flex; align-items:center; gap:var(--space-2);
-  padding:var(--space-2) var(--space-5);
-  background:var(--color-primary); color:var(--color-text-inverse);
-  border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500;
-}
-.btn-primary:hover { background:var(--color-primary-hover); }
-.btn-secondary {
-  display:flex; align-items:center; gap:var(--space-2);
-  padding:var(--space-2) var(--space-5);
-  background:var(--color-surface-offset); color:var(--color-text);
-  border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500;
-  border: 1px solid var(--color-border);
-}
-.btn-secondary:hover { background:var(--color-surface-dynamic); }
 .qod-progress {
   margin-top:var(--space-6);
   font-size:var(--text-xs); color:var(--color-text-faint);
 }
 
-/* ===== QUOTES LIST ===== */
+/* =============================================================================
+   QUOTES LIST
+   Grid layout that shows all stored quotes with search/filter controls.
+   ============================================================================= */
 .list-section { padding:var(--space-8) var(--space-6); max-width:var(--content-default); margin:0 auto; }
 .list-header {
   display:flex; align-items:center; gap:var(--space-4);
@@ -297,7 +323,10 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .filter-tab.active { background:var(--color-primary); color:var(--color-text-inverse); border-color:var(--color-primary); }
 .filter-tab:hover:not(.active) { border-color:var(--color-primary); color:var(--color-primary); }
 
-/* ===== ADD QUOTE ===== */
+/* =============================================================================
+   ADD QUOTE
+   Form for manually adding quotes and JSON import UI.
+   ============================================================================= */
 .add-section { padding:var(--space-8) var(--space-6); max-width:680px; margin:0 auto; }
 .add-section h2 { font-family:var(--font-display); font-size:var(--text-xl); font-weight:500; margin-bottom:var(--space-2); }
 .add-section .subtitle { font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-8); }
@@ -317,6 +346,9 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
 .form-actions { display:flex; gap:var(--space-3); margin-top:var(--space-6); }
 .form-divider { border:none; border-top:1px solid var(--color-divider); margin:var(--space-10) 0; }
+.section-subheading { font-family:var(--font-display); font-size:var(--text-lg); font-weight:500; margin-bottom:var(--space-2); }
+.import-hint { font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4); }
+.inline-code { background:var(--color-surface-offset); padding:2px 6px; border-radius:4px; font-size:0.85em; }
 .import-area {
   border:2px dashed var(--color-border); border-radius:var(--radius-lg);
   padding:var(--space-8); text-align:center; cursor:pointer;
@@ -326,12 +358,25 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .import-area:hover { border-color:var(--color-primary); background:var(--color-primary-highlight); }
 .import-area p { font-size:var(--text-sm); color:var(--color-text-muted); margin-top:var(--space-2); }
 .import-area strong { color:var(--color-text); }
+.import-area-icon { margin:0 auto var(--space-3); color:var(--color-text-muted); }
+.import-file-input { display:none; }
+.json-example-wrap { margin-top:var(--space-4); }
+.json-example-label { font-size:var(--text-xs); color:var(--color-text-faint); margin-bottom:var(--space-2); }
+.json-example {
+  background:var(--color-surface-offset); border-radius:var(--radius-md);
+  padding:var(--space-4); font-size:0.78rem; overflow-x:auto;
+  color:var(--color-text-muted); line-height:1.7;
+}
 .tag-input-wrap { display:flex; flex-wrap:wrap; gap:var(--space-2); align-items:center; }
+.tag-input { flex:1; min-width:150px; }
 .tag { display:flex; align-items:center; gap:var(--space-1); padding:var(--space-1) var(--space-3) var(--space-1) var(--space-3); background:var(--color-primary-highlight); color:var(--color-primary); border-radius:var(--radius-full); font-size:var(--text-xs); font-weight:500; }
 .tag button { display:flex; align-items:center; color:inherit; opacity:0.6; }
 .tag button:hover { opacity:1; }
 
-/* ===== SETTINGS ===== */
+/* =============================================================================
+   SETTINGS
+   Configuration panel with data export/import and danger-zone actions.
+   ============================================================================= */
 .settings-section { padding:var(--space-8) var(--space-6); max-width:680px; margin:0 auto; }
 .settings-section h2 { font-family:var(--font-display); font-size:var(--text-xl); font-weight:500; margin-bottom:var(--space-8); }
 .settings-group { margin-bottom:var(--space-8); }
@@ -345,12 +390,18 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .danger-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) var(--space-5); border:1px solid #e05555; border-radius:var(--radius-full); font-size:var(--text-sm); color:#e05555; background:transparent; }
 .danger-btn:hover { background:#e0555515; }
 
-/* ===== TOAST ===== */
+/* =============================================================================
+   TOAST
+   Transient notification messages displayed in the bottom-right corner.
+   ============================================================================= */
 .toast-wrap { position:fixed; bottom:var(--space-6); right:var(--space-6); display:flex; flex-direction:column; gap:var(--space-2); z-index:999; pointer-events:none; }
 .toast { padding:var(--space-3) var(--space-5); background:var(--color-text); color:var(--color-bg); border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500; box-shadow:var(--shadow-lg); opacity:0; transform:translateY(8px); transition:opacity 0.25s, transform 0.25s; }
 .toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
 
-/* ===== MODAL ===== */
+/* =============================================================================
+   MODAL
+   Overlay dialog used for confirmations and detail views.
+   ============================================================================= */
 .modal-overlay { position:fixed; inset:0; background:oklch(0.1 0 0 / 0.5); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:center; justify-content:center; padding:var(--space-4); opacity:0; pointer-events:none; transition:opacity 0.2s; }
 .modal-overlay.open { opacity:1; pointer-events:auto; }
 .modal { background:var(--color-surface-2); border-radius:var(--radius-xl); padding:var(--space-8); max-width:480px; width:100%; box-shadow:var(--shadow-lg); transform:scale(0.96); transition:transform 0.2s; max-height:90dvh; overflow-y:auto; }
@@ -362,7 +413,10 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .modal-quote-text { font-family:var(--font-display); font-style:italic; font-size:var(--text-lg); line-height:1.6; color:var(--color-text); background:var(--color-surface-offset); border-radius:var(--radius-md); padding:var(--space-5); margin-bottom:var(--space-4); max-height:160px; overflow-y:auto; scrollbar-width:thin; scrollbar-color: var(--color-border) transparent; }
 .modal-quote-author { font-size:var(--text-sm); font-weight:500; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-primary); margin-bottom:var(--space-6); }
 
-/* ===== RESPONSIVE ===== */
+/* =============================================================================
+   RESPONSIVE
+   Mobile / small-viewport overrides.
+   ============================================================================= */
 @media (max-width: 640px) {
   header { padding:var(--space-3) var(--space-4); gap:var(--space-2); flex-wrap:wrap; }
   .nav-tabs { order:3; flex:1 0 100%; justify-content:center; }
@@ -481,7 +535,7 @@ body.no-scroll { overflow:hidden; height:100dvh; }
         <div class="form-group">
           <label class="form-label" for="q-tags">Теги <span>(необязательно)</span></label>
           <div class="tag-input-wrap" id="tags-wrap">
-            <input class="form-input" type="text" id="q-tags" placeholder="Введите тег и нажмите Enter" onkeydown="addTag(event)" style="flex:1;min-width:150px;">
+            <input class="form-input tag-input" type="text" id="q-tags" placeholder="Введите тег и нажмите Enter" onkeydown="addTag(event)">
           </div>
         </div>
         <div class="form-actions">
@@ -495,18 +549,18 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 
       <hr class="form-divider">
 
-      <h3 style="font-family:var(--font-display);font-size:var(--text-lg);font-weight:500;margin-bottom:var(--space-2)">Импорт из JSON</h3>
-      <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)">Загрузите файл формата <code style="background:var(--color-surface-offset);padding:2px 6px;border-radius:4px;font-size:0.85em">.json</code> со списком цитат.</p>
+      <h3 class="section-subheading">Импорт из JSON</h3>
+      <p class="import-hint">Загрузите файл формата <code class="inline-code">.json</code> со списком цитат.</p>
       <label class="import-area" for="import-file">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto var(--space-3);color:var(--color-text-muted)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <svg class="import-area-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <strong>Выберите файл или перетащите сюда</strong>
         <p>Формат: массив объектов с полями <code>text</code>, <code>author</code>, <code>source</code></p>
-        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+        <input type="file" id="import-file" accept=".json" class="import-file-input" onchange="importJSON(event)">
       </label>
 
-      <div style="margin-top:var(--space-4)">
-        <p style="font-size:var(--text-xs);color:var(--color-text-faint);margin-bottom:var(--space-2)">Пример структуры JSON:</p>
-        <pre style="background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-4);font-size:0.78rem;overflow-x:auto;color:var(--color-text-muted);line-height:1.7">[
+      <div class="json-example-wrap">
+        <p class="json-example-label">Пример структуры JSON:</p>
+        <pre class="json-example">[
   {
     "text": "Текст цитаты",
     "author": "Имя автора",
@@ -594,39 +648,101 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-// ===== DATA =====
+// =============================================================================
+// CONSTANTS & STATE
+// Application-wide constants, API endpoint, and mutable module-level state.
+// =============================================================================
 const API = '/api/quotes';
+
+const TOAST_DISPLAY_DURATION_MS = 2500;
+const TOAST_FADE_DURATION_MS = 300;
+const QOD_ANIMATION_DEBOUNCE_MS = 60;
+const FAVORITE_RERENDER_DELAY_MS = 220;
+
 let quotes = [];
 let currentFilter = 'all';
 let currentQodIndex = -1;
-let pendingTags = [];
 let editingId = null;
+let currentTags = [];
 
+// =============================================================================
+// DATA / API
+// Backend communication layer and initial data loading.
+// =============================================================================
+
+/**
+ * Thin wrapper around the quotes REST API. Centralises fetch calls so the rest
+ * of the app does not deal with HTTP details.
+ */
+const Api = {
+  /**
+   * Fetches all quotes from the backend.
+   * @returns {Promise<Array>} Promise resolving to the raw quotes array.
+   */
+  getAll: () => fetch(API).then(r => r.json()),
+  /**
+   * Creates a new quote on the backend.
+   * @param {Object} payload - Quote payload to persist.
+   * @returns {Promise<Response>} Raw fetch Response.
+   */
+  create: (payload) => fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }),
+  /**
+   * Updates an existing quote by id.
+   * @param {number|string} id - Quote identifier.
+   * @param {Object} payload - Updated quote payload.
+   * @returns {Promise<Response>} Raw fetch Response.
+   */
+  update: (id, payload) => fetch(`${API}/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }),
+  /**
+   * Deletes a single quote by id.
+   * @param {number|string} id - Quote identifier.
+   * @returns {Promise<Response>} Raw fetch Response.
+   */
+  delete: (id) => fetch(`${API}/${id}`, { method: 'DELETE' }),
+  /**
+   * Deletes all quotes.
+   * @returns {Promise<Response>} Raw fetch Response.
+   */
+  deleteAll: () => fetch(API, { method: 'DELETE' })
+};
+
+/**
+ * Loads all quotes from the backend and normalises their tags from a CSV
+ * string into an array. On failure, resets the local quotes array.
+ * @returns {Promise<void>}
+ */
 async function loadData() {
   try {
-    const res = await fetch(API);
-    const raw = await res.json();
-    quotes = raw.map(q => ({ ...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : [] }));
+    const rawQuotes = await Api.getAll();
+    quotes = rawQuotes.map(q => ({ ...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : [] }));
   } catch(e) {
     console.error('Ошибка загрузки:', e);
     quotes = [];
   }
 }
 
-// ===== THEME =====
+// =============================================================================
+// THEME
+// Theme toggle IIFE — reads saved preference, applies it, and wires the button.
+// =============================================================================
 (function(){
-  const t = document.querySelector('[data-theme-toggle]');
-  const r = document.documentElement;
-  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-  try { const s = localStorage.getItem('theme'); if(s) d = s; } catch(e){}
-  r.setAttribute('data-theme', d);
-  updateThemeIcon(t, d);
-  t && t.addEventListener('click', () => {
-    d = d === 'dark' ? 'light' : 'dark';
-    r.setAttribute('data-theme', d);
-    try { localStorage.setItem('theme', d); } catch(e){}
-    updateThemeIcon(t, d);
+  const themeToggleBtn = document.querySelector('[data-theme-toggle]');
+  const htmlElement = document.documentElement;
+  let currentTheme = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  try { const s = localStorage.getItem('theme'); if(s) currentTheme = s; } catch(e){}
+  htmlElement.setAttribute('data-theme', currentTheme);
+  updateThemeIcon(themeToggleBtn, currentTheme);
+  themeToggleBtn && themeToggleBtn.addEventListener('click', () => {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    htmlElement.setAttribute('data-theme', currentTheme);
+    try { localStorage.setItem('theme', currentTheme); } catch(e){}
+    updateThemeIcon(themeToggleBtn, currentTheme);
   });
+  /**
+   * Updates the theme toggle button icon and aria-label for the current theme.
+   * @param {HTMLElement|null} btn - Theme toggle button.
+   * @param {string} mode - Either 'dark' or 'light'.
+   */
   function updateThemeIcon(btn, mode) {
     if (!btn) return;
     if (mode === 'dark') {
@@ -639,7 +755,15 @@ async function loadData() {
   }
 })();
 
-// ===== NAVIGATION =====
+// =============================================================================
+// NAVIGATION
+// Logic for switching between the main application views.
+// =============================================================================
+
+/**
+ * Switches the currently active view and tab, and triggers per-view rendering.
+ * @param {string} id - View identifier ('qod', 'list', 'add', 'settings').
+ */
 function switchView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -650,7 +774,15 @@ function switchView(id) {
   if (id === 'qod') renderQod();
 }
 
-// ===== QUOTE OF THE DAY =====
+// =============================================================================
+// QUOTE OF THE DAY
+// Rendering, randomisation, copying, and favouriting for the QoD section.
+// =============================================================================
+
+/**
+ * Computes a deterministic quote index for today based on the day-of-year.
+ * @returns {number} Index within the quotes array, or 0 when empty.
+ */
 function getDayIndex() {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
@@ -660,6 +792,10 @@ function getDayIndex() {
   return quotes.length ? (day % quotes.length) : 0;
 }
 
+/**
+ * Renders the Quote of the Day section.
+ * @param {number} [overrideIdx] - Optional quote index to display instead of today's.
+ */
 function renderQod(overrideIdx) {
   if (!quotes.length) {
     document.getElementById('qod-text').textContent = 'Добавьте первую цитату в разделе «Добавить»';
@@ -688,10 +824,14 @@ function renderQod(overrideIdx) {
       const fits = section.getBoundingClientRect().height <= (window.innerHeight - 57) + 2;
       document.body.classList.toggle('no-scroll', fits);
     });
-  }, 60);
+  }, QOD_ANIMATION_DEBOUNCE_MS);
   document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
 }
 
+/**
+ * Picks a random quote (different from the current one when possible) and
+ * renders it in the QoD section.
+ */
 function randomQuote() {
   if (!quotes.length) return;
   let idx;
@@ -699,40 +839,59 @@ function randomQuote() {
   renderQod(idx);
 }
 
+/**
+ * Copies the currently displayed QoD quote to the clipboard.
+ */
 function copyQod() {
   const q = quotes[currentQodIndex];
   if (!q) return;
-  let text = q.text;
-  if (q.author) text += '\n— ' + q.author;
-  if (q.source) text += ', «' + q.source + '»';
+  const text = formatQuoteAsText(q);
   navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка копирования'));
 }
 
+/**
+ * Toggles the favourite flag on the currently displayed QoD quote and
+ * persists the change. Reverts local state if the request fails.
+ * @returns {Promise<void>}
+ */
 async function favQod() {
   const q = quotes[currentQodIndex];
   if (!q) return;
   q.fav = !q.fav;
   try {
-    await fetch(`${API}/${q.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
-    });
+    await Api.update(q.id, { ...q, tags: (q.tags || []).join(',') });
     updateFavQodButton();
   } catch(e) { q.fav = !q.fav; toast('Ошибка'); }
 }
 
-// ===== LIST =====
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderList();
+/**
+ * Updates the QoD "favourite" button to reflect the current quote's fav state.
+ */
+function updateFavQodButton() {
+  const q = quotes[currentQodIndex];
+  const btn = document.getElementById('btn-fav-qod');
+  if (!btn || !q) return;
+  const isFav = !!q.fav;
+  btn.innerHTML = `
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" style="color:${isFav ? 'var(--color-gold)' : 'inherit'}">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+    ${isFav ? 'В избранном' : 'В избранное'}
+  `;
+  btn.style.color = isFav ? 'var(--color-gold)' : '';
 }
 
+// =============================================================================
+// QUOTES LIST
+// Filtering, search, and rendering for the list-of-all-quotes view.
+// =============================================================================
+
+/**
+ * Renders the list view, applying the current search query and filter.
+ */
 function renderList() {
   const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
-  let filtered = quotes.filter(q => {
+  let filteredQuotes = quotes.filter(q => {
     if (currentFilter === 'fav' && !q.fav) return false;
     if (!query) return true;
     return (q.text + ' ' + (q.author||'') + ' ' + (q.source||'')).toLowerCase().includes(query);
@@ -744,11 +903,11 @@ function renderList() {
   document.getElementById('stats-bar').innerHTML =
     `<span><strong>${total}</strong> цитат всего</span><span><strong>${favCount}</strong> в избранном</span>`;
 
-  if (!filtered.length) {
+  if (!filteredQuotes.length) {
     grid.innerHTML = `<div class="empty-state"><h3>${query ? 'Ничего не найдено' : 'Пока нет цитат'}</h3><p>${query ? 'Попробуйте другой запрос' : 'Перейдите в раздел «Добавить»'}</p></div>`;
     return;
   }
-  grid.innerHTML = filtered.map((q, i) => `
+  grid.innerHTML = filteredQuotes.map((q, i) => `
     <article class="quote-card">
       <span class="quote-card-num">${i + 1}</span>
       <p class="quote-card-text">${escHtml(q.text)}</p>
@@ -773,42 +932,34 @@ function renderList() {
   `).join('');
 }
 
-// ===== ADD / EDIT =====
-let currentTags = [];
-
-function addTag(e) {
-  if (e.key !== 'Enter') return;
-  e.preventDefault();
-  const val = e.target.value.trim();
-  if (!val || currentTags.includes(val)) return;
-  currentTags.push(val);
-  e.target.value = '';
-  renderTags();
+/**
+ * Updates the active list filter and re-renders the list.
+ * @param {string} f - Filter identifier ('all' or 'fav').
+ * @param {HTMLElement} btn - The filter button that was clicked.
+ */
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
 }
 
-function removeTag(tag) {
-  currentTags = currentTags.filter(t => t !== tag);
-  renderTags();
-}
+// =============================================================================
+// ADD / EDIT
+// Form handling for adding new quotes, tag management, and form reset.
+// =============================================================================
 
-function renderTags() {
-  const wrap = document.getElementById('tags-wrap');
-  const input = document.getElementById('q-tags');
-  wrap.innerHTML = '';
-  currentTags.forEach(tag => {
-    const span = document.createElement('span');
-    span.className = 'tag';
-    span.innerHTML = `${escHtml(tag)}<button onclick="removeTag('${escHtml(tag)}')" aria-label="Убрать тег"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
-    wrap.appendChild(span);
-  });
-  wrap.appendChild(input);
-}
-
+/**
+ * Handles the new-quote form submission: validates input, posts it to the
+ * backend, and updates the local quotes array on success.
+ * @param {Event} e - The form submit event.
+ * @returns {Promise<void>}
+ */
 async function addQuote(e) {
   e.preventDefault();
   const text = document.getElementById('q-text').value.trim();
 
-  // Клиентская валидация — показываем ошибку явно
+  // Client-side validation — show the error explicitly to the user
   if (!text) {
     toast('Текст цитаты обязателен', 'error');
     document.getElementById('q-text').focus();
@@ -825,11 +976,7 @@ async function addQuote(e) {
   };
 
   try {
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const res = await Api.create(payload);
 
     if (!res.ok) {
       const err = await res.json();
@@ -848,6 +995,9 @@ async function addQuote(e) {
   }
 }
 
+/**
+ * Clears the add-quote form fields and resets the pending tags list.
+ */
 function resetForm() {
   document.getElementById('q-text').value = '';
   document.getElementById('q-author').value = '';
@@ -856,39 +1006,85 @@ function resetForm() {
   renderTags();
 }
 
+/**
+ * Adds a new tag to the pending tag list when the user presses Enter.
+ * @param {KeyboardEvent} e - The keydown event from the tag input.
+ */
+function addTag(e) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  const val = e.target.value.trim();
+  if (!val || currentTags.includes(val)) return;
+  currentTags.push(val);
+  e.target.value = '';
+  renderTags();
+}
+
+/**
+ * Removes a tag from the pending tag list and re-renders.
+ * @param {string} tag - Tag value to remove.
+ */
+function removeTag(tag) {
+  currentTags = currentTags.filter(t => t !== tag);
+  renderTags();
+}
+
+/**
+ * Re-renders the tag chips inside the add-quote form.
+ */
+function renderTags() {
+  const wrap = document.getElementById('tags-wrap');
+  const input = document.getElementById('q-tags');
+  wrap.innerHTML = '';
+  currentTags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.innerHTML = `${escHtml(tag)}<button onclick="removeTag('${escHtml(tag)}')" aria-label="Убрать тег"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    wrap.appendChild(span);
+  });
+  wrap.appendChild(input);
+}
+
+// =============================================================================
+// FAVORITES
+// Favourite toggling from the list view.
+// =============================================================================
+
+/**
+ * Toggles the favourite flag of a quote identified by id and updates the UI
+ * in place without re-rendering the entire grid.
+ * @param {number|string} id - Quote identifier.
+ * @returns {Promise<void>}
+ */
 async function toggleFav(id) {
   const q = quotes.find(q => q.id === id);
   if (!q) return;
   q.fav = !q.fav;
   try {
-    await fetch(`${API}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...q, tags: (q.tags || []).join(',') })
-    });
+    await Api.update(id, { ...q, tags: (q.tags || []).join(',') });
 
-    // Точечно обновляем только кнопку в карточке — без перерисовки грида
+    // Update just the button in the card — avoid a full grid re-render
     const btn = document.querySelector(`.card-btn.fav[onclick="toggleFav(${id})"]`);
     if (btn) {
       btn.classList.toggle('active', q.fav);
       btn.querySelector('svg').setAttribute('fill', q.fav ? 'currentColor' : 'none');
     }
 
-    // Обновляем счётчик в stats-bar
+    // Refresh the counter in the stats bar
     const favCount = quotes.filter(q => q.fav).length;
     const statsBar = document.getElementById('stats-bar');
     if (statsBar) {
       statsBar.innerHTML = `<span><strong>${quotes.length}</strong> цитат всего</span><span><strong>${favCount}</strong> в избранном</span>`;
     }
 
-    // Если активен фильтр "fav" — убираем карточку из грида плавно
+    // When the "fav" filter is active, smoothly remove the card from the grid
     if (currentFilter === 'fav' && !q.fav) {
       const card = btn.closest('.quote-card');
       if (card) {
         card.style.transition = 'opacity 0.2s, transform 0.2s';
         card.style.opacity = '0';
         card.style.transform = 'scale(0.97)';
-        setTimeout(() => renderList(), 220);
+        setTimeout(() => renderList(), FAVORITE_RERENDER_DELAY_MS);
       }
     }
   } catch(e) {
@@ -897,29 +1093,28 @@ async function toggleFav(id) {
   }
 }
 
-function updateFavQodButton() {
-  const q = quotes[currentQodIndex];
-  const btn = document.getElementById('btn-fav-qod');
-  if (!btn || !q) return;
-  const isFav = !!q.fav;
-  btn.innerHTML = `
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" style="color:${isFav ? 'var(--color-gold)' : 'inherit'}">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>
-    ${isFav ? 'В избранном' : 'В избранное'}
-  `;
-  btn.style.color = isFav ? 'var(--color-gold)' : '';
-}
+// =============================================================================
+// COPY / DELETE
+// Single-quote copy-to-clipboard and delete-with-confirmation actions.
+// =============================================================================
 
+/**
+ * Copies a single quote identified by id to the clipboard.
+ * @param {number|string} id - Quote identifier.
+ */
 function copyQuote(id) {
   const q = quotes.find(q => q.id === id);
   if (!q) return;
-  let text = q.text;
-  if (q.author) text += '\n— ' + q.author;
-  if (q.source) text += ', «' + q.source + '»';
+  const text = formatQuoteAsText(q);
   navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка'));
 }
 
+/**
+ * Prompts the user for confirmation and, on approval, deletes a single quote
+ * both on the backend and locally, then re-renders the list.
+ * @param {number|string} id - Quote identifier.
+ * @returns {Promise<void>}
+ */
 async function deleteQuote(id) {
   const q = quotes.find(q => q.id === id);
   if (!q) return;
@@ -928,7 +1123,7 @@ async function deleteQuote(id) {
           `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author||'')}</div>Это действие нельзя отменить.`,
           [{ label:'Удалить', cls:'btn-primary', action: async () => {
       try {
-        await fetch(`${API}/${id}`, { method:'DELETE' });
+        await Api.delete(id);
         quotes = quotes.filter(q => q.id !== id);
         renderList();
         closeModal();
@@ -939,7 +1134,17 @@ async function deleteQuote(id) {
   );
 }
 
-// ===== IMPORT / EXPORT =====
+// =============================================================================
+// IMPORT / EXPORT
+// Bulk JSON import, JSON export, copy-all-as-text, and delete-all operations.
+// =============================================================================
+
+/**
+ * Imports a list of quotes from a user-selected JSON file, persisting each
+ * one on the backend and appending it to the local quotes array.
+ * @param {Event} e - The file input change event.
+ * @returns {Promise<void>}
+ */
 async function importJSON(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -951,7 +1156,7 @@ async function importJSON(e) {
     for (const item of data) {
       if (!item.text) continue;
       const payload = { text: item.text, author: item.author||'', source: item.source||'', tags: Array.isArray(item.tags) ? item.tags.join(',') : (item.tags||''), fav: false, added: Date.now() };
-      const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      const res = await Api.create(payload);
       const saved = await res.json();
       saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
       quotes.push(saved);
@@ -962,6 +1167,9 @@ async function importJSON(e) {
   } catch(err) { toast('Ошибка импорта: ' + err.message); }
 }
 
+/**
+ * Exports the current quotes array as a downloadable JSON file.
+ */
 function exportJSON() {
   const data = quotes.map(q => ({ text: q.text, author: q.author, source: q.source, tags: q.tags, fav: q.fav }));
   const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
@@ -971,23 +1179,28 @@ function exportJSON() {
   a.click();
 }
 
+/**
+ * Copies every quote to the clipboard as a plain-text block.
+ */
 function copyAll() {
   const text = quotes.map(q => {
-    let s = q.text;
-    if (q.author) s += '\n— ' + q.author;
-    if (q.source) s += ', «' + q.source + '»';
-    return s;
+    const formatted = formatQuoteAsText(q);
+    return formatted;
   }).join('\n\n');
   navigator.clipboard.writeText(text).then(() => toast('Скопировано!')).catch(() => toast('Ошибка'));
 }
 
+/**
+ * Prompts the user for confirmation and, on approval, deletes every quote on
+ * the backend and clears the local state.
+ */
 function confirmClear() {
   showModal(
     'Удалить все цитаты?',
     `Вы собираетесь удалить все ${quotes.length} цитат. Это действие нельзя отменить.`,
     [{ label:'Удалить всё', cls:'btn-primary', action: async () => {
       try {
-        await fetch(API, { method:'DELETE' });
+        await Api.deleteAll();
         quotes = [];
         renderList();
         closeModal();
@@ -998,7 +1211,17 @@ function confirmClear() {
   );
 }
 
-// ===== MODAL =====
+// =============================================================================
+// MODAL
+// Modal dialog show/close helpers and overlay-click handling.
+// =============================================================================
+
+/**
+ * Shows the shared modal dialog with the given title, body, and action buttons.
+ * @param {string} title - Modal heading text.
+ * @param {string} body - HTML string rendered inside the modal body.
+ * @param {Array<{label: string, cls: string, action: Function}>} actions - Buttons to render in the footer.
+ */
 function showModal(title, body, actions) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = body;
@@ -1008,29 +1231,42 @@ function showModal(title, body, actions) {
     const btn = document.createElement('button');
     btn.className = a.cls;
     btn.textContent = a.label;
-    // bind action directly so closeModal() is called without a MouseEvent argument, bypassing the overlay-click guard
+    // Bind the action directly so closeModal() runs without a MouseEvent argument, bypassing the overlay-click guard
     btn.addEventListener('click', a.action);
     actEl.appendChild(btn);
   });
   document.getElementById('modal').classList.add('open');
 }
 
-// Close modal (Cancel button)
+/**
+ * Closes the shared modal dialog.
+ */
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
 }
 
-// Close modal (Overlay)
+/**
+ * Closes the modal when the user clicks on the overlay background (but not on the dialog itself).
+ * @param {MouseEvent} e - The click event on the overlay.
+ */
 function handleModalOverlayClick(e) {
   if (e.target === document.getElementById('modal')) closeModal();
 }
 
-// Close modal (Escape button)
+// Close the modal when the user presses Escape
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeModal();
 });
 
-// ===== TOAST =====
+// =============================================================================
+// TOAST
+// Transient notification helper.
+// =============================================================================
+
+/**
+ * Displays a transient toast notification at the bottom-right of the screen.
+ * @param {string} msg - Message to display.
+ */
 function toast(msg) {
   const wrap = document.getElementById('toast-wrap');
   const el = document.createElement('div');
@@ -1038,15 +1274,40 @@ function toast(msg) {
   el.textContent = msg;
   wrap.appendChild(el);
   requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2500);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), TOAST_FADE_DURATION_MS); }, TOAST_DISPLAY_DURATION_MS);
 }
 
-// ===== UTILS =====
+// =============================================================================
+// UTILITIES
+// Small shared helpers used across multiple sections.
+// =============================================================================
+
+/**
+ * Formats a quote object into a plain-text string suitable for copying.
+ * Format: "text\n— author, «source»"
+ * @param {Object} quote - Quote object with text, author, source fields.
+ * @returns {string} Formatted plain-text representation.
+ */
+function formatQuoteAsText(quote) {
+  let result = quote.text;
+  if (quote.author) result += '\n— ' + quote.author;
+  if (quote.source) result += ', «' + quote.source + '»';
+  return result;
+}
+
+/**
+ * Escapes a string for safe inclusion in HTML.
+ * @param {*} s - Value to escape (coerced to string).
+ * @returns {string} Escaped HTML-safe string.
+ */
 function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ===== INIT =====
+// =============================================================================
+// INIT
+// Application bootstrap — loads data then renders the initial QoD view.
+// =============================================================================
 (async () => {
   await loadData();
   renderQod();
