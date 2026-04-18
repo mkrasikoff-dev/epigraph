@@ -65,7 +65,7 @@ When `develop` is ready:
 
 ### Step 3 — Sync develop from trunk
 After the release PR is merged into trunk, open a PR: `trunk → develop`
-- Title: `Sync develop from trunk after Release v0.1.9`
+- Title: `Sync develop from trunk after Release v0.2.0`
 - Merge method: **regular merge** (не squash — нужно сохранить граф истории)
 
 This prevents diverged branches on the next release. 

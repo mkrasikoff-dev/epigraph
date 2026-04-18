@@ -10,3 +10,8 @@ spring:
 # Railway port: Railway injects PORT automatically, fallback 8080 for local
 server:
   port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 86400000  # 24 часа
