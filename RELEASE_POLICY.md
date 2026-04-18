@@ -55,7 +55,7 @@ git push origin feature/TASK-42
 ```
 
 Open PR: `feature/TASK-42 → develop`  
-Merge without approval.
+Merge with squash without approval.
 
 ### Step 2 — Prepare release PR
 When `develop` is ready:
