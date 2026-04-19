@@ -182,6 +182,18 @@ header {
   border: 1px solid var(--color-border);
 }
 .btn-secondary:hover { background:var(--color-surface-dynamic); }
+.btn-danger {
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--space-2);
+  padding:var(--space-2) var(--space-5);
+  border-radius:var(--radius-full);
+  font-size:var(--text-sm); font-weight:500;
+  background:#c0392b;
+  color:#fff;
+  border:1.5px solid transparent;
+  transition: background var(--transition), opacity var(--transition);
+}
+.btn-danger:hover { background:#a93226; }
+.btn-danger:active { opacity:0.85; }
 
 /* =============================================================================
    VIEWS
@@ -303,6 +315,7 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .card-btn { width:28px; height:28px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; color:var(--color-text-muted); }
 .card-btn:hover { background:var(--color-surface-offset); color:var(--color-primary); }
 .card-btn.fav.active { color:var(--color-gold); }
+.card-btn.danger:hover { color:#c0392b; background:oklch(from #c0392b l c h / 0.1); }
 .empty-state {
   grid-column:1/-1; padding:var(--space-20) var(--space-8);
   text-align:center; color:var(--color-text-muted);
@@ -388,8 +401,6 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .settings-item-info p { font-size:var(--text-sm); color:var(--color-text-muted); margin-top:var(--space-1); }
 .export-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) var(--space-5); border:1px solid var(--color-border); border-radius:var(--radius-full); font-size:var(--text-sm); color:var(--color-text); background:var(--color-surface); white-space:nowrap; }
 .export-btn:hover { border-color:var(--color-primary); color:var(--color-primary); }
-.danger-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2) var(--space-5); border:1px solid #e05555; border-radius:var(--radius-full); font-size:var(--text-sm); color:#e05555; background:transparent; }
-.danger-btn:hover { background:#e0555515; }
 
 /* =============================================================================
    TOAST
@@ -810,7 +821,7 @@ body.no-scroll { overflow:hidden; height:100dvh; }
             <h4>Удалить все цитаты</h4>
             <p>Безвозвратное удаление всех цитат из приложения.</p>
           </div>
-          <button class="danger-btn" onclick="confirmClear()">
+          <button class="btn-danger" onclick="confirmClear()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             Удалить всё
           </button>
@@ -1227,7 +1238,7 @@ function renderList() {
           <button class="card-btn" onclick="copyQuote(${q.id})" aria-label="Копировать">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
-          <button class="card-btn" onclick="deleteQuote(${q.id})" aria-label="Удалить">
+          <button class="card-btn danger" onclick="deleteQuote(${q.id})" aria-label="Удалить">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
@@ -1425,7 +1436,7 @@ async function deleteQuote(id) {
   showModal(
           'Удалить цитату?',
           `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author||'')}</div>Это действие нельзя отменить.`,
-          [{ label:'Удалить', cls:'btn-primary', action: async () => {
+          [{ label:'Удалить', cls:'btn-danger', action: async () => {
       try {
         await Api.delete(id);
         quotes = quotes.filter(q => q.id !== id);
@@ -1502,16 +1513,17 @@ function confirmClear() {
   showModal(
     'Удалить все цитаты?',
     `Вы собираетесь удалить все ${quotes.length} цитат. Это действие нельзя отменить.`,
-    [{ label:'Удалить всё', cls:'btn-primary', action: async () => {
-      try {
-        await Api.deleteAll();
-        quotes = [];
-        renderList();
-        closeModal();
-        toast('Все цитаты удалены');
-      } catch(e) { toast('Ошибка'); }
-    }},
-    { label:'Отмена', cls:'btn-secondary', action: closeModal }]
+          [{ label:'Удалить всё', cls:'btn-danger', action: async () => {
+            try {
+              await Api.deleteAll();
+              quotes = [];
+              renderList();
+              closeModal();
+              toast('Все цитаты удалены');
+            } catch(e) { toast('Ошибка'); }
+          }},
+            { label:'Отмена', cls:'btn-secondary', action: closeModal }
+          ]
   );
 }
 
