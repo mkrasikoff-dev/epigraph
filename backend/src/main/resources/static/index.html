@@ -97,8 +97,8 @@
    Global element resets, default typography, focus styles, and motion prefs.
    ============================================================================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust:none; text-size-adjust:none; -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
-body { min-height:100dvh; font-family:var(--font-body); font-size:var(--text-base); color:var(--color-text); background:var(--color-bg); line-height:1.6; }
+html { -webkit-text-size-adjust:none; text-size-adjust:none; -webkit-font-smoothing:antialiased; scroll-behavior:smooth; overflow-x:hidden; }
+body { min-height:100dvh; font-family:var(--font-body); font-size:var(--text-base); color:var(--color-text); background:var(--color-bg); line-height:1.6; overflow-x:hidden; }
 img { display:block; max-width:100%; height:auto; }
 button { cursor:pointer; background:none; border:none; font:inherit; color:inherit; }
 a, button, [role="button"] { transition: color var(--transition), background var(--transition), border-color var(--transition), box-shadow var(--transition), opacity var(--transition); }
@@ -420,7 +420,8 @@ body.no-scroll { overflow:hidden; height:100dvh; }
    ============================================================================= */
 @media (max-width: 640px) {
   header { padding:var(--space-3) var(--space-4); gap:var(--space-2); flex-wrap:wrap; }
-  .nav-tabs { order:3; flex:1 0 100%; justify-content:center; }
+  .nav-tabs { order:3; flex:1 0 100%; justify-content:center; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
   .logo { font-size:var(--text-base); }
   .qod-card { padding:var(--space-6) var(--space-6); }
   .form-row { grid-template-columns:1fr; }
@@ -434,18 +435,29 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 
 /* =============================================================================
    AUTH
-   Login / register screen shown before the main app.
+   Login / register screen shown when click Login the main app.
    ============================================================================= */
+.app-blur-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.25);
+  z-index: 999;
+}
+.app-blur-overlay.visible { display: block; }
+
 .auth-screen {
   display: none;
   position: fixed;
   inset: 0;
-  background: var(--color-bg);
   z-index: 1000;
   align-items: center;
   justify-content: center;
   padding: var(--space-6);
 }
+
 .auth-screen.visible { display: flex; }
 
 .auth-card {
@@ -458,6 +470,9 @@ body.no-scroll { overflow:hidden; height:100dvh; }
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  position: relative;
+  z-index: 1001;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
 }
 
 .auth-title {
@@ -533,7 +548,9 @@ body.no-scroll { overflow:hidden; height:100dvh; }
   color: var(--color-text-faint);
   font-size: var(--text-sm);
 }
+
 .auth-divider::before,
+
 .auth-divider::after {
   content: '';
   flex: 1;
@@ -556,23 +573,29 @@ body.no-scroll { overflow:hidden; height:100dvh; }
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
+
 .btn-google:hover { background: var(--color-surface-offset); border-color: var(--color-primary); }
 
-.auth-logout-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  font-family: var(--font-body);
-  cursor: pointer;
-  padding: 0;
+/* Inactive tabs fro guest */
+.nav-tab.guest-locked {
+  opacity: 0.45;
+  cursor: default;
 }
-.auth-logout-btn:hover { color: var(--color-text); }
+
+.btn-secondary.guest-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 </style>
 </head>
 <body>
-<!-- AUTH SCREEN -->
-<div class="auth-screen" id="auth-screen">
+
+<!-- BLUR OVERLAY -->
+<div id="app-blur-overlay" class="app-blur-overlay" onclick="handleAuthOverlayClick(event)"></div>
+
+<!-- AUTH MODAL -->
+<div class="auth-screen" id="auth-screen" onclick="handleAuthOverlayClick(event)">
   <div class="auth-card">
     <h1 class="auth-title">Epigraph</h1>
     <p class="auth-subtitle" id="auth-subtitle">Войдите, чтобы продолжить</p>
@@ -629,7 +652,14 @@ body.no-scroll { overflow:hidden; height:100dvh; }
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       </svg>
     </button>
-    <button class="auth-logout-btn" id="logout-btn" onclick="logout()" style="display:none">Выйти</button>
+    <button class="btn-secondary" id="login-btn" onclick="showAuthModal()">Войти</button>
+    <button class="btn-icon" id="logout-btn" onclick="logout()" style="display:none" aria-label="Выйти из аккаунта">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
   </div>
 </header>
 
@@ -820,6 +850,7 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
+
 // =============================================================================
 // CONSTANTS & STATE
 // Application-wide constants, API endpoint, and mutable module-level state.
@@ -838,6 +869,14 @@ let currentQodIndex = -1;
 let editingId     = null;
 let currentTags   = [];
 
+const GUEST_QUOTES = [
+  { id: -1, text: 'Счастье зависит от нас самих.', author: 'Аристотель', source: 'Никомахова этика', fav: false, tags: [] },
+  { id: -2, text: 'Не важно, как медленно ты идёшь, главное — не останавливаться.', author: 'Конфуций', source: '', fav: false, tags: [] },
+  { id: -3, text: 'Потеря — это не что иное, как изменение, а изменение — радость природы.', author: 'Марк Аврелий', source: 'Размышления', fav: false, tags: [] },
+  { id: -4, text: 'Познай самого себя.', author: 'Сократ', source: '', fav: false, tags: [] },
+  { id: -5, text: 'Единственное благо — знание, единственное зло — невежество.', author: 'Диоген Лаэртский', source: '', fav: false, tags: [] },
+];
+
 // =============================================================================
 // AUTH STATE
 // JWT token stored in localStorage, helpers to read/write/clear it.
@@ -855,26 +894,50 @@ function authHeaders() {
 
 // =============================================================================
 // AUTH UI
-// Show/hide auth screen, toggle between login and register modes.
+// The block responsible for authentication
 // =============================================================================
 
-let authMode = 'login'; // 'login' | 'register'
+let authMode = 'login';
+let isGuest = true;
 
-function showAuthScreen() {
+function showAuthModal() {
   document.getElementById('auth-screen').classList.add('visible');
-  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('app-blur-overlay').classList.add('visible');
 }
 
-function hideAuthScreen() {
+function hideAuthModal() {
   document.getElementById('auth-screen').classList.remove('visible');
+  document.getElementById('app-blur-overlay').classList.remove('visible');
+}
+
+function showGuestMode() {
+  isGuest = true;
+  quotes  = GUEST_QUOTES;
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('login-btn').style.display  = '';
+  // Darken blocked tabs
+  ['list','add','settings'].forEach(id => {
+    document.getElementById('tab-' + id)?.classList.add('guest-locked');
+    document.getElementById('btn-fav-qod')?.classList.add('guest-locked');
+  });
+  renderQod();
+}
+
+function hideGuestMode() {
+  isGuest = false;
   document.getElementById('logout-btn').style.display = '';
+  document.getElementById('login-btn').style.display  = 'none';
+  ['list','add','settings'].forEach(id => {
+    document.getElementById('tab-' + id)?.classList.remove('guest-locked');
+    document.getElementById('btn-fav-qod')?.classList.remove('guest-locked');
+  });
 }
 
 function toggleAuthMode() {
   authMode = authMode === 'login' ? 'register' : 'login';
   const isRegister = authMode === 'register';
-  document.getElementById('auth-subtitle').textContent    = isRegister ? 'Создайте аккаунт' : 'Войдите, чтобы продолжить';
-  document.getElementById('auth-submit-btn').textContent  = isRegister ? 'Зарегистрироваться' : 'Войти';
+  document.getElementById('auth-subtitle').textContent = isRegister ? 'Создайте аккаунт' : 'Войдите, чтобы продолжить';
+  document.getElementById('auth-submit-btn').textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
   document.getElementById('auth-switch-text').textContent = isRegister ? 'Уже есть аккаунт?' : 'Нет аккаунта?';
   document.querySelector('#auth-screen .auth-switch button').textContent = isRegister ? 'Войти' : 'Зарегистрироваться';
   document.getElementById('auth-error').textContent = '';
@@ -902,7 +965,8 @@ async function authSubmit() {
     if (!res.ok) { errorEl.textContent = data.message || 'Ошибка'; return; }
 
     setToken(data.token);
-    hideAuthScreen();
+    hideAuthModal();
+    hideGuestMode();
     await loadData();
     renderQod();
 
@@ -917,8 +981,12 @@ function loginWithGoogle() {
 
 function logout() {
   clearToken();
-  quotes = [];
-  showAuthScreen();
+  showGuestMode();
+}
+
+// Overlay click closes modal block
+function handleAuthOverlayClick(e) {
+  if (e.target === document.getElementById('auth-screen')) hideAuthModal();
 }
 
 // =============================================================================
@@ -990,9 +1058,15 @@ async function loadData() {
 
 /**
  * Switches the currently active view and tab, and triggers per-view rendering.
+ * For quests block everyting except qod
  * @param {string} id - View identifier ('qod', 'list', 'add', 'settings').
  */
 function switchView(id) {
+  if (isGuest && id !== 'qod') {
+    toast('Войдите в аккаунт для доступа к этому разделу');
+    return;
+  }
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
@@ -1083,6 +1157,7 @@ function copyQod() {
  * @returns {Promise<void>}
  */
 async function favQod() {
+  if (isGuest) { toast('Войдите в аккаунт для доступа к этому разделу'); return; }
   const q = quotes[currentQodIndex];
   if (!q) return;
   q.fav = !q.fav;
@@ -1549,20 +1624,20 @@ function escHtml(s) {
   const token = getToken();
 
   if (!token) {
-    showAuthScreen();
+    showGuestMode();
     return;
   }
 
   const res = await fetch(API, { headers: authHeaders() });
   if (res.status === 401 || res.status === 403) {
     clearToken();
-    showAuthScreen();
+    showGuestMode();
     return;
   }
 
   const rawQuotes = await res.json();
   quotes = rawQuotes.map(q => ({ ...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : [] }));
-  hideAuthScreen();
+  hideGuestMode();
   renderQod();
 })();
 </script>
