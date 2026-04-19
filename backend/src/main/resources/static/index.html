@@ -395,8 +395,8 @@ body.no-scroll { overflow:hidden; height:100dvh; }
    TOAST
    Transient notification messages displayed in the bottom-right corner.
    ============================================================================= */
-.toast-wrap { position:fixed; bottom:var(--space-6); right:var(--space-6); display:flex; flex-direction:column; gap:var(--space-2); z-index:999; pointer-events:none; }
-.toast { padding:var(--space-3) var(--space-5); background:var(--color-text); color:var(--color-bg); border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500; box-shadow:var(--shadow-lg); opacity:0; transform:translateY(8px); transition:opacity 0.25s, transform 0.25s; }
+.toast-wrap { position:fixed; bottom:var(--space-6); right:var(--space-6); display:flex; flex-direction:column; align-items:flex-end; gap:var(--space-2); z-index:999; pointer-events:none; }
+.toast { padding:var(--space-3) var(--space-5); background:var(--color-text); color:var(--color-bg); border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500; box-shadow:var(--shadow-lg); opacity:0; transform:translateY(8px); transition:opacity 0.25s, transform 0.25s; white-space:nowrap; }
 .toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
 
 /* =============================================================================
@@ -420,7 +420,7 @@ body.no-scroll { overflow:hidden; height:100dvh; }
    ============================================================================= */
 @media (max-width: 640px) {
   header { padding:var(--space-3) var(--space-4); gap:var(--space-2); flex-wrap:wrap; }
-  .nav-tabs { order:3; flex:1 0 100%; justify-content:center; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs { order:3; flex:1 0 100%; justify-content:flex-start; overflow-x:auto; scrollbar-width:none; padding:var(--space-1); }
   .nav-tabs::-webkit-scrollbar { display:none; }
   .logo { font-size:var(--text-base); }
   .qod-card { padding:var(--space-6) var(--space-6); }
@@ -428,9 +428,10 @@ body.no-scroll { overflow:hidden; height:100dvh; }
   .qod-actions { flex-wrap:wrap; }
   .list-header { flex-direction:column; align-items:stretch; }
   .search-wrap { max-width:100%; }
+  .toast-wrap { right:50%; transform:translateX(50%); align-items:center; }
 }
 @media (max-width: 380px) {
-  .nav-tab { padding:var(--space-1) var(--space-2); font-size:0.75rem; }
+  .nav-tab { padding:var(--space-1) var(--space-2); font-size:0.75rem; min-height:44px; }
 }
 
 /* =============================================================================
@@ -1557,8 +1558,17 @@ function handleModalOverlayClick(e) {
 }
 
 // Close the modal when the user presses Escape
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+
+  // close basic modal
+  if (document.getElementById('modal').classList.contains('open')) {
+    closeModal();
+  }
+  // close login modal
+  if (document.getElementById('auth-screen').classList.contains('visible')) {
+    hideAuthModal();
+  }
 });
 
 // =============================================================================
@@ -1640,6 +1650,15 @@ function escHtml(s) {
   hideGuestMode();
   renderQod();
 })();
+
+// remove outline from Escape
+document.addEventListener('mousedown', e => {
+  if (e.target.closest('button, [role="button"]')) {
+    e.target.closest('button, [role="button"]').addEventListener(
+            'click', () => document.activeElement?.blur(), { once: true }
+    );
+  }
+});
 </script>
 </body>
 </html>
