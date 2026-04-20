@@ -38,5 +38,11 @@ logging:
   level:
     root: INFO
     com.mkrasikoff.epigraph: DEBUG
-    org.springframework.web: DEBUG
-    liquibase: INFO
+    org.springframework.web: INFO
+    org.springframework.web.servlet.DispatcherServlet: WARN
+    org.springframework.web.servlet.mvc.method.annotation: WARN
+    org.springframework.web.servlet.handler: WARN
+    org.springframework.web.servlet.view: WARN
+    liquibase: WARN
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: WARN

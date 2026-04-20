@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
         return Map.of("error", "Value too long for one of the fields");
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleAuth(AuthException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalArgument(IllegalArgumentException ex) {

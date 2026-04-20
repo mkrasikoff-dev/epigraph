@@ -35,7 +35,7 @@ public class QuoteController {
     public List<Quote> getAll(@AuthenticationPrincipal Long userId) {
         List<Quote> quotes = service.findAll(userId);
 
-        log.info("GET /api/quotes - userId={}, returning {} quotes", userId, quotes.size());
+        log.info("Fetching all quotes — found {}", quotes.size());
 
         return quotes;
     }
@@ -46,7 +46,7 @@ public class QuoteController {
                         @AuthenticationPrincipal Long userId) {
         Quote saved = service.save(quote, userId);
 
-        log.info("POST /api/quotes - userId={}, created quote id={}", userId, saved.getId());
+        log.info("Quote created — id = {}", saved.getId());
 
         return saved;
     }
@@ -57,7 +57,7 @@ public class QuoteController {
                         @AuthenticationPrincipal Long userId) {
         Quote updated = service.update(id, quote, userId);
 
-        log.info("PUT /api/quotes/{} - userId={}, fav={}", id, userId, updated.isFav());
+        log.info("Quote updated — id = {}, fav = {}", id, updated.isFav());
 
         return updated;
     }
@@ -68,7 +68,7 @@ public class QuoteController {
                        @AuthenticationPrincipal Long userId) {
         service.deleteById(id, userId);
 
-        log.info("DELETE /api/quotes/{} - userId={}", id, userId);
+        log.info("Quote deleted — id = {}", id);
     }
 
     @DeleteMapping
@@ -76,6 +76,6 @@ public class QuoteController {
     public void deleteAll(@AuthenticationPrincipal Long userId) {
         service.deleteAll(userId);
 
-        log.info("DELETE /api/quotes - ALL deleted for userId={}", userId);
+        log.info("All quotes deleted");
     }
 }
