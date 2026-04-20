@@ -974,7 +974,15 @@ async function authSubmit() {
 
     const data = await res.json();
 
-    if (!res.ok) { errorEl.textContent = data.message || 'Ошибка'; return; }
+    if (!res.ok) {
+      // Validation errors come as Map<field, message>
+      if (data.password) { errorEl.textContent = data.password; return; }
+      if (data.email) { errorEl.textContent = 'Некорректный email'; return; }
+
+      errorEl.textContent = data.message || 'Неверный email или пароль';
+
+      return;
+    }
 
     setToken(data.token);
     hideAuthModal();

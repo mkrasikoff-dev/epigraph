@@ -15,3 +15,12 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: 86400000  # 24 часа
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss} %5level [req:%X{requestId}] [user:%X{userId}] %logger{20} - %msg%n"
+  level:
+    com.mkrasikoff.epigraph.service.AuthService: INFO
+    com.mkrasikoff.epigraph.controller.AuthController: INFO
+    org.springframework.web.servlet.mvc.method.annotation: WARN
+    org.springframework.security: WARN
