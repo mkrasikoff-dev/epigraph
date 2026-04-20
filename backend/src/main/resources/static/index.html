@@ -1100,18 +1100,44 @@ function switchView(id) {
 // QUOTE OF THE DAY
 // Rendering, randomisation, copying, and favouriting for the QoD section.
 // =============================================================================
-
 /**
- * Computes a deterministic quote index for today based on the day-of-year.
- * @returns {number} Index within the quotes array, or 0 when empty.
+ * Returns a stable index for the Quote of the Day.
+ * The selected quote id is persisted in sessionStorage keyed by today's date.
+ * This ensures the daily quote does not change when quotes are added or removed.
+ * @returns {number} Index within the current quotes array, or 0 when empty.
  */
-function getDayIndex() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const day = Math.floor(diff / oneDay);
-  return quotes.length ? (day % quotes.length) : 0;
+function getQodQuoteIndex() {
+  if (!quotes.length) return 0;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const stored = (() => {
+    try {
+      return JSON.parse(sessionStorage.getItem('qod_selection'));
+    } catch {
+      return null;
+    }
+  })();
+
+  // Reuse stored selection if it matches today and the quote still exists
+  if (stored && stored.date === today) {
+    const idx = quotes.findIndex(q => q.id === stored.id);
+    if (idx !== -1) return idx;
+  }
+
+  // Compute a date-based hash that does NOT depend on quotes.length
+  let hash = 0;
+  for (let i = 0; i < today.length; i++) {
+    hash = (Math.imul(31, hash) + today.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % quotes.length;
+
+  try {
+    sessionStorage.setItem('qod_selection', JSON.stringify({ date: today, id: quotes[idx].id }));
+  } catch {
+    /* sessionStorage unavailable in some environments */
+  }
+
+  return idx;
 }
 
 /**
@@ -1126,7 +1152,7 @@ function renderQod(overrideIdx) {
     document.getElementById('qod-progress').textContent = '';
     return;
   }
-  const idx = overrideIdx !== undefined ? overrideIdx : getDayIndex();
+  const idx = overrideIdx !== undefined ? overrideIdx : getQodQuoteIndex();
   currentQodIndex = idx;
   const q = quotes[idx];
   const now = new Date();
@@ -1147,7 +1173,8 @@ function renderQod(overrideIdx) {
       document.body.classList.toggle('no-scroll', fits);
     });
   }, QOD_ANIMATION_DEBOUNCE_MS);
-  document.getElementById('qod-progress').textContent = `Цитата ${idx + 1} из ${quotes.length}`;
+  // Show quote progress only for authenticated users — guest quotes are preset and have no meaningful index
+  document.getElementById('qod-progress').textContent = isGuest ? '' : `Цитата ${idx + 1} из ${quotes.length}`;
 }
 
 /**
