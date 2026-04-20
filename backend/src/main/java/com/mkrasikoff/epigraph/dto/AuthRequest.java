@@ -4,15 +4,17 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString(exclude = "password")
 public class AuthRequest {
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "Email не должен быть пустым")
+    @Email(message = "Некорректный формат email")
     private String email;
 
-    @NotBlank
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @NotBlank(message = "Пароль не должен быть пустым")
+    @Size(min = 6, message = "Пароль должен содержать минимум 6 символов")
     private String password;
 }

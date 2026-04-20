@@ -1,5 +1,6 @@
 package com.mkrasikoff.epigraph.service;
 
+import com.mkrasikoff.epigraph.exception.AuthException;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +25,7 @@ public class AuthService {
     @Transactional
     public String register(String email, String rawPassword) {
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new IllegalArgumentException("Этот email уже зарегистрирован");
         }
 
         User user = new User();
@@ -40,13 +41,9 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public String login(String email, String rawPassword) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
-
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
-        }
-
-        return jwtService.generateToken(user.getId(), user.getEmail());
+        return userRepository.findByEmail(email)
+                .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
+                .map(user -> jwtService.generateToken(user.getId(), user.getEmail()))
+                .orElse(null);
     }
 }
