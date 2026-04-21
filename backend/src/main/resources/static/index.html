@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Your personal quote collection">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your personal quote collection">
+  <meta name="theme-color" content="#f5f2ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#18160f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f5f2ec"> <!-- updated dynamically by JS -->
 <title>Epigraph</title>
 <link rel="icon" href="/icon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,6 +36,8 @@
   --color-primary-highlight: #e8ddd4;
   --color-accent:         #c8956c;
   --color-gold:           #c9a227;
+  --color-toast-error-bg:   #7a2318;
+  --color-toast-error-text: #fdf0ee;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
@@ -73,6 +78,8 @@
   --color-primary-highlight: #3a2d22;
   --color-accent:         #c8956c;
   --color-gold:           #d4a830;
+  --color-toast-error-bg:   #e85d4a;
+  --color-toast-error-text: #1a0a08;
   --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.25);
   --shadow-md: 0 4px 16px oklch(0 0 0 / 0.35);
   --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.45);
@@ -409,6 +416,10 @@ body.no-scroll { overflow:hidden; height:100dvh; }
 .toast-wrap { position:fixed; bottom:var(--space-6); right:var(--space-6); display:flex; flex-direction:column; align-items:flex-end; gap:var(--space-2); z-index:999; pointer-events:none; }
 .toast { padding:var(--space-3) var(--space-5); background:var(--color-text); color:var(--color-bg); border-radius:var(--radius-full); font-size:var(--text-sm); font-weight:500; box-shadow:var(--shadow-lg); opacity:0; transform:translateY(8px); transition:opacity 0.25s, transform 0.25s; white-space:nowrap; }
 .toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
+.toast.toast--error {
+  background: var(--color-toast-error-bg);
+  color: var(--color-toast-error-text);
+}
 
 /* =============================================================================
    MODAL
@@ -1048,12 +1059,15 @@ async function loadData() {
   try { const s = localStorage.getItem('theme'); if(s) currentTheme = s; } catch(e){}
   htmlElement.setAttribute('data-theme', currentTheme);
   updateThemeIcon(themeToggleBtn, currentTheme);
+  updateThemeColorMeta(currentTheme);
   themeToggleBtn && themeToggleBtn.addEventListener('click', () => {
     currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
     htmlElement.setAttribute('data-theme', currentTheme);
     try { localStorage.setItem('theme', currentTheme); } catch(e){}
     updateThemeIcon(themeToggleBtn, currentTheme);
+    updateThemeColorMeta(currentTheme);
   });
+
   /**
    * Updates the theme toggle button icon and aria-label for the current theme.
    * @param {HTMLElement|null} btn - Theme toggle button.
@@ -1070,6 +1084,16 @@ async function loadData() {
     }
   }
 })();
+
+/**
+ * Syncs the theme-color meta tag so the mobile status bar
+ * matches the current app theme on initial load and manual toggle.
+ * @param {string} mode - Either 'dark' or 'light'.
+ */
+function updateThemeColorMeta(mode) {
+  const meta = document.getElementById('theme-color-meta');
+  if (meta) meta.setAttribute('content', mode === 'dark' ? '#18160f' : '#f5f2ec');
+}
 
 // =============================================================================
 // NAVIGATION
@@ -1626,15 +1650,19 @@ document.addEventListener('keydown', e => {
 /**
  * Displays a transient toast notification at the bottom-right of the screen.
  * @param {string} msg - Message to display.
+ * @param {'success'|'error'} [type='success'] - Visual style variant.
  */
-function toast(msg) {
+function toast(msg, type) {
   const wrap = document.getElementById('toast-wrap');
   const el = document.createElement('div');
-  el.className = 'toast';
+  el.className = 'toast' + (type === 'error' ? ' toast--error' : '');
   el.textContent = msg;
   wrap.appendChild(el);
   requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), TOAST_FADE_DURATION_MS); }, TOAST_DISPLAY_DURATION_MS);
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), TOAST_FADE_DURATION_MS);
+  }, TOAST_DISPLAY_DURATION_MS);
 }
 
 // =============================================================================
