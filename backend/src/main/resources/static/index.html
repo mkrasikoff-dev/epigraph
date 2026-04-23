@@ -2425,9 +2425,13 @@
             grid.innerHTML = `<div class="empty-state"><h3>${query ? 'Ничего не найдено' : 'Пока нет цитат'}</h3><p>${query ? 'Попробуйте другой запрос' : 'Перейдите в раздел «Добавить»'}</p></div>`;
             return;
         }
+
+        const sortedByAdd = [...quotes].sort((a, b) => (a.id || 0) - (b.id || 0));
+        const rankMap = new Map(sortedByAdd.map((q, i) => [q.id, i + 1]));
+
         grid.innerHTML = filteredQuotes.map((q, i) => `
     <article class="quote-card">
-      <span class="quote-card-num">${i + 1}</span>
+      <span class="quote-card-num">${rankMap.get(q.id) ?? '—'}</span>
       <p class="quote-card-text">${escHtml(q.text)}</p>
       ${q.tags && q.tags.length ? `<div class="quote-card-tags">${q.tags.map(t => `<button class="quote-tag-chip" onclick="searchByTag('${escHtml(t)}')">${escHtml(t)}</button>`).join('')}</div>` : ''}
       <div class="quote-card-meta">
