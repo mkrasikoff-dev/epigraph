@@ -1735,30 +1735,51 @@
                     <button class="filter-tab active" onclick="setFilter('all', this)">Все</button>
                     <button class="filter-tab" onclick="setFilter('fav', this)">⭐ Избранные</button>
                     <div class="sort-dropdown" id="sort-dropdown">
-                        <button class="sort-btn" id="sort-btn" onclick="toggleSortMenu()" aria-haspopup="listbox" aria-expanded="false">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/>
+                        <button class="sort-btn" id="sort-btn" onclick="toggleSortMenu()" aria-haspopup="listbox"
+                                aria-expanded="false">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                                <line x1="3" y1="12" x2="15" y2="12"/>
+                                <line x1="3" y1="18" x2="9" y2="18"/>
                             </svg>
                             <span id="sort-btn-label">Сначала новые</span>
-                            <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                            <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
                         </button>
                         <div class="sort-menu" id="sort-menu" role="listbox">
-                            <button class="sort-menu-item active" data-sort="date_desc" onclick="selectSort('date_desc')" role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <button class="sort-menu-item active" data-sort="date_desc"
+                                    onclick="selectSort('date_desc')" role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2.5" stroke-linecap="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
                                 Сначала новые
                             </button>
-                            <button class="sort-menu-item" data-sort="date_asc" onclick="selectSort('date_asc')" role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <button class="sort-menu-item" data-sort="date_asc" onclick="selectSort('date_asc')"
+                                    role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2.5" stroke-linecap="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
                                 Сначала старые
                             </button>
-                            <button class="sort-menu-item" data-sort="author_asc" onclick="selectSort('author_asc')" role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <button class="sort-menu-item" data-sort="author_asc" onclick="selectSort('author_asc')"
+                                    role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2.5" stroke-linecap="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
                                 По автору (А–Я)
                             </button>
-                            <button class="sort-menu-item" data-sort="author_desc" onclick="selectSort('author_desc')" role="option">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <button class="sort-menu-item" data-sort="author_desc" onclick="selectSort('author_desc')"
+                                    role="option">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2.5" stroke-linecap="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
                                 По автору (Я–А)
                             </button>
                         </div>
@@ -2476,9 +2497,9 @@
     // =============================================================================
 
     const SORT_LABELS = {
-        date_desc:   'Сначала новые',
-        date_asc:    'Сначала старые',
-        author_asc:  'По автору (А–Я)',
+        date_desc: 'Сначала новые',
+        date_asc: 'Сначала старые',
+        author_asc: 'По автору (А–Я)',
         author_desc: 'По автору (Я–А)',
     };
 
@@ -2486,7 +2507,7 @@
      * Toggles the sort dropdown menu open/closed.
      */
     function toggleSortMenu() {
-        const btn  = document.getElementById('sort-btn');
+        const btn = document.getElementById('sort-btn');
         const menu = document.getElementById('sort-menu');
         const isOpen = menu.classList.contains('open');
         if (isOpen) {
@@ -2502,7 +2523,7 @@
      * Closes the sort dropdown menu.
      */
     function closeSortMenu() {
-        const btn  = document.getElementById('sort-btn');
+        const btn = document.getElementById('sort-btn');
         const menu = document.getElementById('sort-menu');
         btn?.classList.remove('open');
         menu?.classList.remove('open');
@@ -2516,7 +2537,10 @@
      */
     function selectSort(value) {
         currentSort = value;
-        try { localStorage.setItem('epigraph_sort', value); } catch(e) {}
+        try {
+            localStorage.setItem('epigraph_sort', value);
+        } catch (e) {
+        }
 
         // Update button label
         const label = document.getElementById('sort-btn-label');
@@ -2776,7 +2800,7 @@
             'Редактировать цитату',
             body,
             [
-                { label: 'Сохранить', cls: 'btn-primary', id: 'editQuoteSubmitBtn', action: saveEditQuote },
+                {label: 'Сохранить', cls: 'btn-primary', id: 'editQuoteSubmitBtn', action: saveEditQuote},
                 {
                     label: 'Отмена', cls: 'btn-secondary', action: () => {
                         closeModal();
@@ -3059,7 +3083,7 @@
     function formatQuoteAsText(quote) {
         let result = quote.text;
         if (quote.author) result += '\n— ' + quote.author;
-        if (quote.source) result += ', «' + quote.source + '»';
+        if (quote.source) result += '\n«' + quote.source + '»';
         return result;
     }
 
@@ -3132,7 +3156,8 @@
                     item.classList.toggle('active', item.dataset.sort === savedSort);
                 });
             }
-        } catch(e) {}
+        } catch (e) {
+        }
 
         if (!token) {
             showGuestMode();
