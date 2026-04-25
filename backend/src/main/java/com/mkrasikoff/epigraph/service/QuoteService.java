@@ -6,7 +6,9 @@ import com.mkrasikoff.epigraph.repository.QuoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class QuoteService {
@@ -20,6 +22,27 @@ public class QuoteService {
     @Transactional(readOnly = true)
     public List<Quote> findAll(Long userId) {
         return repo.findByUserId(userId);
+    }
+
+    /**
+     * Returns the Quote of the Day for a user — deterministic, date-based.
+     * Uses quotes sorted by ID (creation order) so adding new quotes doesn't
+     * shift today's selection.
+     */
+    @Transactional(readOnly = true)
+    public Optional<Quote> getQod(Long userId) {
+        List<Quote> sorted = repo.findByUserId(userId).stream()
+                .sorted(Comparator.comparingLong(Quote::getId))
+                .toList();
+
+        if (sorted.isEmpty()) return Optional.empty();
+
+        // Same deterministic hash as the frontend (date string → int)
+        String today = java.time.LocalDate.now(java.time.ZoneId.of("Europe/Moscow")).toString(); // "2026-04-25"
+        int hash = 0;
+        for (char c : today.toCharArray()) hash = 31 * hash + c;
+
+        return Optional.of(sorted.get(Math.abs(hash) % sorted.size()));
     }
 
     @Transactional

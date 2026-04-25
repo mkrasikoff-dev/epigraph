@@ -32,6 +32,10 @@ spring:
 app:
   jwt:
     secret: dGhpcy1pcy1hLXZlcnktc2VjcmV0LWtleS1mb3ItZXBpZ3JhcGgtYXBw
+  vapid:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    subject: mailto:epigraph.support@icloud.com
 
 # Logging: verbose for local development
 logging:

@@ -31,6 +31,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+	implementation("org.bouncycastle:bcprov-jdk18on:1.78.1") // Web Push (VAPID)
+	implementation("nl.martijndwars:web-push:5.1.1") { // Web Push (VAPID)
+		exclude(group = "org.bouncycastle")
+	}
+	implementation("tools.jackson.core:jackson-databind:3.1.0")
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
