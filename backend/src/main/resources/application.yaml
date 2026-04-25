@@ -15,6 +15,10 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: 86400000  # 24 часа
+  vapid:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:mailto:epigraph.support@icloud.com}
 
 logging:
   pattern:

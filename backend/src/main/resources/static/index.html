@@ -24,6 +24,11 @@
     </script>
     <title>Epigraph</title>
     <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Epigraph">
+    <link rel="apple-touch-icon" href="/icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap"
@@ -1198,6 +1203,54 @@
         }
 
         /* =============================================================================
+        // TOGGLE SWITCH  (notifications settings)
+        // ============================================================================= */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--color-border);
+            border-radius: 24px;
+            transition: background .25s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform .25s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--color-primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        /* =============================================================================
         // TOAST
         // Transient notification messages displayed in the bottom-right corner.
         // ============================================================================= */
@@ -1844,7 +1897,7 @@
         <div class="view" id="view-add">
             <section class="add-section">
                 <h2>Добавить цитату</h2>
-                <p class="subtitle">Добавляйте цитаты вручную или импортируйте сразу несколько через JSON-файл.</p>
+                <p class="subtitle">Добавляйте цитаты вручную или импортируйте через JSON файл.</p>
 
                 <form onsubmit="addQuote(event)">
                     <div class="form-group">
@@ -1948,6 +2001,63 @@
                             </svg>
                             Выйти
                         </button>
+                    </div>
+                </div>
+
+                <!-- NOTIFICATIONS -->
+                <div class="settings-group" id="settings-notif-group">
+                    <div class="settings-group-title">Уведомления</div>
+
+                    <!-- iOS PWA hint — shown only when needed -->
+                    <div class="settings-item" id="notif-ios-hint" style="display:none">
+                        <div class="settings-item-info">
+                            <h4>iPhone / iPad</h4>
+                            <p>Для уведомлений: Safari → <strong>Поделиться</strong> → <strong>«На экран
+                                "Домой"»</strong> → запустите приложение оттуда.</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4>Цитата дня</h4>
+                            <p>Push-уведомление с цитатой. Работает даже с закрытой вкладкой.</p>
+                        </div>
+                        <label class="toggle-switch" aria-label="Уведомления о цитате дня">
+                            <input type="checkbox" id="notif-toggle"
+                                   onchange="handleNotifToggle(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item" id="notif-interval-row">
+                        <div class="settings-item-info">
+                            <h4>Частота</h4>
+                            <p>Как часто отправлять уведомление.</p>
+                        </div>
+                        <div class="sort-dropdown" id="notif-interval-dropdown">
+                            <button class="sort-btn" id="notif-interval-btn"
+                                    onclick="toggleNotifIntervalMenu()"
+                                    aria-haspopup="listbox" aria-expanded="false">
+                                <span id="notif-interval-label">Раз в день</span>
+                                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2.2"
+                                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <ul class="sort-menu" id="notif-interval-menu" role="listbox"
+                                style="min-width: 160px; left: auto; right: 0;">
+                                <li class="sort-menu-item" data-value="6"
+                                    onclick="selectNotifInterval(this)">Каждые 6 часов
+                                </li>
+                                <li class="sort-menu-item" data-value="12"
+                                    onclick="selectNotifInterval(this)">Каждые 12 часов
+                                </li>
+                                <li class="sort-menu-item active" data-value="24"
+                                    onclick="selectNotifInterval(this)">Раз в день
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -2468,7 +2578,7 @@
         switchView('add');
         setTimeout(() => {
             const importArea = document.querySelector('.import-area');
-            if (importArea) importArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (importArea) importArea.scrollIntoView({behavior: 'smooth', block: 'center'});
         }, 100);
     }
 
@@ -2778,6 +2888,10 @@
     document.addEventListener('click', e => {
         if (!document.getElementById('sort-dropdown')?.contains(e.target)) {
             closeSortMenu();
+        }
+
+        if (!document.getElementById('notif-interval-dropdown')?.contains(e.target)) {
+            closeNotifIntervalMenu();
         }
     });
 
@@ -3339,6 +3453,261 @@
     }
 
     // =============================================================================
+    // NOTIFICATIONS (Web Push / PWA)
+    // Handles Service Worker registration, push subscription, and Settings UI.
+    // Requires: VAPID keys on backend, HTTPS, and browser Notification permission.
+    // iOS: only works when app is installed via Safari → Share → "На экран «Домой»".
+    // =============================================================================
+
+    /**
+     * Converts a base64url VAPID public key string to a Uint8Array
+     * required by pushManager.subscribe().
+     */
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+    }
+
+    /**
+     * Registers /sw.js and returns the ServiceWorkerRegistration.
+     * Returns null if Service Workers or Push API are not supported.
+     */
+    async function getSwRegistration() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+        try {
+            const reg = await navigator.serviceWorker.register('/sw.js');
+            await navigator.serviceWorker.ready;
+            return reg;
+        } catch (e) {
+            console.error('[Notif] SW registration failed:', e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the current PushSubscription if active, null otherwise.
+     */
+    async function getCurrentPushSubscription() {
+        const reg = await navigator.serviceWorker?.getRegistration('/sw.js');
+        return reg ? reg.pushManager.getSubscription() : null;
+    }
+
+    /**
+     * Subscribes the user to push notifications:
+     *  1. Register SW
+     *  2. Request notification permission
+     *  3. Fetch VAPID public key
+     *  4. Subscribe via pushManager
+     *  5. POST subscription to backend
+     */
+    async function subscribeToPush(intervalHours) {
+        const reg = await getSwRegistration();
+        if (!reg) {
+            toast('Ваш браузер не поддерживает push-уведомления');
+            document.getElementById('notif-toggle').checked = false;
+            return;
+        }
+
+        if (Notification.permission === 'default') {
+            toast('Сейчас браузер попросит разрешение — нажмите «Разрешить»');
+            await new Promise(r => setTimeout(r, 800)); // small pause, to show toast
+        }
+
+        const perm = Notification.permission === 'granted'
+            ? 'granted'
+            : await Notification.requestPermission();
+
+        if (perm !== 'granted') {
+            toast('Разрешите уведомления в настройках браузера');
+            document.getElementById('notif-toggle').checked = false;
+            return;
+        }
+
+        try {
+            // Fetch VAPID public key from backend
+            const keyRes = await fetch('/api/push/vapid-public-key');
+            const {publicKey} = await keyRes.json();
+
+            if (!publicKey) {
+                toast('Push-уведомления временно недоступны');
+                document.getElementById('notif-toggle').checked = false;
+                return;
+            }
+
+            // Subscribe in the browser
+            const subscription = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(publicKey)
+            });
+
+            const subJson = subscription.toJSON();
+
+            // Save subscription to backend
+            await fetch('/api/push/subscribe', {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({
+                    endpoint: subJson.endpoint,
+                    keys: {
+                        p256dh: subJson.keys.p256dh,
+                        auth: subJson.keys.auth
+                    },
+                    intervalHours
+                })
+            });
+
+            updateNotifUI(true, intervalHours);
+            toast('Уведомления включены');
+        } catch (e) {
+            console.error('[Notif] Subscribe failed:', e);
+            toast('Ошибка подписки на уведомления');
+            document.getElementById('notif-toggle').checked = false;
+        }
+    }
+
+    /**
+     * Unsubscribes from push: removes from browser + notifies backend.
+     */
+    async function unsubscribeFromPush() {
+        try {
+            const sub = await getCurrentPushSubscription();
+            if (sub) {
+                const endpoint = sub.endpoint;
+                await sub.unsubscribe();
+                await fetch('/api/push/unsubscribe', {
+                    method: 'DELETE',
+                    headers: authHeaders(),
+                    body: JSON.stringify({endpoint})
+                });
+            }
+            updateNotifUI(false);
+            toast('Уведомления отключены');
+        } catch (e) {
+            console.error('[Notif] Unsubscribe failed:', e);
+            toast('Ошибка отключения уведомлений');
+        }
+    }
+
+    /**
+     * Called by the Settings toggle. Subscribes or unsubscribes.
+     * @param {boolean} enabled
+     */
+    async function handleNotifToggle(enabled) {
+        if (isGuest) {
+            toast('Войдите в аккаунт для настройки уведомлений');
+            document.getElementById('notif-toggle').checked = false;
+            return;
+        }
+
+        const intervalHours = parseInt(
+            document.getElementById('notif-interval-select')?.value || '24', 10
+        );
+
+        if (enabled) {
+            await subscribeToPush(intervalHours);
+        } else {
+            await unsubscribeFromPush();
+        }
+    }
+
+    /** Toggles the notification interval dropdown menu. */
+    function toggleNotifIntervalMenu() {
+        const btn = document.getElementById('notif-interval-btn');
+        const menu = document.getElementById('notif-interval-menu');
+        const isOpen = menu.classList.contains('open');
+        if (isOpen) {
+            closeNotifIntervalMenu();
+        } else {
+            btn.classList.add('open');
+            menu.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    /** Closes the notification interval dropdown. */
+    function closeNotifIntervalMenu() {
+        const btn = document.getElementById('notif-interval-btn');
+        const menu = document.getElementById('notif-interval-menu');
+        btn?.classList.remove('open');
+        menu?.classList.remove('open');
+        btn?.setAttribute('aria-expanded', 'false');
+    }
+
+    /**
+     * Handles selection from the notification interval dropdown.
+     * @param {HTMLElement} el - The clicked menu item.
+     */
+    function selectNotifInterval(el) {
+        const value = el.dataset.value;
+        const label = document.getElementById('notif-interval-label');
+        if (label) label.textContent = el.textContent.trim();
+        document.querySelectorAll('#notif-interval-menu .sort-menu-item').forEach(item => {
+            item.classList.toggle('active', item === el);
+        });
+        closeNotifIntervalMenu();
+        handleNotifIntervalChange(value);
+    }
+
+    function handleNotifIntervalChange(value) {
+        fetch('/api/push/interval', {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify({intervalHours: parseInt(value, 10)})
+        }).catch(e => console.error('[Notif] Interval update failed:', e));
+    }
+
+    /**
+     * Syncs the notification Settings UI with the current subscription state.
+     * @param {boolean} subscribed
+     * @param {number} [intervalHours]
+     */
+    function updateNotifUI(subscribed, intervalHours) {
+        const toggle = document.getElementById('notif-toggle');
+        if (toggle) toggle.checked = subscribed;
+
+        if (intervalHours) {
+            const labels = { '6': 'Каждые 6 часов', '12': 'Каждые 12 часов', '24': 'Раз в день' };
+            const label  = document.getElementById('notif-interval-label');
+            if (label) label.textContent = labels[String(intervalHours)] || 'Раз в день';
+            document.querySelectorAll('#notif-interval-menu .sort-menu-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.value === String(intervalHours));
+            });
+        }
+    }
+
+    /**
+     * Bootstrap: registers SW, syncs UI, shows iOS hint if needed.
+     * Call once during app init (after auth check).
+     */
+    async function initNotifications() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        const iosHint = document.getElementById('notif-ios-hint');
+
+        if (isIOS && !isStandalone) {
+            // iOS Safari: push doesn't work without PWA — show hint, disable toggle
+            if (iosHint) iosHint.style.display = '';
+            const toggle = document.getElementById('notif-toggle');
+            if (toggle) {
+                toggle.disabled = true;
+                toggle.closest('label').style.opacity = '0.4';
+            }
+            return;
+        }
+
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            document.getElementById('settings-notif-group')?.style.setProperty('display', 'none');
+            return;
+        }
+
+        await getSwRegistration();
+        const sub = await getCurrentPushSubscription();
+        updateNotifUI(!!sub);
+    }
+
+    // =============================================================================
     // INIT
     // Application bootstrap — loads data then renders the initial QoD view.
     // =============================================================================
@@ -3373,17 +3742,22 @@
             return;
         }
 
-        const res = await fetch(API, {headers: authHeaders()});
-        if (res.status === 401 || res.status === 403) {
-            clearToken();
+        try {
+            const res = await fetch(API, {headers: authHeaders()});
+            if (res.status === 401 || res.status === 403) {
+                clearToken();
+                showGuestMode();
+                return;
+            }
+            const rawQuotes = await res.json();
+            quotes = rawQuotes.map(q => ({...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : []}));
+            hideGuestMode();
+            renderQod();
+            initNotifications();
+        } catch (e) {
+            console.error('[Init] Failed to load data, falling back to guest mode:', e);
             showGuestMode();
-            return;
         }
-
-        const rawQuotes = await res.json();
-        quotes = rawQuotes.map(q => ({...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : []}));
-        hideGuestMode();
-        renderQod();
     })();
 
     // remove outline from Escape
