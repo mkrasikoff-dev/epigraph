@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,13 @@ public class QuoteController {
         log.info("Fetching all quotes — found {}", quotes.size());
 
         return quotes;
+    }
+
+    @GetMapping("/qod")
+    public ResponseEntity<Quote> getQod(@AuthenticationPrincipal Long userId) {
+        return service.getQod(userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @PostMapping
