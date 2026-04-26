@@ -493,6 +493,24 @@
             color: var(--color-text-faint);
         }
 
+        @media (hover: none) {
+            .qod-card { cursor: grab; user-select: none; }
+            .qod-card::after {
+                content: '← свайп →';
+                display: block;
+                text-align: center;
+                font-size: var(--text-xs);
+                color: var(--color-text-faint);
+                margin-top: var(--space-3);
+            }
+        }
+
+        .btn-disabled-empty {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: auto !important; /* allow click to show toast */
+        }
+
         /* =============================================================================
         // QUOTES LIST
         // Grid layout that shows all stored quotes with search/filter controls.
@@ -1657,6 +1675,15 @@
             background: var(--color-divider);
         }
 
+        .auth-card--register {
+            border-color: var(--color-primary);
+            background: color-mix(in oklch, var(--color-primary) 4%, var(--color-surface));
+        }
+
+        .auth-card--register .auth-title {
+            color: var(--color-primary);
+        }
+
         .btn-google {
             display: flex;
             align-items: center;
@@ -1689,6 +1716,12 @@
             cursor: not-allowed;
         }
 
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1710,6 +1743,11 @@
             <label for="auth-password">Пароль</label>
             <input type="password" id="auth-password" placeholder="Минимум 6 символов" autocomplete="current-password">
         </div>
+
+        <p id="auth-password-hint"
+           style="display:none;font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-2))">
+            Используйте буквы и цифры.
+        </p>
 
         <p class="auth-error" id="auth-error"></p>
 
@@ -1753,7 +1791,7 @@
 
         <nav class="nav-tabs" role="tablist">
             <button class="nav-tab active" role="tab" onclick="switchView('qod')" id="tab-qod">На сегодня</button>
-            <button class="nav-tab" role="tab" onclick="switchView('list')" id="tab-list">Все цитаты</button>
+            <button class="nav-tab" role="tab" onclick="switchView('list')" id="tab-list">Мои цитаты</button>
             <button class="nav-tab" role="tab" onclick="switchView('add')" id="tab-add">Добавить</button>
             <button class="nav-tab" role="tab" onclick="switchView('settings')" id="tab-settings">Настройки</button>
         </nav>
@@ -1820,11 +1858,11 @@
             </section>
         </div>
 
-        <!-- ALL QUOTES -->
+        <!-- MY QUOTES -->
         <div class="view" id="view-list">
             <section class="list-section">
                 <div class="list-header">
-                    <h2>Все цитаты</h2>
+                    <h2>Мои цитаты</h2>
                     <div class="search-wrap">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" aria-hidden="true">
@@ -2083,7 +2121,7 @@
                     <div class="settings-item">
                         <div class="settings-item-info">
                             <h4>Копировать всё как текст</h4>
-                            <p>Скопируйте все цитаты в буфер обмена в текстовом формате.</p>
+                            <p>Скопируйте все ваши цитаты в буфер обмена в текстовом формате.</p>
                         </div>
                         <button class="export-btn" id="copy-all-btn" onclick="copyAll()">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2116,8 +2154,8 @@
                     <div class="settings-group-title">Опасная зона</div>
                     <div class="settings-item">
                         <div class="settings-item-info">
-                            <h4>Удалить все цитаты</h4>
-                            <p>Безвозвратное удаление всех цитат из приложения.</p>
+                            <h4>Удалить все ваши цитаты</h4>
+                            <p>Безвозвратное удаление всех ваших цитат из приложения.</p>
                         </div>
                         <button class="btn-danger" onclick="confirmClear()">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2235,11 +2273,178 @@
             fav: false,
             tags: []
         },
-        {id: -4, text: 'Познай самого себя.', author: 'Сократ', source: '', fav: false, tags: []},
+        {
+            id: -4,
+            text: 'Познай самого себя.',
+            author: 'Сократ',
+            source: '',
+            fav: false,
+            tags: []
+        },
         {
             id: -5,
             text: 'Единственное благо — знание, единственное зло — невежество.',
             author: 'Диоген Лаэртский',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -6,
+            text: 'Жизнь — это то, что происходит, пока ты строишь другие планы.',
+            author: 'Джон Леннон',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -7,
+            text: 'В конце концов, важны не годы жизни, а жизнь в годах.',
+            author: 'Авраам Линкольн',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -8,
+            text: 'Будь собой — остальные роли уже заняты.',
+            author: 'Оскар Уайльд',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -9,
+            text: 'Два самых важных дня в твоей жизни — день, когда ты родился, и день, когда ты понял зачем.',
+            author: 'Марк Твен',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -10,
+            text: 'Не бойся медленно двигаться, бойся стоять на месте.',
+            author: 'Китайская пословица',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -11,
+            text: 'Всё, что я знаю — это то, что я ничего не знаю.',
+            author: 'Сократ',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -12,
+            text: 'Человек — мера всех вещей.',
+            author: 'Протагор',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -13,
+            text: 'Смелость — это не отсутствие страха, а решение, что что-то важнее страха.',
+            author: 'Амброз Редмун',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -14,
+            text: 'Тот, кто знает — не говорит. Тот, кто говорит — не знает.',
+            author: 'Лао-цзы',
+            source: 'Дао Дэ Цзин',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -15,
+            text: 'Мудрец не тот, кто знает многое, а тот, кто знает нужное.',
+            author: 'Эсхил',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -16,
+            text: 'Начало — половина всего.',
+            author: 'Аристотель',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -17,
+            text: 'Сомнение — начало мудрости.',
+            author: 'Аристотель',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -18,
+            text: 'Без труда не выловишь и рыбку из пруда.',
+            author: 'Русская пословица',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -19,
+            text: 'Самый длинный путь начинается с первого шага.',
+            author: 'Лао-цзы',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -20,
+            text: 'Когда дует ветер перемен, одни строят стены, другие — ветряные мельницы.',
+            author: 'Китайская пословица',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -21,
+            text: 'Лучше зажечь одну свечу, чем проклинать темноту.',
+            author: 'Конфуций',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -22,
+            text: 'Всё гениальное просто.',
+            author: 'Леонардо да Винчи',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -23,
+            text: 'Не откладывай на завтра то, что можно сделать сегодня.',
+            author: 'Бенджамин Франклин',
+            source: '',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -24,
+            text: 'Твоё время ограничено, не трать его на чужую жизнь.',
+            author: 'Стив Джобс',
+            source: 'Речь в Стэнфорде',
+            fav: false,
+            tags: []
+        },
+        {
+            id: -25,
+            text: 'Падать — не страшно. Страшно — не подниматься.',
+            author: 'Конфуций',
             source: '',
             fav: false,
             tags: []
@@ -2309,7 +2514,7 @@
         });
         const accountGroup = document.getElementById('settings-account-group');
         if (accountGroup) accountGroup.style.display = 'none';
-        renderQod();
+        ;
     }
 
     function hideGuestMode() {
@@ -2385,23 +2590,41 @@
     function toggleAuthMode() {
         authMode = authMode === 'login' ? 'register' : 'login';
         const isRegister = authMode === 'register';
-        document.getElementById('auth-subtitle').textContent = isRegister ? 'Создайте аккаунт' : 'Войдите, чтобы продолжить';
+
+        document.getElementById('auth-subtitle').textContent = isRegister
+            ? 'Создайте аккаунт, это бесплатно'
+            : 'Войдите, чтобы продолжить';
         document.getElementById('auth-submit-btn').textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
         document.getElementById('auth-switch-text').textContent = isRegister ? 'Уже есть аккаунт?' : 'Нет аккаунта?';
         document.querySelector('#auth-screen .auth-switch button').textContent = isRegister ? 'Войти' : 'Зарегистрироваться';
         document.getElementById('auth-error').textContent = '';
+
+        // Visual distinction: teal tint on register mode
+        const card = document.querySelector('.auth-card');
+        card.classList.toggle('auth-card--register', isRegister);
+
+        // Show/hide password hint
+        const hint = document.getElementById('auth-password-hint');
+        if (hint) hint.style.display = isRegister ? 'block' : 'none';
     }
 
     async function authSubmit() {
         const email = document.getElementById('auth-email').value.trim();
         const password = document.getElementById('auth-password').value;
         const errorEl = document.getElementById('auth-error');
+        const btn = document.getElementById('auth-submit-btn');
         errorEl.textContent = '';
 
         if (!email || !password) {
             errorEl.textContent = 'Заполните все поля';
             return;
         }
+
+        // Loading state
+        btn.disabled = true;
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        style="animation:spin 0.7s linear infinite;flex-shrink:0">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Подождите...`;
 
         const endpoint = authMode === 'login' ? '/login' : '/register';
 
@@ -2438,6 +2661,9 @@
 
         } catch (e) {
             errorEl.textContent = 'Ошибка соединения';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = authMode === 'register' ? 'Зарегистрироваться' : 'Войти';
         }
     }
 
@@ -2474,7 +2700,7 @@
     };
 
     /**
-     * Loads all quotes from the backend and normalises their tags from a CSV
+     * Loads all user quotes from the backend and normalises their tags from a CSV
      * string into an array. On failure, resets the local quotes array.
      * @returns {Promise<void>}
      */
@@ -2630,15 +2856,17 @@
     /**
      * Renders the Quote of the Day section.
      * @param {number} [overrideIdx] - Optional quote index to display instead of today's.
-     */
+     */renderQod()
     function renderQod(overrideIdx) {
         if (!quotes.length) {
             document.getElementById('qod-text').textContent = 'Добавьте первую цитату в разделе «Добавить»';
             document.getElementById('qod-author').textContent = '';
             document.getElementById('qod-source').textContent = '';
             document.getElementById('qod-progress').textContent = '';
+            setQodActionsDisabled(true);
             return;
         }
+        setQodActionsDisabled(false);
         const idx = overrideIdx !== undefined ? overrideIdx : getQodQuoteIndex();
         currentQodIndex = idx;
         const q = quotes[idx];
@@ -2664,6 +2892,29 @@
         }, QOD_ANIMATION_DEBOUNCE_MS);
         // Show quote progress only for authenticated users — guest quotes are preset and have no meaningful index
         document.getElementById('qod-progress').textContent = isGuest ? '' : `Цитата ${idx + 1} из ${quotes.length}`;
+    }
+
+    function setQodActionsDisabled(disabled) {
+        const actions = [
+            { selector: '.qod-actions .btn-primary', msg: 'Сначала добавьте хотя бы одну цитату' },
+            { selector: '.qod-actions .btn-secondary:not(#btn-fav-qod)', msg: 'Сначала добавьте хотя бы одну цитату' },
+            { selector: '#btn-fav-qod', msg: 'Сначала добавьте хотя бы одну цитату' },
+        ];
+        actions.forEach(({ selector, msg }) => {
+            const btn = document.querySelector(selector);
+            if (!btn) return;
+            if (disabled) {
+                btn.dataset.disabledMsg = msg;
+                btn.dataset.originalOnclick = btn.getAttribute('onclick') || '';
+                btn.setAttribute('onclick', `toast('${msg}', 'error'); return false;`);
+                btn.classList.add('btn-disabled-empty');
+            } else {
+                if (btn.dataset.originalOnclick !== undefined) {
+                    btn.setAttribute('onclick', btn.dataset.originalOnclick);
+                }
+                btn.classList.remove('btn-disabled-empty');
+            }
+        });
     }
 
     /**
@@ -3291,7 +3542,7 @@
      */
     function confirmClear() {
         showModal(
-            'Удалить все цитаты?',
+            'Удалить все ваши цитаты?',
             `Вы собираетесь удалить все ${quotes.length} цитат. Это действие нельзя отменить.`,
             [{
                 label: 'Удалить всё', cls: 'btn-danger', action: async () => {
@@ -3300,7 +3551,7 @@
                         quotes = [];
                         renderList();
                         closeModal();
-                        toast('Все цитаты удалены');
+                        toast('Все ваши цитаты удалены');
                     } catch (e) {
                         toast('Ошибка');
                     }
@@ -3669,8 +3920,8 @@
         if (toggle) toggle.checked = subscribed;
 
         if (intervalHours) {
-            const labels = { '6': 'Каждые 6 часов', '12': 'Каждые 12 часов', '24': 'Раз в день' };
-            const label  = document.getElementById('notif-interval-label');
+            const labels = {'6': 'Каждые 6 часов', '12': 'Каждые 12 часов', '24': 'Раз в день'};
+            const label = document.getElementById('notif-interval-label');
             if (label) label.textContent = labels[String(intervalHours)] || 'Раз в день';
             document.querySelectorAll('#notif-interval-menu .sort-menu-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.value === String(intervalHours));
@@ -3769,6 +4020,32 @@
             );
         }
     });
+
+    // Global Enter handler for auth screen
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && document.getElementById('auth-screen').classList.contains('visible')) {
+            e.preventDefault();
+            authSubmit();
+        }
+    });
+
+    // Swipe on QOD card
+    (function() {
+        const card = document.querySelector('.qod-card');
+        if (!card) return;
+        let startX = 0, startY = 0;
+        card.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, {passive: true});
+        card.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - startX;
+            const dy = e.changedTouches[0].clientY - startY;
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                randomQuote();
+            }
+        }, {passive: true});
+    })();
 </script>
 </body>
 </html>

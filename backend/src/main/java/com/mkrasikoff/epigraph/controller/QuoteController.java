@@ -36,7 +36,7 @@ public class QuoteController {
     public List<Quote> getAll(@AuthenticationPrincipal Long userId) {
         List<Quote> quotes = service.findAll(userId);
 
-        log.info("Fetching all quotes — found {}", quotes.size());
+        log.info("Fetching user quotes — found {}", quotes.size());
 
         return quotes;
     }
@@ -84,6 +84,6 @@ public class QuoteController {
     public void deleteAll(@AuthenticationPrincipal Long userId) {
         service.deleteAll(userId);
 
-        log.info("All quotes deleted for userId = {}", userId);
+        log.info("All user quotes deleted for userId = {}", userId);
     }
 }
