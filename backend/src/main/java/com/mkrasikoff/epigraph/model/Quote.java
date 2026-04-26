@@ -25,7 +25,7 @@ public class Quote {
     private Long userId;
 
     @NotBlank(message = "Quote text must not be empty")
-    @Size(max = 3000, message = "Размер цитаты не должен превышать 3000 символов")
+    @Size(max = 1000, message = "Размер цитаты не должен превышать 1000 символов")
     @Column(length = 3000)
     private String text;
 

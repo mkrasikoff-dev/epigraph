@@ -1,6 +1,5 @@
 package com.mkrasikoff.epigraph.service;
 
-import com.mkrasikoff.epigraph.exception.AuthException;
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,13 +12,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final QuoteService quoteService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       QuoteService quoteService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.quoteService = quoteService;
     }
 
     @Transactional
@@ -34,7 +36,9 @@ public class AuthService {
         user.setProvider("local");
         user.setCreatedAt(System.currentTimeMillis());
 
-        userRepository.save(user);
+        userRepository.save(user); // userId генерируется здесь (IDENTITY strategy)
+
+        quoteService.createDefaultQuotes(user.getId());
 
         return jwtService.generateToken(user.getId(), user.getEmail());
     }

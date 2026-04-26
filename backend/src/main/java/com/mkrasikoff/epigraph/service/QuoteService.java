@@ -80,4 +80,44 @@ public class QuoteService {
     public void deleteAll(Long userId) {
         repo.findByUserId(userId).forEach(q -> repo.deleteById(q.getId()));
     }
+
+    /**
+     * Создаёт 3 стартовые цитаты для нового пользователя.
+     * Вызывается сразу после регистрации (local и OAuth2).
+     */
+    @Transactional
+    public void createDefaultQuotes(Long userId) {
+        long now = System.currentTimeMillis();
+
+        List<Quote> defaults = List.of(
+                buildDefaultQuote(
+                        "Менее всего просты люди, желающие казаться простыми",
+                        "Лев Толстой", null, "философия", now),
+                buildDefaultQuote(
+                        "Не бывает некрасивых женщин, бывают ленивые",
+                        "Коко Шанель", null, "мотивация", now + 1),
+                buildDefaultQuote(
+                        "За малое зло человек может отомстить, а за большое — не может; " +
+                                "из чего следует, что наносимую человеку обиду надо рассчитывать так, " +
+                                "чтобы не бояться мести",
+                        "Никколо Макиавелли", "Государь", "философия", now + 2)
+        );
+
+        defaults.forEach(q -> {
+            q.setUserId(userId);
+            repo.save(q);
+        });
+    }
+
+    private Quote buildDefaultQuote(String text, String author, String source, String tags, long added) {
+        Quote q = new Quote();
+
+        q.setText(text);
+        q.setAuthor(author);
+        q.setSource(source);
+        q.setTags(tags);
+        q.setAdded(added);
+
+        return q;
+    }
 }
