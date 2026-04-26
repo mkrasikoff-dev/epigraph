@@ -1277,7 +1277,8 @@
             opacity: 0;
             transform: translateY(8px);
             transition: opacity 0.25s, transform 0.25s;
-            white-space: nowrap;
+            max-width: calc(100vw - 2 * var(--space-6));
+            word-break: break-word;
         }
 
         .toast.show {
@@ -1905,8 +1906,8 @@
                             Текст цитаты <span>(обязательно)</span>
                         </label>
                         <textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…"
-                                  maxlength="3000"></textarea>
-                        <div class="char-counter" id="quoteTextCounter">0 / 3000</div>
+                                  maxlength="1000"></textarea>
+                        <div class="char-counter" id="quoteTextCounter">0 / 1000</div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -3090,8 +3091,8 @@
         <label ...>Текст цитаты <span>(обязательно)</span></label>
         <textarea class="edit-textarea" id="editQuoteText" rows="4"
                   placeholder="Текст цитаты..."
-                  maxlength="3000"></textarea>
-        <div class="char-counter" id="editQuoteTextCounter">0 / 3000</div>
+                  maxlength="1000"></textarea>
+        <div class="char-counter" id="editQuoteTextCounter">0 / 1000</div>
     </div>
     <div class="edit-form-row">
       <div class="edit-form-group">
@@ -3420,8 +3421,8 @@
     }
 
     // Character counter for quote textarea fields
-    const QUOTE_MAX_LENGTH = 3000;
-    const QUOTE_WARN_THRESHOLD = 2700; // 90% of limit
+    const QUOTE_MAX_LENGTH = 1000;
+    const QUOTE_WARN_THRESHOLD = 900; // 90% of limit
 
     function updateCharCounter(textarea, counterId, submitBtnId) {
         const counter = document.getElementById(counterId);
