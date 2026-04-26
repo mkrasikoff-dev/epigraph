@@ -84,6 +84,6 @@ public class QuoteController {
     public void deleteAll(@AuthenticationPrincipal Long userId) {
         service.deleteAll(userId);
 
-        log.info("All quotes deleted");
+        log.info("All quotes deleted for userId = {}", userId);
     }
 }
