@@ -88,11 +88,11 @@ Base URL: `http://localhost:8080/api`
 
 | Method   | Path           | Description           |
 |----------|----------------|-----------------------|
-| `GET`    | `/quotes`      | Get all quotes        |
+| `GET`    | `/quotes`      | Get user quotes       |
 | `POST`   | `/quotes`      | Add a quote           |
 | `PUT`    | `/quotes/{id}` | Update a quote        |
 | `DELETE` | `/quotes/{id}` | Delete a single quote |
-| `DELETE` | `/quotes`      | Delete all quotes     |
+| `DELETE` | `/quotes`      | Delete user quotes    |
 
 #### Quote format (JSON)
 
