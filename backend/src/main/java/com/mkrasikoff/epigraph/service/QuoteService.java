@@ -78,7 +78,7 @@ public class QuoteService {
 
     @Transactional
     public void deleteAll(Long userId) {
-        repo.findByUserId(userId).forEach(q -> repo.deleteById(q.getId()));
+        repo.deleteAllByUserId(userId);
     }
 
     /**

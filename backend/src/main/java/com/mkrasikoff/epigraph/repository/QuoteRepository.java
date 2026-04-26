@@ -17,4 +17,6 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
     boolean existsByIdAndUserId(Long id, Long userId);
 
     void deleteByIdAndUserId(Long id, Long userId);
+
+    void deleteAllByUserId(Long userId);
 }

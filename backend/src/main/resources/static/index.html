@@ -3143,7 +3143,7 @@
         const id = editingId;
         if (id === null) return;
 
-        const text = document.getElementById('edit-text')?.value.trim();
+        const text = document.getElementById('editQuoteText')?.value.trim();
         if (!text) {
             toast('Текст цитаты обязателен', 'error');
             return;
