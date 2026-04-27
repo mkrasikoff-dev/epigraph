@@ -510,16 +510,35 @@
             color: var(--color-text-faint);
         }
 
-        @media (hover: none) {
-            .qod-card { cursor: grab; user-select: none; }
-            .qod-card::after {
-                content: '← свайп →';
-                display: block;
-                text-align: center;
-                font-size: var(--text-xs);
-                color: var(--color-text-faint);
-                margin-top: var(--space-3);
-            }
+        .qod-card {
+            cursor: grab;
+            user-select: none;
+            will-change: transform;
+        }
+
+        .qod-card.is-dragging {
+            transition: none;
+        }
+
+        .swipe-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-xl);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 80ms linear;
+        }
+
+        .swipe-overlay-left {
+            background: linear-gradient(to right,
+            oklch(from var(--color-primary) l c h / 0.18) 0%,
+            transparent 70%);
+        }
+
+        .swipe-overlay-right {
+            background: linear-gradient(to left,
+            oklch(from var(--color-primary) l c h / 0.18) 0%,
+            transparent 70%);
         }
 
         .btn-disabled-empty {
@@ -1839,6 +1858,8 @@
                 <div class="qod-bg-ornament"></div>
                 <div class="qod-date" id="qod-date"></div>
                 <div class="qod-card">
+                    <div class="swipe-overlay swipe-overlay-left"  id="swipe-left"></div>
+                    <div class="swipe-overlay swipe-overlay-right" id="swipe-right"></div>
                     <p class="qod-quote" id="qod-text"></p>
                     <div class="qod-author" id="qod-author"></div>
                     <div class="qod-source" id="qod-source"></div>
@@ -4046,23 +4067,177 @@
         }
     });
 
-    // Swipe on QOD card
-    (function() {
-        const card = document.querySelector('.qod-card');
+    // Swipe on QOD card — Reigns-style drag with tilt and fly-out animation
+    (function () {
+        const card    = document.querySelector('.qod-card');
+        const overlayL = document.getElementById('swipe-left');
+        const overlayR = document.getElementById('swipe-right');
         if (!card) return;
-        let startX = 0, startY = 0;
-        card.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, {passive: true});
-        card.addEventListener('touchend', e => {
-            const dx = e.changedTouches[0].clientX - startX;
-            const dy = e.changedTouches[0].clientY - startY;
-            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-                randomQuote();
+
+        function isSwipeAllowed() {
+            // Guests always have preset quotes — allow swipe
+            // Logged-in users with empty library — block
+            return isGuest || quotes.length > 0;
+        }
+
+        const THRESHOLD = 110; // px — minimum drag distance to trigger swipe
+        const MAX_DRAG = 160; // px — maximum visual displacement
+
+        let dragging = false;
+        let startX = 0, startY = 0, currentX = 0;
+        let pointerLocked = false;
+        let isAnimating = false;
+
+        function applyDrag(dx) {
+            const clamped = Math.sign(dx) * Math.min(Math.abs(dx), MAX_DRAG);
+            const rotate = clamped * 0.045;
+            card.style.transform = `translateX(${clamped}px) rotate(${rotate}deg)`;
+            const ratio = Math.min(1, Math.abs(dx) / THRESHOLD);
+            if (dx < 0) {
+                overlayL.style.opacity = ratio;
+                overlayR.style.opacity = 0;
+            } else {
+                overlayR.style.opacity = ratio;
+                overlayL.style.opacity = 0;
             }
-        }, {passive: true});
+        }
+
+        function snapBack() {
+            card.classList.remove('is-dragging');
+            card.style.transition = 'transform 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 420ms ease-out';
+            card.style.transform = '';
+            overlayL.style.opacity = 0;
+            overlayR.style.opacity = 0;
+            setTimeout(() => { card.style.transition = ''; }, 430);
+        }
+
+        function flyOut(direction) {
+            isAnimating = true;
+            card.classList.remove('is-dragging');
+
+            // Freeze card height to prevent layout jump during animation
+            card.style.height = card.offsetHeight + 'px';
+
+            // Phase 1: fly out
+            card.style.transition = 'transform 300ms cubic-bezier(0.4, 0, 1, 1), opacity 220ms ease-in';
+            const flyX = direction * (window.innerWidth * 0.85 + 200);
+            const flyRot = direction * 20;
+            card.style.transform = `translateX(${flyX}px) rotate(${flyRot}deg)`;
+            card.style.opacity = '0';
+            overlayL.style.opacity = 0;
+            overlayR.style.opacity = 0;
+
+            setTimeout(() => {
+                // Phase 2: reposition off-screen
+                card.style.transition = 'none';
+                card.style.transform = `translateX(${-direction * 80}px) translateY(16px)`;
+                card.style.opacity = '0';
+                // Height is still frozen from Phase 1
+
+                // Update content
+                randomQuote();
+
+                // Measure new natural height after content update
+                const prevHeight = parseFloat(card.style.height);
+                card.style.height = 'auto';
+                const newHeight = card.offsetHeight;
+
+                if (Math.abs(newHeight - prevHeight) > 4) {
+                    // Heights differ — animate from old to new during card entry
+                    card.style.height = prevHeight + 'px';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            card.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease-out, height 450ms cubic-bezier(0.16, 1, 0.3, 1)';
+                            card.style.transform = '';
+                            card.style.opacity = '1';
+                            card.style.height = newHeight + 'px';
+
+                            setTimeout(() => {
+                                card.style.transition = '';
+                                card.style.transform  = '';
+                                card.style.opacity    = '';
+                                card.style.height     = ''; // release to auto
+                                isAnimating = false;
+                            }, 520);
+                        });
+                    });
+                } else {
+                    // Same height — no resize animation needed
+                    card.style.height = '';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            card.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease-out';
+                            card.style.transform = '';
+                            card.style.opacity = '1';
+
+                            setTimeout(() => {
+                                card.style.transition = '';
+                                card.style.transform  = '';
+                                card.style.opacity    = '';
+                                isAnimating = false;
+                            }, 520);
+                        });
+                    });
+                }
+            }, 310);
+        }
+
+        // Pointer Events API — works for both touch and mouse
+        card.addEventListener('pointerdown', e => {
+            if (isAnimating || !isSwipeAllowed()) return; // block swipe when no quotes
+            if (e.button !== undefined && e.button !== 0) return;
+            dragging = true;
+            pointerLocked = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            currentX = 0;
+            card.setPointerCapture(e.pointerId);
+            card.classList.add('is-dragging');
+            card.classList.remove('is-snapping');
+        });
+
+        card.addEventListener('pointermove', e => {
+            if (!dragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+
+            // Блокируем свайп если движение больше вертикальное
+            if (!pointerLocked && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+                dragging = false;
+                snapBack();
+                return;
+            }
+            if (Math.abs(dx) > 8) pointerLocked = true;
+            if (pointerLocked) e.preventDefault();
+            currentX = dx;
+            applyDrag(dx);
+        });
+
+        card.addEventListener('pointerup', e => {
+            if (!dragging) return;
+            dragging = false;
+            card.classList.remove('is-dragging');
+            if (Math.abs(currentX) >= THRESHOLD) {
+                flyOut(currentX > 0 ? 1 : -1);
+            } else {
+                snapBack();
+            }
+        });
+
+        card.addEventListener('pointercancel', () => {
+            if (!dragging) return;
+            dragging = false;
+            snapBack();
+        });
     })();
+
+    // Keyboard navigation for QOD card — left/right arrows trigger random quote
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const view = document.getElementById('view-qod');
+        if (!view || !view.classList.contains('active')) return;
+        if (isGuest || quotes.length > 0) randomQuote();
+    });
 </script>
 </body>
 </html>
