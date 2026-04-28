@@ -720,10 +720,10 @@
 
         /* Expanded card — full width in grid, full text visible */
         .quote-card.is-expanded {
-            grid-column: 1 / -1;
             background: var(--color-surface-2);
             box-shadow: var(--shadow-lg);
             cursor: default;
+            /* No grid-column: 1/-1 — stays in place, just grows down */
         }
 
         .quote-card.is-expanded .quote-card-text {
