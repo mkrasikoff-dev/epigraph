@@ -446,15 +446,29 @@
             margin-bottom: var(--space-6);
         }
 
+        /* QoD card — fluid width, grows before font shrinks */
         .qod-card {
-            max-width: 680px;
-            width: 100%;
+            width: min(92vw, 1100px);
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-xl);
             padding: var(--space-10) var(--space-12);
             box-shadow: var(--shadow-lg);
             position: relative;
+            cursor: grab;
+            user-select: none;
+            will-change: transform;
+            transition: width 300ms ease;
+        }
+
+        /* Size modifier classes — width first, font second */
+        .qod-card.qod-size-short     { width: min(92vw, 480px);  }
+        .qod-card.qod-size-medium    { width: min(92vw, 740px);  }
+        .qod-card.qod-size-long      { width: min(92vw, 960px);  }
+        .qod-card.qod-size-very-long { width: min(92vw, 1100px); }
+
+        .qod-card.is-dragging {
+            transition: none;
         }
 
         .qod-card::before {
@@ -473,12 +487,13 @@
 
         .qod-quote {
             font-family: var(--font-display);
-            font-size: var(--text-quote);
             font-style: italic;
             font-weight: 400;
             line-height: 1.5;
             color: var(--color-text);
             margin-bottom: var(--space-6);
+            /* Убираем фиксированный --text-quote, размер ставится динамически через JS */
+            transition: font-size 200ms ease;
         }
 
         .qod-author {
@@ -508,16 +523,6 @@
             margin-top: var(--space-6);
             font-size: var(--text-xs);
             color: var(--color-text-faint);
-        }
-
-        .qod-card {
-            cursor: grab;
-            user-select: none;
-            will-change: transform;
-        }
-
-        .qod-card.is-dragging {
-            transition: none;
         }
 
         .swipe-overlay {
@@ -2552,7 +2557,7 @@
         });
         const accountGroup = document.getElementById('settings-account-group');
         if (accountGroup) accountGroup.style.display = 'none';
-        ;
+        renderQod();
     }
 
     function hideGuestMode() {
@@ -2916,6 +2921,7 @@
         textEl.style.transform = 'translateY(6px)';
         setTimeout(() => {
             textEl.textContent = q.text;
+            applyQodAdaptiveSize(q.text);
             document.getElementById('qod-author').textContent = q.author || '';
             document.getElementById('qod-source').textContent = q.source || '';
             textEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
@@ -2930,6 +2936,28 @@
         }, QOD_ANIMATION_DEBOUNCE_MS);
         // Show quote progress only for authenticated users — guest quotes are preset and have no meaningful index
         document.getElementById('qod-progress').textContent = isGuest ? '' : `Цитата ${idx + 1} из ${quotes.length}`;
+    }
+
+    // Adaptive font size and card width based on quote length
+    function applyQodAdaptiveSize(text) {
+        const len = text.length;
+        const card = document.querySelector('.qod-card');
+        const el = document.getElementById('qod-text');
+
+        // Width class — card expands first, before font shrinks
+        card.classList.remove('qod-size-short', 'qod-size-medium', 'qod-size-long', 'qod-size-very-long');
+        if (len < 40)        card.classList.add('qod-size-short');
+        else if (len < 80)   card.classList.add('qod-size-medium');
+        else if (len < 180)  card.classList.add('qod-size-long');
+        else                 card.classList.add('qod-size-very-long');
+
+        // Font size — scale down only when card width is already maxed out
+        let fontSize;
+        if (len < 40)        fontSize = 'clamp(2.4rem, 4vw + 0.5rem, 3.8rem)';
+        else if (len < 80)   fontSize = 'clamp(2rem, 3vw + 0.5rem, 3.2rem)';
+        else if (len < 180)  fontSize = 'clamp(1.6rem, 2.2vw + 0.4rem, 2.4rem)';
+        else                 fontSize = 'clamp(1.2rem, 1.6vw + 0.3rem, 1.8rem)';
+        el.style.fontSize = fontSize;
     }
 
     function setQodActionsDisabled(disabled) {
