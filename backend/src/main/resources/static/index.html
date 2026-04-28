@@ -718,6 +718,48 @@
             margin-bottom: 0;
         }
 
+        /* Expanded card — full width in grid, full text visible */
+        .quote-card.is-expanded {
+            grid-column: 1 / -1;
+            background: var(--color-surface-2);
+            box-shadow: var(--shadow-lg);
+            cursor: default;
+        }
+
+        .quote-card.is-expanded .quote-card-text {
+            display: block;
+            -webkit-line-clamp: unset;
+            overflow: visible;
+        }
+
+        .quote-card.is-expanded .quote-card-text-wrap::after {
+            display: none;
+        }
+
+        /* Expand hint — shown only on clipped cards */
+        .quote-card-expand-hint {
+            display: none;
+            font-size: var(--text-xs);
+            color: var(--color-text-faint);
+            margin-top: var(--space-2);
+            cursor: pointer;
+            user-select: none;
+            transition: color var(--transition);
+        }
+
+        .quote-card-text-wrap.is-clipped ~ .quote-card-expand-hint {
+            display: block;
+        }
+
+        .quote-card.is-expanded .quote-card-expand-hint {
+            display: block;
+            color: var(--color-primary);
+        }
+
+        .quote-card:has(.quote-card-text-wrap.is-clipped) {
+            cursor: pointer;
+        }
+
         .quote-card-meta {
             display: flex;
             align-items: center;
@@ -3159,6 +3201,7 @@
               <div class="quote-card-text-wrap">
                 <p class="quote-card-text">${escHtml(q.text)}</p>
               </div>
+              <span class="quote-card-expand-hint">Нажмите, чтобы читать полностью ↓</span>
               ${q.tags && q.tags.length ? `<div class="quote-card-tags">${q.tags.map(t => `<button class="quote-tag-chip" onclick="searchByTag('${escHtml(t)}')">${escHtml(t)}</button>`).join('')}</div>` : ''}
               <div class="quote-card-meta">
                 <div>
@@ -3184,6 +3227,7 @@
           `).join('');
         // Mark cards where text is actually overflowing
         markClippedCards();
+        initExpandableCards();
     }
 
     function markClippedCards() {
@@ -3194,6 +3238,45 @@
                 wrap.classList.add('is-clipped');
             } else {
                 wrap.classList.remove('is-clipped');
+            }
+        });
+    }
+
+    function initExpandableCards() {
+        const grid = document.getElementById('quotes-grid');
+        if (!grid || grid._expandListenerAttached) return;
+        grid._expandListenerAttached = true;
+
+        grid.addEventListener('click', function (e) {
+            // Ignore clicks on buttons, tags
+            if (e.target.closest('.card-btn, .quote-tag-chip')) return;
+
+            const card = e.target.closest('.quote-card');
+            if (!card) return;
+
+            const wrap = card.querySelector('.quote-card-text-wrap');
+            const hint = card.querySelector('.quote-card-expand-hint');
+            const isClipped = wrap?.classList.contains('is-clipped');
+            const isExpanded = card.classList.contains('is-expanded');
+
+            // Only react to click if card is clipped or already expanded
+            if (!isClipped && !isExpanded) return;
+
+            if (isExpanded) {
+                // Collapse
+                card.classList.remove('is-expanded');
+                if (hint) hint.textContent = 'Нажмите, чтобы читать полностью ↓';
+            } else {
+                // Collapse any other expanded card first
+                document.querySelectorAll('.quote-card.is-expanded').forEach(c => {
+                    c.classList.remove('is-expanded');
+                    const h = c.querySelector('.quote-card-expand-hint');
+                    if (h) h.textContent = 'Нажмите, чтобы читать полностью ↓';
+                });
+                // Expand this card
+                card.classList.add('is-expanded');
+                if (hint) hint.textContent = 'Свернуть ↑';
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         });
     }
