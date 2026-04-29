@@ -5,12 +5,18 @@ on:
     types: [closed]
     branches: [trunk]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   tag-and-sync:
     if: |
       github.event.pull_request.merged == true &&
       startsWith(github.event.pull_request.title, 'Release v')
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,14 +55,11 @@ jobs:
 
           while IFS= read -r line; do
             lower=$(echo "$line" | tr '[:upper:]' '[:lower:]')
-            # Skip release/sync commits
             if echo "$lower" | grep -qE "^release v|^sync develop"; then
               continue
             fi
-            # Bug fixes: bugfix/ branch PRs or keywords fix/bug
             if echo "$lower" | grep -qE "fix|bug|hotfix"; then
               BUGFIXES="${BUGFIXES}- ${line}\n"
-            # Internal: no [TASK-*] prefix, or contains keywords
             elif ! echo "$line" | grep -qE "^\[TASK-"; then
               INTERNAL="${INTERNAL}- ${line}\n"
             else
@@ -64,7 +67,6 @@ jobs:
             fi
           done <<< "$COMMITS"
 
-          # Build release notes
           NOTES="## What's Changed"$'\n'
           NOTES+=$'\n'"### Features"$'\n'
           if [ -n "$FEATURES" ]; then
@@ -79,7 +81,6 @@ jobs:
             NOTES+=$(printf "$INTERNAL")
           fi
 
-          # Write to file to avoid quoting issues
           printf '%s' "$NOTES" > /tmp/release_notes.md
           echo "notes_file=/tmp/release_notes.md" >> $GITHUB_OUTPUT
 
