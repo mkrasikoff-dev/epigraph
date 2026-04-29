@@ -6,12 +6,13 @@ This document describes the branching model, versioning, and release process for
 
 ## Branches
 
-| Branch           | Purpose                                      | Protected |
-|------------------|----------------------------------------------|-----------|
-| `trunk`          | Production. Railway deploys from here.       | ✅         |
-| `develop`        | Integration branch. Collects ready features. | ✅         |
-| `feature/TASK-*` | One branch per task, created from `develop`. | ❌         |
-| `hotfix/*`       | Urgent production fix, created from `trunk`. | ❌         |
+| Branch           | Purpose                                              | Protected |
+|------------------|------------------------------------------------------|-----------|
+| `trunk`          | Production. Railway deploys from here.               | ✅         |
+| `develop`        | Integration branch. Collects ready features.         | ✅         |
+| `feature/TASK-*` | One branch per task, created from `develop`.         | ❌         |
+| `bugfix/TASK-*`  | One branch per bug / defect, created from `develop`. | ❌         |
+| `hotfix/*`       | Urgent production fix, created from `trunk`.         | ❌         |
 
 > **Note:** After each release, `develop` will always show as *N commits ahead of trunk*
 > in GitHub. This is expected behaviour when using squash-merge: original feature commits
