@@ -1,0 +1,110 @@
+name: Post Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [trunk]
+
+jobs:
+  tag-and-sync:
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.title, 'Release v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull latest trunk
+        run: git pull origin trunk
+
+      - name: Extract version
+        id: version
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          VERSION="${TITLE#Release }"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          PREV=$(git tag --sort=-version:refname | head -n 1 || echo "")
+          echo "tag=$PREV" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"%s" HEAD)
+          else
+            COMMITS=$(git log --pretty=format:"%s" ${PREV_TAG}..HEAD)
+          fi
+
+          FEATURES=""
+          BUGFIXES=""
+          INTERNAL=""
+
+          while IFS= read -r line; do
+            lower=$(echo "$line" | tr '[:upper:]' '[:lower:]')
+            # Skip release/sync commits
+            if echo "$lower" | grep -qE "^release v|^sync develop"; then
+              continue
+            fi
+            # Bug fixes: bugfix/ branch PRs or keywords fix/bug
+            if echo "$lower" | grep -qE "fix|bug|hotfix"; then
+              BUGFIXES="${BUGFIXES}- ${line}\n"
+            # Internal: no [TASK-*] prefix, or contains keywords
+            elif ! echo "$line" | grep -qE "^\[TASK-"; then
+              INTERNAL="${INTERNAL}- ${line}\n"
+            else
+              FEATURES="${FEATURES}- ${line}\n"
+            fi
+          done <<< "$COMMITS"
+
+          # Build release notes
+          NOTES="## What's Changed"$'\n'
+          NOTES+=$'\n'"### Features"$'\n'
+          if [ -n "$FEATURES" ]; then
+            NOTES+=$(printf "$FEATURES")
+          fi
+          NOTES+=$'\n'"### Bug Fixes"$'\n'
+          if [ -n "$BUGFIXES" ]; then
+            NOTES+=$(printf "$BUGFIXES")
+          fi
+          NOTES+=$'\n'"### Internal"$'\n'
+          if [ -n "$INTERNAL" ]; then
+            NOTES+=$(printf "$INTERNAL")
+          fi
+
+          # Write to file to avoid quoting issues
+          printf '%s' "$NOTES" > /tmp/release_notes.md
+          echo "notes_file=/tmp/release_notes.md" >> $GITHUB_OUTPUT
+
+      - name: Create annotated tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a ${{ steps.version.outputs.version }} \
+            -m "Release ${{ steps.version.outputs.version }}"
+          git push origin ${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.version.outputs.version }} \
+            --title "Release ${{ steps.version.outputs.version }}" \
+            --notes-file ${{ steps.changelog.outputs.notes_file }}
+
+      - name: Create Sync PR (trunk → develop)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base develop \
+            --head trunk \
+            --title "Sync develop from trunk after Release ${{ steps.version.outputs.version }}" \
+            --body "⚠️ Merge this PR using **regular merge** (not squash) to preserve history graph."
