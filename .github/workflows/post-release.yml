@@ -42,7 +42,13 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
           PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          REPO="${{ github.repository }}"
+
+          # Collect commits between previous tag and HEAD
           if [ -z "$PREV_TAG" ]; then
             COMMITS=$(git log --pretty=format:"%s" HEAD)
           else
@@ -67,21 +73,33 @@ jobs:
             fi
           done <<< "$COMMITS"
 
-          NOTES="## What's Changed"$'\n'
-          NOTES+=$'\n'"### Features"$'\n'
-          if [ -n "$FEATURES" ]; then
-            NOTES+=$(printf "$FEATURES")
-          fi
-          NOTES+=$'\n'"### Bug Fixes"$'\n'
-          if [ -n "$BUGFIXES" ]; then
-            NOTES+=$(printf "$BUGFIXES")
-          fi
-          NOTES+=$'\n'"### Internal"$'\n'
-          if [ -n "$INTERNAL" ]; then
-            NOTES+=$(printf "$INTERNAL")
+          # Build header line
+          HEADER="* Release ${VERSION} by @${PR_AUTHOR} in https://github.com/${REPO}/pull/${PR_NUMBER}"
+
+          # Build Full Changelog line
+          if [ -n "$PREV_TAG" ]; then
+            CHANGELOG_LINK="**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${VERSION}"
+          else
+            CHANGELOG_LINK="**Full Changelog**: https://github.com/${REPO}/commits/${VERSION}"
           fi
 
-          printf '%s' "$NOTES" > /tmp/release_notes.md
+          # Assemble notes
+          {
+            echo "## What's Changed"
+            echo "$HEADER"
+            echo ""
+            echo "### Features"
+            if [ -n "$FEATURES" ]; then printf "$FEATURES"; fi
+            echo ""
+            echo "### Bug Fixes"
+            if [ -n "$BUGFIXES" ]; then printf "$BUGFIXES"; fi
+            echo ""
+            echo "### Internal"
+            if [ -n "$INTERNAL" ]; then printf "$INTERNAL"; fi
+            echo ""
+            echo "$CHANGELOG_LINK"
+          } > /tmp/release_notes.md
+
           echo "notes_file=/tmp/release_notes.md" >> $GITHUB_OUTPUT
 
       - name: Create annotated tag
