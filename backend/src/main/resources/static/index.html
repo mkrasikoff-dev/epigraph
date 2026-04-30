@@ -462,6 +462,10 @@
             user-select: none;
             will-change: transform;
             transition: width 300ms ease;
+            touch-action: pan-y;              /* browser handles vertical scroll, JS gets horizontal */
+            -webkit-user-select: none;        /* prevent text selection on iOS during swipe */
+            user-select: none;                /* already present — keep it */
+            -webkit-touch-callout: none;      /* suppress long-press callout menu on iOS */
         }
 
         /* Size modifier classes — width first, font second */
@@ -1902,7 +1906,7 @@
 
         <p id="auth-password-hint"
            style="display:none;font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-2))">
-            Используйте буквы и цифры.
+            Минимум 8 символов, хотя бы одна буква и одна цифра.
         </p>
 
         <p class="auth-error" id="auth-error"></p>
@@ -2766,9 +2770,16 @@
         const card = document.querySelector('.auth-card');
         card.classList.toggle('auth-card--register', isRegister);
 
-        // Show/hide password hint
+        // Show/hide password hint and update placeholder for register mode
         const hint = document.getElementById('auth-password-hint');
+        const passInput = document.getElementById('auth-password');
+
         if (hint) hint.style.display = isRegister ? 'block' : 'none';
+
+        if (passInput) {
+            passInput.placeholder = isRegister ? 'Минимум 8 символов' : 'Ваш пароль';
+            passInput.autocomplete = isRegister ? 'new-password' : 'current-password';
+        }
     }
 
     async function authSubmit() {
@@ -2778,16 +2789,40 @@
         const btn = document.getElementById('auth-submit-btn');
         errorEl.textContent = '';
 
+        // Client-side validation
         if (!email || !password) {
             errorEl.textContent = 'Заполните все поля';
             return;
         }
 
+        const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            errorEl.textContent = 'Введите корректный email';
+            return;
+        }
+
+        if (authMode === 'register') {
+            if (password.length < 8) {
+                errorEl.textContent = 'Пароль должен содержать минимум 8 символов';
+                return;
+            }
+            if (password.length > 128) {
+                errorEl.textContent = 'Пароль слишком длинный (максимум 128 символов)';
+                return;
+            }
+            if (!/[A-Za-z]/.test(password)) {
+                errorEl.textContent = 'Пароль должен содержать минимум одну букву';
+                return;
+            }
+            if (!/[0-9]/.test(password)) {
+                errorEl.textContent = 'Пароль должен содержать минимум одну цифру';
+                return;
+            }
+        }
+
         // Loading state
         btn.disabled = true;
-        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-        style="animation:spin 0.7s linear infinite;flex-shrink:0">
-        <path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Подождите...`;
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"style="animation:spin 0.7s linear infinite;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Подождите...`;
 
         const endpoint = authMode === 'login' ? '/login' : '/register';
 
@@ -2806,6 +2841,7 @@
                     errorEl.textContent = data.password;
                     return;
                 }
+
                 if (data.email) {
                     errorEl.textContent = 'Некорректный email';
                     return;
@@ -4435,7 +4471,6 @@
             card.setPointerCapture(e.pointerId);
             card.classList.add('is-dragging');
             card.classList.remove('is-snapping');
-            document.body.classList.add('no-scroll');
         });
 
         card.addEventListener('pointermove', e => {
@@ -4446,7 +4481,6 @@
             // Блокируем свайп если движение больше вертикальное
             if (!pointerLocked && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
                 dragging = false;
-                document.body.classList.remove('no-scroll');
                 snapBack();
                 return;
             }
@@ -4459,7 +4493,6 @@
         card.addEventListener('pointerup', e => {
             if (!dragging) return;
             dragging = false;
-            document.body.classList.remove('no-scroll');
             card.classList.remove('is-dragging');
             if (Math.abs(currentX) >= THRESHOLD) {
                 flyOut(currentX > 0 ? 1 : -1);
@@ -4471,7 +4504,6 @@
         card.addEventListener('pointercancel', () => {
             if (!dragging) return;
             dragging = false;
-            document.body.classList.remove('no-scroll');
             snapBack();
         });
     })();
