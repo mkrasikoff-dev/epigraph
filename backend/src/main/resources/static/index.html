@@ -1060,6 +1060,7 @@
             font-style: italic;
             font-size: var(--text-lg);
             min-height: 140px;
+            max-height: 320px;
             resize: vertical;
             line-height: 1.6;
         }
@@ -4251,9 +4252,11 @@
 
         counter.classList.remove('is-warning', 'is-over');
 
-        if (len >= QUOTE_MAX_LENGTH) {
+        if (len > QUOTE_MAX_LENGTH) {
             counter.classList.add('is-over');
             if (submitBtn) submitBtn.disabled = true;
+        } else if (len === QUOTE_MAX_LENGTH) {
+            counter.classList.add('is-over');
         } else if (len >= QUOTE_WARN_THRESHOLD) {
             counter.classList.add('is-warning');
             if (submitBtn) submitBtn.disabled = false;
