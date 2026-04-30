@@ -1059,6 +1059,16 @@
             font-weight: 400;
         }
 
+        .form-input-wrap,
+        .edit-input-wrap {
+            position: relative;
+        }
+
+        .form-input-wrap .form-input,
+        .edit-input-wrap .edit-input {
+            padding-right: 4rem;
+        }
+
         .form-input, .form-textarea {
             width: 100%;
             padding: var(--space-3) var(--space-4);
@@ -1079,6 +1089,7 @@
             max-height: 320px;
             resize: vertical;
             line-height: 1.6;
+            padding-bottom: calc(var(--space-4) + 1.2rem);
         }
 
         .form-input:focus, .form-textarea:focus {
@@ -1134,10 +1145,11 @@
             border: 2px dashed var(--color-border);
             border-radius: var(--radius-lg);
             padding: var(--space-8);
-            text-align: center;
             cursor: pointer;
             transition: border-color var(--transition), background var(--transition);
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .import-area:hover {
@@ -1156,7 +1168,7 @@
         }
 
         .import-area-icon {
-            margin: 0 auto var(--space-3);
+            margin-bottom: var(--space-3);
             color: var(--color-text-muted);
         }
 
@@ -1224,22 +1236,57 @@
         // Character counter displayed below quote textarea fields.
         // ============================================================================= */
         .char-counter {
-            font-size: var(--text-xs);
+            position: absolute;
+            bottom: var(--space-3);
+            right: var(--space-3);
+            font-size: 0.7rem;
             color: var(--color-text-faint);
-            text-align: right;
-            margin-top: var(--space-1);
             font-variant-numeric: tabular-nums;
-            transition: color var(--transition);
+            transition: color var(--transition), opacity var(--transition);
             user-select: none;
+            pointer-events: none;
+            line-height: 1;
+            letter-spacing: 0.02em;
+            opacity: 0.6;
+            background: color-mix(in oklch, var(--color-surface-offset) 85%, transparent);
+            padding: 0.15rem 0.3rem;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(2px);
+        }
+
+        .form-textarea-wrap .char-counter,
+        .edit-textarea-wrap .char-counter {
+            bottom: calc(var(--space-2) + 0.4rem);
+            right: calc(var(--space-3));
         }
 
         .char-counter.is-warning {
             color: var(--color-gold);
         }
 
+        .form-textarea-wrap:focus-within .char-counter,
+        .edit-textarea-wrap:focus-within .char-counter,
+        .form-input-wrap:focus-within .char-counter,
+        .edit-input-wrap:focus-within .char-counter {
+            opacity: 1;
+        }
+
+        .char-counter.is-warning {
+            color: var(--color-gold);
+            opacity: 1;
+        }
+
         .char-counter.is-over {
             color: #c0392b;
             font-weight: 600;
+            opacity: 1;
+        }
+
+        .form-textarea-wrap,
+        .edit-textarea-wrap,
+        .form-input-wrap,
+        .edit-input-wrap {
+            position: relative;
         }
 
         /* =============================================================================
@@ -1586,6 +1633,7 @@
             resize: vertical;
             line-height: 1.6;
             transition: border-color var(--transition), box-shadow var(--transition);
+            padding-bottom: calc(var(--space-4) + 1.2rem);
         }
 
         .edit-input {
@@ -2341,20 +2389,24 @@
                         <label class="form-label" for="q-text">
                             Текст цитаты <span>(обязательно)</span>
                         </label>
-                        <textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…"
-                                  maxlength="1000"></textarea>
-                        <div class="char-counter" id="quoteTextCounter">0 / 1000</div>
+                        <div class="form-textarea-wrap"><textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…" maxlength="1000"></textarea>
+                            <div class="char-counter" id="quoteTextCounter">0 / 1000</div>
+                        </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="q-author">Автор <span>(необязательно)</span></label>
-                            <input class="form-input" type="text" id="q-author" placeholder="Имя автора" maxlength="100">
-                            <div class="char-counter" id="authorCounter">0 / 100</div>
+                            <div class="form-input-wrap">
+                                <input class="form-input" type="text" id="q-author" placeholder="Имя автора" maxlength="100">
+                                <div class="char-counter" id="authorCounter">0 / 100</div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="q-source">Источник <span>(необязательно)</span></label>
-                            <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…" maxlength="200">
-                            <div class="char-counter" id="sourceCounter">0 / 200</div>
+                            <div class="form-input-wrap">
+                                <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…" maxlength="200">
+                                <div class="char-counter" id="sourceCounter">0 / 200</div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -3928,20 +3980,28 @@
 
         const body = `
     <div class="edit-form-group">
-        <label ...>Текст цитаты <span>(обязательно)</span></label>
+    <label for="editQuoteText">Текст цитаты <span>(обязательно)</span></label>
+    <div class="edit-textarea-wrap">
         <textarea class="edit-textarea" id="editQuoteText" rows="4"
                   placeholder="Текст цитаты..."
                   maxlength="1000"></textarea>
         <div class="char-counter" id="editQuoteTextCounter">0 / 1000</div>
     </div>
+    </div>
     <div class="edit-form-row">
       <div class="edit-form-group">
         <label for="edit-author">Автор <span>(необязательно)</span></label>
-        <input class="edit-input" type="text" id="edit-author" value="${escHtml(q.author || '')}" placeholder="Имя автора" maxlength="100"><div class="char-counter" id="editAuthorCounter">${(q.author || '').length} / 100</div>
+        <div class="edit-input-wrap">
+            <input class="edit-input" type="text" id="edit-author" value="${escHtml(q.author || '')}" placeholder="Имя автора" maxlength="100">
+            <div class="char-counter" id="editAuthorCounter">${(q.author || '').length} / 100</div>
+        </div>
       </div>
       <div class="edit-form-group">
         <label for="edit-source">Источник <span>(необязательно)</span></label>
-        <input class="edit-input" type="text" id="edit-source" value="${escHtml(q.source || '')}" placeholder="Книга, фильм, речь..." maxlength="200"><div class="char-counter" id="editSourceCounter">${(q.source || '').length} / 200</div>
+        <div class="edit-input-wrap">
+            <input class="edit-input" type="text" id="edit-source" value="${escHtml(q.source || '')}" placeholder="Книга, фильм, речь..." maxlength="200">
+            <div class="char-counter" id="editSourceCounter">${(q.source || '').length} / 200</div>
+        </div>
       </div>
     </div>
     <div class="edit-form-group">
