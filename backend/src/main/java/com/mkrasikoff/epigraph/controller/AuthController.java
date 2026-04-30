@@ -3,6 +3,7 @@ package com.mkrasikoff.epigraph.controller;
 import com.mkrasikoff.epigraph.dto.AuthRequest;
 import com.mkrasikoff.epigraph.dto.AuthResponse;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
+import com.mkrasikoff.epigraph.dto.RegisterRequest;
 import com.mkrasikoff.epigraph.service.AuthService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(@Valid @RequestBody AuthRequest request) {
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         String token = authService.register(request.getEmail(), request.getPassword());
 
         log.info("New user registered — email = {}", request.getEmail());
