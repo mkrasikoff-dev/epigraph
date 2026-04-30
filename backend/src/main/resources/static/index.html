@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-          content="Храните и перечитывайте цитаты, которые вас вдохновляют. Ваша личная библиотека смыслов.">
+          content="Ваши цитаты. Каждый день.">
     <meta name="theme-color" content="#f5f2ec" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#18160f" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f5f2ec" id="theme-color-meta">
@@ -33,9 +33,8 @@
     <!-- Open Graph / Social Preview -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://epigraph.me/">
-    <meta property="og:title" content="Epigraph — личная коллекция цитат">
-    <meta property="og:description"
-          content="Храните и перечитывайте цитаты, которые вас вдохновляют. Ваша личная библиотека смыслов.">
+    <meta property="og:title" content="Epigraph — ваши цитаты каждый день">
+    <meta property="og:description" content="Ваши цитаты. Каждый день.">
     <meta property="og:image" content="https://epigraph.me/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -44,9 +43,8 @@
 
     <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Epigraph — личная коллекция цитат">
-    <meta name="twitter:description"
-          content="Храните и перечитывайте цитаты, которые вас вдохновляют. Ваша личная библиотека смыслов.">
+    <meta name="twitter:title" content="Epigraph — ваши цитаты каждый день">
+    <meta name="twitter:description" content="Ваши цитаты. Каждый день.">
     <meta name="twitter:image" content="https://epigraph.me/og-image.png">
     <link rel="apple-touch-icon" href="/icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1735,7 +1733,7 @@
             font-size: var(--text-sm);
             color: var(--color-text-muted);
             text-align: center;
-            margin-top: calc(-1 * var(--space-3));
+            margin-top: var(--space-4);
         }
 
         .auth-field {
@@ -1805,13 +1803,164 @@
             background: var(--color-divider);
         }
 
-        .auth-card--register {
-            border-color: var(--color-primary);
-            background: color-mix(in oklch, var(--color-primary) 4%, var(--color-surface));
+        /* Login mode: compact card with branding header */
+        .auth-login-header {
+            margin: calc(-1 * var(--space-8)) calc(-1 * var(--space-8)) 0;
+            padding: var(--space-5) var(--space-8);
+            background: var(--color-surface-offset);
+            border-bottom: 1px solid var(--color-border);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            text-align: center;
         }
 
-        .auth-card--register .auth-title {
+        .auth-login-header-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-family: var(--font-display);
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--space-1);
+        }
+
+        .auth-login-header-logo svg {
             color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .auth-login-tagline {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+            line-height: 1.5;
+        }
+
+        /* Register mode: wide two-column card */
+        .auth-card--register {
+            max-width: 780px;
+            flex-direction: row;
+            padding: 0;
+            overflow: hidden;
+            gap: 0;
+        }
+
+        /* Left decorative panel */
+        .auth-register-panel {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 300px;
+            flex-shrink: 0;
+            background: var(--color-surface-offset);
+            border-right: 1px solid var(--color-border);
+            padding: var(--space-8);
+            border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        }
+
+        .auth-card--register .auth-register-panel {
+            display: flex;
+        }
+
+        .auth-register-panel-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-family: var(--font-display);
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .auth-register-panel-logo svg {
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .auth-register-panel-quotes {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+            flex: 1;
+            justify-content: center;
+            padding: var(--space-8) 0;
+        }
+
+        .auth-register-panel-quote {
+            border-left: 2px solid var(--color-primary);
+            padding-left: var(--space-4);
+        }
+
+        .auth-register-panel-quote p {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: var(--text-sm);
+            color: var(--color-text);
+            line-height: 1.6;
+            margin-bottom: var(--space-1);
+            max-width: none;
+        }
+
+        .auth-register-panel-quote cite {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            font-style: normal;
+        }
+
+        .auth-register-panel-tagline {
+            font-size: var(--text-xs);
+            color: var(--color-text-faint);
+        }
+
+        /* Right form column */
+        .auth-register-form-col {
+            display: none;
+            flex-direction: column;
+            gap: var(--space-5);
+            flex: 1;
+            padding: var(--space-8);
+            min-width: 0;
+        }
+
+        .auth-card--register .auth-register-form-col {
+            display: flex;
+        }
+
+        /* Hide top branding header in register mode (it's in left panel) */
+        .auth-card--register .auth-login-header {
+            display: none !important;
+        }
+
+        /* Register top heading inside form col */
+        .auth-register-top {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .auth-register-heading {
+            font-family: var(--font-display);
+            font-size: var(--text-xl);
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        .auth-register-sub {
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+        }
+
+        /* Hide login-mode elements directly in the card when in register mode */
+        .auth-card--register > .auth-subtitle,
+        .auth-card--register > .auth-field,
+        .auth-card--register > #auth-password-hint,
+        .auth-card--register > .auth-error,
+        .auth-card--register > #auth-submit-btn,
+        .auth-card--register > .auth-divider,
+        .auth-card--register > .btn-google,
+        .auth-card--register > .auth-switch {
+            display: none !important;
         }
 
         .btn-google {
@@ -1892,7 +2041,81 @@
 <!-- AUTH MODAL -->
 <div class="auth-screen" id="auth-screen" onclick="handleAuthOverlayClick(event)">
     <div class="auth-card">
-        <h1 class="auth-title">Epigraph</h1>
+
+        <!-- Login branding header — visible in login mode -->
+        <div class="auth-login-header" id="auth-login-header">
+            <div class="auth-login-header-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                </svg>
+                Epigraph
+            </div>
+            <p class="auth-login-tagline">Ваши цитаты. Каждый день.</p>
+        </div>
+
+        <!-- Register two-column layout — visible in register mode only -->
+        <div class="auth-register-panel" id="auth-register-panel">
+            <div class="auth-register-panel-logo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                </svg>
+                Epigraph
+            </div>
+            <div class="auth-register-panel-quotes">
+                <div class="auth-register-panel-quote">
+                    <p>Не важно, как медленно ты идёшь, главное — не останавливаться.</p>
+                    <cite>— Конфуций</cite>
+                </div>
+                <div class="auth-register-panel-quote">
+                    <p>Жизнь — это то, что происходит, пока ты строишь другие планы.</p>
+                    <cite>— Джон Леннон</cite>
+                </div>
+                <div class="auth-register-panel-quote">
+                    <p>Начало — это половина всего.</p>
+                    <cite>— Аристотель</cite>
+                </div>
+            </div>
+            <p class="auth-register-panel-tagline">Ваши цитаты. Каждый день.</p>
+        </div>
+
+        <div class="auth-register-form-col" id="auth-register-form-col">
+            <div class="auth-register-top">
+                <h2 class="auth-register-heading">Создайте аккаунт</h2>
+                <p class="auth-register-sub">Это бесплатно. Навсегда.</p>
+            </div>
+            <div class="auth-field">
+                <label for="auth-email-reg">Email</label>
+                <input type="email" id="auth-email-reg" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="auth-field">
+                <label for="auth-password-reg">Пароль</label>
+                <input type="password" id="auth-password-reg" placeholder="Минимум 8 символов" autocomplete="new-password">
+            </div>
+            <p id="auth-password-hint-reg" style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-3))">
+                Минимум 8 символов, хотя бы одна буква и одна цифра.
+            </p>
+            <p class="auth-error" id="auth-error-reg"></p>
+            <button class="btn-primary" id="auth-submit-btn-reg" onclick="authSubmitRegister()">Зарегистрироваться</button>
+            <div class="auth-divider">или</div>
+            <button class="btn-google" onclick="loginWithGoogle()">
+                <svg width="18" height="18" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                Войти через Google
+            </button>
+            <p class="auth-switch" style="text-align:center">
+                <span>Уже есть аккаунт?</span>
+                <button onclick="toggleAuthMode()">Войти</button>
+            </p>
+        </div>
+
+        <!-- Shown in login mode only -->
+        <h1 class="auth-title" id="auth-title-logo" style="display:none">Epigraph</h1>
         <p class="auth-subtitle" id="auth-subtitle">Войдите, чтобы продолжить</p>
 
         <div class="auth-field">
@@ -1901,7 +2124,7 @@
         </div>
         <div class="auth-field">
             <label for="auth-password">Пароль</label>
-            <input type="password" id="auth-password" placeholder="Минимум 6 символов" autocomplete="current-password">
+            <input type="password" id="auth-password" placeholder="Ваш пароль" autocomplete="current-password">
         </div>
 
         <p id="auth-password-hint"
@@ -1917,14 +2140,10 @@
 
         <button class="btn-google" onclick="loginWithGoogle()">
             <svg width="18" height="18" viewBox="0 0 48 48">
-                <path fill="#EA4335"
-                      d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4"
-                      d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05"
-                      d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853"
-                      d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             </svg>
             Войти через Google
         </button>
@@ -2758,19 +2977,32 @@
         authMode = authMode === 'login' ? 'register' : 'login';
         const isRegister = authMode === 'register';
 
-        document.getElementById('auth-subtitle').textContent = isRegister
-            ? 'Создайте аккаунт, это бесплатно'
-            : 'Войдите, чтобы продолжить';
         document.getElementById('auth-submit-btn').textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
         document.getElementById('auth-switch-text').textContent = isRegister ? 'Уже есть аккаунт?' : 'Нет аккаунта?';
         document.querySelector('#auth-screen .auth-switch button').textContent = isRegister ? 'Войти' : 'Зарегистрироваться';
         document.getElementById('auth-error').textContent = '';
 
-        // Visual distinction: teal tint on register mode
+        // Toggle card width for register mode
         const card = document.querySelector('.auth-card');
         card.classList.toggle('auth-card--register', isRegister);
 
-        // Show/hide password hint and update placeholder for register mode
+        const loginHeader = document.getElementById('auth-login-header');
+        const registerPanel = document.getElementById('auth-register-panel');
+        const registerFormCol = document.getElementById('auth-register-form-col');
+        const subtitle = document.getElementById('auth-subtitle');
+
+        if (loginHeader) loginHeader.style.display = isRegister ? 'none' : '';
+        if (registerPanel) registerPanel.style.display = isRegister ? '' : 'none';
+        if (registerFormCol) registerFormCol.style.display = isRegister ? '' : 'none';
+        if (subtitle) subtitle.style.display = isRegister ? 'none' : '';
+
+        // Sync email if switching back from register to login
+        if (!isRegister) {
+            const regEmail = document.getElementById('auth-email-reg')?.value.trim();
+            if (regEmail) document.getElementById('auth-email').value = regEmail;
+        }
+
+        // Password field: update hint, placeholder and autocomplete
         const hint = document.getElementById('auth-password-hint');
         const passInput = document.getElementById('auth-password');
 
@@ -2864,6 +3096,28 @@
             btn.disabled = false;
             btn.textContent = authMode === 'register' ? 'Зарегистрироваться' : 'Войти';
         }
+    }
+
+    /**
+     * Handles registration form submission from the register two-column layout.
+     */
+    async function authSubmitRegister() {
+        const email = document.getElementById('auth-email-reg')?.value.trim() || '';
+        const password = document.getElementById('auth-password-reg')?.value || '';
+        const errorEl = document.getElementById('auth-error-reg');
+
+        // Reuse same validation as main form
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        const passRe = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d).{8,}$/;
+        if (!emailRe.test(email)) { if (errorEl) errorEl.textContent = 'Введите корректный email.'; return; }
+        if (!passRe.test(password)) { if (errorEl) errorEl.textContent = 'Минимум 8 символов, буква и цифра.'; return; }
+        if (errorEl) errorEl.textContent = '';
+
+        // Temporarily sync to main fields so existing authSubmit logic works
+        document.getElementById('auth-email').value = email;
+        document.getElementById('auth-password').value = password;
+        authMode = 'register';
+        await authSubmit();
     }
 
     function loginWithGoogle() {
