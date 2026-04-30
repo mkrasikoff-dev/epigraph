@@ -462,6 +462,10 @@
             user-select: none;
             will-change: transform;
             transition: width 300ms ease;
+            touch-action: pan-y;              /* browser handles vertical scroll, JS gets horizontal */
+            -webkit-user-select: none;        /* prevent text selection on iOS during swipe */
+            user-select: none;                /* already present — keep it */
+            -webkit-touch-callout: none;      /* suppress long-press callout menu on iOS */
         }
 
         /* Size modifier classes — width first, font second */
@@ -4467,7 +4471,6 @@
             card.setPointerCapture(e.pointerId);
             card.classList.add('is-dragging');
             card.classList.remove('is-snapping');
-            document.body.classList.add('no-scroll');
         });
 
         card.addEventListener('pointermove', e => {
@@ -4478,7 +4481,6 @@
             // Блокируем свайп если движение больше вертикальное
             if (!pointerLocked && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
                 dragging = false;
-                document.body.classList.remove('no-scroll');
                 snapBack();
                 return;
             }
@@ -4491,7 +4493,6 @@
         card.addEventListener('pointerup', e => {
             if (!dragging) return;
             dragging = false;
-            document.body.classList.remove('no-scroll');
             card.classList.remove('is-dragging');
             if (Math.abs(currentX) >= THRESHOLD) {
                 flyOut(currentX > 0 ? 1 : -1);
@@ -4503,7 +4504,6 @@
         card.addEventListener('pointercancel', () => {
             if (!dragging) return;
             dragging = false;
-            document.body.classList.remove('no-scroll');
             snapBack();
         });
     })();
