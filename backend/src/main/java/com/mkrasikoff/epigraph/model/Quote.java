@@ -29,11 +29,11 @@ public class Quote {
     @Column(length = 3000)
     private String text;
 
-    @Size(max = 255, message = "Author name must not exceed 255 characters")
+    @Size(max = 100, message = "Имя автора не должна превышать 100 символов")
     @Column(length = 255)
     private String author;
 
-    @Size(max = 500, message = "Source must not exceed 500 characters")
+    @Size(max = 200, message = "Длина источника не должна превышать 200 символов")
     @Column(length = 500)
     private String source;
 

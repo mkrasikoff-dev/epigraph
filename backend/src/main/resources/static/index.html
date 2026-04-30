@@ -767,6 +767,7 @@
             align-items: center;
             justify-content: space-between;
             gap: var(--space-2);
+            min-width: 0; /* prevents overflow from breaking flex layout */
         }
 
         .quote-card-author {
@@ -783,11 +784,26 @@
             font-style: italic;
         }
 
+        /* Prevents long author/source from pushing action buttons off-screen */
+        .quote-card-meta > div:first-child {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .quote-card-author,
+        .quote-card-source {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
         .quote-card-actions {
             display: flex;
             gap: var(--space-1);
             opacity: 0;
             transition: opacity var(--transition);
+            flex-shrink: 0;
         }
 
         .quote-card:hover .quote-card-actions {
@@ -2332,11 +2348,13 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="q-author">Автор <span>(необязательно)</span></label>
-                            <input class="form-input" type="text" id="q-author" placeholder="Имя автора">
+                            <input class="form-input" type="text" id="q-author" placeholder="Имя автора" maxlength="100">
+                            <div class="char-counter" id="authorCounter">0 / 100</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="q-source">Источник <span>(необязательно)</span></label>
-                            <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…">
+                            <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…" maxlength="200">
+                            <div class="char-counter" id="sourceCounter">0 / 200</div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -3784,6 +3802,10 @@
         document.getElementById('q-text').value = '';
         document.getElementById('q-author').value = '';
         document.getElementById('q-source').value = '';
+
+        updateInputCounter(document.getElementById('q-author'), 'authorCounter', 100);
+        updateInputCounter(document.getElementById('q-source'), 'sourceCounter', 200);
+
         currentTags = [];
         renderTags();
 
@@ -3915,11 +3937,11 @@
     <div class="edit-form-row">
       <div class="edit-form-group">
         <label for="edit-author">Автор <span>(необязательно)</span></label>
-        <input class="edit-input" type="text" id="edit-author" value="${escHtml(q.author || '')}" placeholder="Имя автора">
+        <input class="edit-input" type="text" id="edit-author" value="${escHtml(q.author || '')}" placeholder="Имя автора" maxlength="100"><div class="char-counter" id="editAuthorCounter">${(q.author || '').length} / 100</div>
       </div>
       <div class="edit-form-group">
         <label for="edit-source">Источник <span>(необязательно)</span></label>
-        <input class="edit-input" type="text" id="edit-source" value="${escHtml(q.source || '')}" placeholder="Книга, фильм, речь...">
+        <input class="edit-input" type="text" id="edit-source" value="${escHtml(q.source || '')}" placeholder="Книга, фильм, речь..." maxlength="200"><div class="char-counter" id="editSourceCounter">${(q.source || '').length} / 200</div>
       </div>
     </div>
     <div class="edit-form-group">
@@ -3949,6 +3971,18 @@
             editQuoteTextArea.addEventListener('input', () => {
                 updateCharCounter(editQuoteTextArea, 'editQuoteTextCounter', 'editQuoteSubmitBtn');
             });
+        }
+
+        const editAuthorInput = document.getElementById('edit-author');
+        if (editAuthorInput) {
+            updateInputCounter(editAuthorInput, 'editAuthorCounter', 100);
+            editAuthorInput.addEventListener('input', () => updateInputCounter(editAuthorInput, 'editAuthorCounter', 100));
+        }
+
+        const editSourceInput = document.getElementById('edit-source');
+        if (editSourceInput) {
+            updateInputCounter(editSourceInput, 'editSourceCounter', 200);
+            editSourceInput.addEventListener('input', () => updateInputCounter(editSourceInput, 'editSourceCounter', 200));
         }
     }
 
@@ -4265,12 +4299,39 @@
         }
     }
 
+    /**
+     * Updates a character counter for a plain text input (no submit button blocking).
+     * @param {HTMLInputElement} input
+     * @param {string} counterId
+     * @param {number} max
+     */
+    function updateInputCounter(input, counterId, max) {
+        const len = input.value.length;
+        const counter = document.getElementById(counterId);
+        if (!counter) return;
+        counter.textContent = `${len} / ${max}`;
+        counter.classList.toggle('is-warning', len >= max * 0.85);
+        counter.classList.toggle('is-over', len >= max);
+    }
+
     // Add form — attach counter
     const quoteTextArea = document.getElementById('q-text');
     if (quoteTextArea) {
         quoteTextArea.addEventListener('input', () => {
             updateCharCounter(quoteTextArea, 'quoteTextCounter', 'addQuoteSubmitBtn');
         });
+    }
+
+    const authorInput = document.getElementById('q-author');
+    if (authorInput) {
+        updateInputCounter(authorInput, 'authorCounter', 100);
+        authorInput.addEventListener('input', () => updateInputCounter(authorInput, 'authorCounter', 100));
+    }
+
+    const sourceInput = document.getElementById('q-source');
+    if (sourceInput) {
+        updateInputCounter(sourceInput, 'sourceCounter', 200);
+        sourceInput.addEventListener('input', () => updateInputCounter(sourceInput, 'sourceCounter', 200));
     }
 
     // =============================================================================
