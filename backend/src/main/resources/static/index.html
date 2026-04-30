@@ -1848,9 +1848,39 @@
             }
         }
 
+        /* App loading overlay — shown on startup, hidden once data is ready */
+        .app-loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: var(--color-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .app-loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .app-loading-spinner {
+            width: 36px;
+            height: 36px;
+            border: 2.5px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+
     </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY — shown on app start until data is ready -->
+<div id="app-loading-overlay" class="app-loading-overlay">
+    <div class="app-loading-spinner"></div>
+</div>
 
 <!-- BLUR OVERLAY -->
 <div id="app-blur-overlay" class="app-blur-overlay" onclick="handleAuthOverlayClick(event)"></div>
@@ -2630,6 +2660,10 @@
         document.getElementById('app-blur-overlay').classList.remove('visible');
     }
 
+    function hideLoadingOverlay() {
+        document.getElementById('app-loading-overlay')?.classList.add('hidden');
+    }
+
     function showGuestMode() {
         isGuest = true;
         quotes = GUEST_QUOTES;
@@ -2643,6 +2677,7 @@
         const accountGroup = document.getElementById('settings-account-group');
         if (accountGroup) accountGroup.style.display = 'none';
         renderQod();
+        hideLoadingOverlay();
     }
 
     function hideGuestMode() {
@@ -4247,6 +4282,7 @@
             hideGuestMode();
             renderQod();
             initNotifications();
+            hideLoadingOverlay();
         } catch (e) {
             console.error('[Init] Failed to load data, falling back to guest mode:', e);
             showGuestMode();
@@ -4399,6 +4435,7 @@
             card.setPointerCapture(e.pointerId);
             card.classList.add('is-dragging');
             card.classList.remove('is-snapping');
+            document.body.classList.add('no-scroll');
         });
 
         card.addEventListener('pointermove', e => {
@@ -4409,6 +4446,7 @@
             // Блокируем свайп если движение больше вертикальное
             if (!pointerLocked && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
                 dragging = false;
+                document.body.classList.remove('no-scroll');
                 snapBack();
                 return;
             }
@@ -4421,6 +4459,7 @@
         card.addEventListener('pointerup', e => {
             if (!dragging) return;
             dragging = false;
+            document.body.classList.remove('no-scroll');
             card.classList.remove('is-dragging');
             if (Math.abs(currentX) >= THRESHOLD) {
                 flyOut(currentX > 0 ? 1 : -1);
@@ -4432,6 +4471,7 @@
         card.addEventListener('pointercancel', () => {
             if (!dragging) return;
             dragging = false;
+            document.body.classList.remove('no-scroll');
             snapBack();
         });
     })();
