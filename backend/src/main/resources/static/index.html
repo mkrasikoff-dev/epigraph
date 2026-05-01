@@ -461,10 +461,10 @@
             user-select: none;
             will-change: transform;
             transition: width 300ms ease;
-            touch-action: pan-y;              /* browser handles vertical scroll, JS gets horizontal */
-            -webkit-user-select: none;        /* prevent text selection on iOS during swipe */
-            user-select: none;                /* already present — keep it */
-            -webkit-touch-callout: none;      /* suppress long-press callout menu on iOS */
+            touch-action: pan-y; /* browser handles vertical scroll, JS gets horizontal */
+            -webkit-user-select: none; /* prevent text selection on iOS during swipe */
+            user-select: none; /* already present — keep it */
+            -webkit-touch-callout: none; /* suppress long-press callout menu on iOS */
         }
 
         /* Size modifier classes — width first, font second */
@@ -1205,8 +1205,34 @@
         }
 
         .tag-input {
-            flex: 1;
-            min-width: 150px;
+            width: 120px;
+            min-width: 60px;
+            max-width: 180px;
+            padding: var(--space-1) var(--space-2);
+            height: auto;
+            font-size: var(--text-xs);
+            line-height: 1.5;
+        }
+
+        .tag-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            padding: var(--space-1) var(--space-3);
+            background: transparent;
+            border: 1.5px solid var(--color-border);
+            color: var(--color-text-muted);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color var(--transition), color var(--transition), background var(--transition);
+        }
+
+        .tag-add-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: var(--color-primary-highlight);
         }
 
         .tag {
@@ -1248,7 +1274,7 @@
             pointer-events: none;
             line-height: 1;
             letter-spacing: 0.02em;
-            opacity: 0.6;
+            opacity: 0;
             background: color-mix(in oklch, var(--color-surface-offset) 85%, transparent);
             padding: 0.15rem 0.3rem;
             border-radius: var(--radius-sm);
@@ -1261,26 +1287,22 @@
             right: calc(var(--space-3));
         }
 
-        .char-counter.is-warning {
-            color: var(--color-gold);
-        }
-
         .form-textarea-wrap:focus-within .char-counter,
         .edit-textarea-wrap:focus-within .char-counter,
         .form-input-wrap:focus-within .char-counter,
         .edit-input-wrap:focus-within .char-counter {
-            opacity: 1;
+            opacity: 0.6;
         }
 
         .char-counter.is-warning {
             color: var(--color-gold);
-            opacity: 1;
+            opacity: 1 !important;
         }
 
         .char-counter.is-over {
             color: #c0392b;
             font-weight: 600;
-            opacity: 1;
+            opacity: 1 !important;
         }
 
         .form-textarea-wrap,
@@ -2131,11 +2153,13 @@
             justify-content: center;
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
+
         .app-loading-overlay.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
+
         .app-loading-spinner {
             width: 36px;
             height: 36px;
@@ -2164,7 +2188,8 @@
         <!-- Login branding header — visible in login mode -->
         <div class="auth-login-header" id="auth-login-header">
             <div class="auth-login-header-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                     <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
                 </svg>
@@ -2176,7 +2201,8 @@
         <!-- Register two-column layout — visible in register mode only -->
         <div class="auth-register-panel" id="auth-register-panel">
             <div class="auth-register-panel-logo">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                     <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
                 </svg>
@@ -2210,20 +2236,27 @@
             </div>
             <div class="auth-field">
                 <label for="auth-password-reg">Пароль</label>
-                <input type="password" id="auth-password-reg" placeholder="Минимум 8 символов" autocomplete="new-password">
+                <input type="password" id="auth-password-reg" placeholder="Минимум 8 символов"
+                       autocomplete="new-password">
             </div>
-            <p id="auth-password-hint-reg" style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-3))">
+            <p id="auth-password-hint-reg"
+               style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:calc(-1*var(--space-3))">
                 Минимум 8 символов, хотя бы одна буква и одна цифра.
             </p>
             <p class="auth-error" id="auth-error-reg"></p>
-            <button class="btn-primary" id="auth-submit-btn-reg" onclick="authSubmitRegister()">Зарегистрироваться</button>
+            <button class="btn-primary" id="auth-submit-btn-reg" onclick="authSubmitRegister()">Зарегистрироваться
+            </button>
             <div class="auth-divider">или</div>
             <button class="btn-google" onclick="loginWithGoogle()">
                 <svg width="18" height="18" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="#EA4335"
+                          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4"
+                          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05"
+                          d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853"
+                          d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                 </svg>
                 Войти через Google
             </button>
@@ -2259,10 +2292,14 @@
 
         <button class="btn-google" onclick="loginWithGoogle()">
             <svg width="18" height="18" viewBox="0 0 48 48">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                <path fill="#EA4335"
+                      d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4"
+                      d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05"
+                      d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853"
+                      d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             </svg>
             Войти через Google
         </button>
@@ -2443,7 +2480,9 @@
                         <label class="form-label" for="q-text">
                             Текст цитаты <span>(обязательно)</span>
                         </label>
-                        <div class="form-textarea-wrap"><textarea class="form-textarea" id="q-text" placeholder="Введите текст цитаты…" maxlength="1000"></textarea>
+                        <div class="form-textarea-wrap"><textarea class="form-textarea" id="q-text"
+                                                                  placeholder="Введите текст цитаты…"
+                                                                  maxlength="1000"></textarea>
                             <div class="char-counter" id="quoteTextCounter">0 / 1000</div>
                         </div>
                     </div>
@@ -2451,24 +2490,24 @@
                         <div class="form-group">
                             <label class="form-label" for="q-author">Автор <span>(необязательно)</span></label>
                             <div class="form-input-wrap">
-                                <input class="form-input" type="text" id="q-author" placeholder="Имя автора" maxlength="100">
+                                <input class="form-input" type="text" id="q-author" placeholder="Имя автора"
+                                       maxlength="100">
                                 <div class="char-counter" id="authorCounter">0 / 100</div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="q-source">Источник <span>(необязательно)</span></label>
                             <div class="form-input-wrap">
-                                <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…" maxlength="200">
+                                <input class="form-input" type="text" id="q-source" placeholder="Книга, фильм, речь…"
+                                       maxlength="200">
                                 <div class="char-counter" id="sourceCounter">0 / 200</div>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="q-tags">Теги <span>(необязательно)</span></label>
+                        <label class="form-label">Теги <span>(необязательно)</span></label>
                         <div class="tag-input-wrap" id="tags-wrap">
-                            <input class="form-input tag-input" type="text" id="q-tags"
-                                   placeholder="философия, мотивация, жизнь — Enter для добавления"
-                                   onkeydown="addTag(event)">
+                            <!-- chips + add-button rendered by renderTags() -->
                         </div>
                     </div>
                     <div class="form-actions">
@@ -3234,8 +3273,14 @@
         // Reuse same validation as main form
         const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
         const passRe = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d).{8,}$/;
-        if (!emailRe.test(email)) { if (errorEl) errorEl.textContent = 'Введите корректный email.'; return; }
-        if (!passRe.test(password)) { if (errorEl) errorEl.textContent = 'Минимум 8 символов, буква и цифра.'; return; }
+        if (!emailRe.test(email)) {
+            if (errorEl) errorEl.textContent = 'Введите корректный email.';
+            return;
+        }
+        if (!passRe.test(password)) {
+            if (errorEl) errorEl.textContent = 'Минимум 8 символов, буква и цифра.';
+            return;
+        }
         if (errorEl) errorEl.textContent = '';
 
         // Temporarily sync to main fields so existing authSubmit logic works
@@ -3370,6 +3415,7 @@
         if (id !== 'qod') document.body.classList.remove('no-scroll');
         if (id === 'list') renderList();
         if (id === 'qod') renderQod();
+        if (id === 'add') renderTags();
         if (id === 'settings') {
             updateSettingsAccount();
             loadAppVersion();
@@ -3726,7 +3772,7 @@
                 // Expand this card
                 card.classList.add('is-expanded');
                 if (hint) hint.textContent = 'Свернуть ↑';
-                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
             }
         });
     }
@@ -3872,6 +3918,13 @@
             return;
         }
 
+        // Flush any active inline tag input before submitting
+        const activeTagInput = document.querySelector('#tags-wrap .tag-input');
+        if (activeTagInput) {
+            const val = activeTagInput.value.trim();
+            if (val && !currentTags.includes(val)) currentTags.push(val);
+        }
+
         const payload = {
             text,
             author: document.getElementById('q-author').value.trim(),
@@ -3920,17 +3973,31 @@
     }
 
     /**
-     * Adds a new tag to the pending tag list when the user presses Enter.
-     * @param {KeyboardEvent} e - The keydown event from the tag input.
+     * Commits the active inline tag input: trims value, adds tag if non-empty,
+     * then switches back to the "+" button state.
+     * @param {HTMLInputElement} input
      */
-    function addTag(e) {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        const val = e.target.value.trim();
-        if (!val || currentTags.includes(val)) return;
-        currentTags.push(val);
-        e.target.value = '';
+    function commitTagInput(input) {
+        if (!input) return;
+        const val = input.value.trim();
+        if (val && !currentTags.includes(val)) {
+            currentTags.push(val);
+        }
+        input.removeEventListener('blur', input._blurHandler);
         renderTags();
+    }
+
+    /**
+     * Shows the inline tag input inside the add-quote form.
+     */
+    function showTagInput() {
+        const wrap = document.getElementById('tags-wrap');
+        // Build from scratch to keep chips intact
+        renderTags(true);
+        const input = wrap.querySelector('.tag-input');
+        if (input) {
+            input.focus();
+        }
     }
 
     /**
@@ -3943,19 +4010,53 @@
     }
 
     /**
-     * Re-renders the tag chips inside the add-quote form.
+     * Re-renders the tag chips + add-button (or inline input) inside the add-quote form.
+     * @param {boolean} [showInput=false] - If true, renders the inline input instead of the + button.
      */
-    function renderTags() {
+    function renderTags(showInput) {
         const wrap = document.getElementById('tags-wrap');
-        const input = document.getElementById('q-tags');
+        if (!wrap) return;
         wrap.innerHTML = '';
+
+        // Render existing chips
         currentTags.forEach(tag => {
             const span = document.createElement('span');
             span.className = 'tag';
-            span.innerHTML = `${escHtml(tag)}<button onclick="removeTag('${escHtml(tag)}')" aria-label="Убрать тег"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+            span.innerHTML = `${escHtml(tag)}<button type="button" onclick="removeTag('${escHtml(tag)}')" aria-label="Убрать тег"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
             wrap.appendChild(span);
         });
-        wrap.appendChild(input);
+
+        if (showInput) {
+            // Inline mini-input
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-input tag-input';
+            input.placeholder = 'тег…';
+            input.maxLength = 50;
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.removeEventListener('blur', input._blurHandler);
+                    commitTagInput(input);
+                } else if (e.key === 'Escape') {
+                    input.removeEventListener('blur', input._blurHandler);
+                    renderTags();
+                }
+            });
+            input._blurHandler = () => commitTagInput(input);
+            input.addEventListener('blur', input._blurHandler);
+            wrap.appendChild(input);
+        } else {
+            // + button
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'tag-add-btn';
+            btn.setAttribute('aria-label', 'Добавить тег');
+            btn.title = 'Добавить тег';
+            btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> тег`;
+            btn.addEventListener('click', () => showTagInput());
+            wrap.appendChild(btn);
+        }
     }
 
     // =============================================================================
@@ -4027,10 +4128,73 @@
      * Uses the existing PUT endpoint via Api.update on save.
      * @param {number|string} id - Quote identifier.
      */
+        // Mutable tag list for the currently open edit modal
+    let editTags = [];
+
+    /**
+     * Re-renders the tag chips + add-button inside the edit modal.
+     * @param {boolean} [showInput=false]
+     */
+    function renderEditTags(showInput) {
+        const wrap = document.getElementById('edit-tags-wrap');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+
+        editTags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.innerHTML = `${escHtml(tag)}<button type="button" onclick="removeEditTag('${escHtml(tag)}')" aria-label="Убрать тег"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+            wrap.appendChild(span);
+        });
+
+        if (showInput) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-input tag-input';
+            input.placeholder = 'тег…';
+            input.maxLength = 50;
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.removeEventListener('blur', input._blurHandler);
+                    const val = input.value.trim();
+                    if (val && !editTags.includes(val)) editTags.push(val);
+                    renderEditTags();
+                } else if (e.key === 'Escape') {
+                    input.removeEventListener('blur', input._blurHandler);
+                    renderEditTags();
+                }
+            });
+            input._blurHandler = () => {
+                const val = input.value.trim();
+                if (val && !editTags.includes(val)) editTags.push(val);
+                renderEditTags();
+            };
+            input.addEventListener('blur', input._blurHandler);
+            wrap.appendChild(input);
+            input.focus();
+        } else {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'tag-add-btn';
+            btn.setAttribute('aria-label', 'Добавить тег');
+            btn.title = 'Добавить тег';
+            btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> тег`;
+            btn.addEventListener('click', () => renderEditTags(true));
+            wrap.appendChild(btn);
+        }
+    }
+
+    function removeEditTag(tag) {
+        editTags = editTags.filter(t => t !== tag);
+        renderEditTags();
+    }
+
     function editQuote(id) {
         const q = quotes.find(q => q.id === id);
         if (!q) return;
         editingId = id;
+        editTags = [...(q.tags || [])];
 
         const body = `
     <div class="edit-form-group">
@@ -4059,8 +4223,8 @@
       </div>
     </div>
     <div class="edit-form-group">
-      <label for="edit-tags">Теги <span>(необязательно)</span></label>
-      <input class="edit-input" type="text" id="edit-tags" value="${escHtml((q.tags || []).join(', '))}" placeholder="философия, мотивация, жизнь">
+      <label>Теги <span>(необязательно)</span></label>
+      <div class="tag-input-wrap" id="edit-tags-wrap"></div>
     </div>
   `;
 
@@ -4098,6 +4262,9 @@
             updateInputCounter(editSourceInput, 'editSourceCounter', 200);
             editSourceInput.addEventListener('input', () => updateInputCounter(editSourceInput, 'editSourceCounter', 200));
         }
+
+        // Render tag chips + add button
+        renderEditTags();
     }
 
     /**
@@ -4118,8 +4285,13 @@
         const q = quotes.find(q => q.id === id);
         if (!q) return;
 
-        const tagsRaw = document.getElementById('edit-tags')?.value || '';
-        const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+        // Flush any active inline input before saving
+        const activeInput = document.querySelector('#edit-tags-wrap .tag-input');
+        if (activeInput) {
+            const val = activeInput.value.trim();
+            if (val && !editTags.includes(val)) editTags.push(val);
+        }
+        const tags = [...editTags];
 
         const payload = {
             ...q,
@@ -4427,6 +4599,9 @@
         counter.classList.toggle('is-warning', len >= max * 0.85);
         counter.classList.toggle('is-over', len >= max);
     }
+
+    // Init tag area (runs once DOM is ready; view-add may be hidden but wrap exists)
+    renderTags();
 
     // Add form — attach counter
     const quoteTextArea = document.getElementById('q-text');
@@ -4759,8 +4934,9 @@
 
     // remove outline from Escape
     document.addEventListener('mousedown', e => {
-        if (e.target.closest('button, [role="button"]')) {
-            e.target.closest('button, [role="button"]').addEventListener(
+        const btn = e.target.closest('button, [role="button"]');
+        if (btn && !btn.classList.contains('tag-add-btn')) {
+            btn.addEventListener(
                 'click', () => document.activeElement?.blur(), {once: true}
             );
         }
