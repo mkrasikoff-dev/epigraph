@@ -334,6 +334,7 @@
         .btn-primary {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: var(--space-2);
             padding: var(--space-2) var(--space-5);
             background: var(--color-primary);
@@ -2026,6 +2027,59 @@
         .auth-card--register > .btn-google,
         .auth-card--register > .auth-switch {
             display: none !important;
+        }
+
+        /* ─── Mobile: registration page ─── */
+        @media (max-width: 639px) {
+
+            /* Center the overlay and reduce padding */
+            .auth-screen {
+                padding: var(--space-3);
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Switch register card back to single-column layout */
+            .auth-card--register {
+                flex-direction: column;
+                max-width: 100%;
+                padding: 0;
+                width: 100%;
+            }
+
+            /* Hide the decorative left panel with quotes on mobile */
+            .auth-card--register .auth-register-panel {
+                display: none !important;
+            }
+
+            /* Form column takes full width */
+            .auth-register-form-col {
+                padding: var(--space-6) !important;
+                gap: var(--space-4) !important;
+            }
+
+            /* Show the top branding header again (since left panel is hidden) */
+            .auth-card--register .auth-login-header {
+                display: block !important;
+                margin: 0;
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+                padding: var(--space-4) var(--space-6);
+            }
+
+            /* Slightly smaller heading on mobile */
+            .auth-register-heading {
+                font-size: var(--text-lg);
+            }
+
+            /* Center heading and subtitle on mobile */
+            .auth-register-top {
+                text-align: center;
+            }
+
+            /* Google button centered */
+            .btn-google {
+                justify-content: center;
+            }
         }
 
         .btn-google {
