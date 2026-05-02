@@ -2,8 +2,8 @@
  * i18n.js — Internationalization dictionary for Epigraph.
  *
  * Usage:
- *   t('key')               — returns the string for the current language
- *   t('key', { n: 5 })     — returns the string with {n} replaced by 5
+ *   t('key') — returns the string for the current language
+ *   t('key', { n: 5 }) — returns the string with {n} replaced by 5
  *
  * To add a new language, duplicate the 'ru' block and translate every value.
  * To switch language at runtime, set window.__epigraphLang and call applyI18n().
@@ -11,7 +11,6 @@
 
 const TRANSLATIONS = {
     ru: {
-
         // ── Auth ──────────────────────────────────────────────────────────────
         authSubtitle:                   'Войдите, чтобы продолжить',
         authSubmitLogin:                'Войти',
@@ -131,7 +130,6 @@ const TRANSLATIONS = {
         toastPushUnsubscribeError:      'Ошибка отключения уведомлений',
         toastPushLoginRequired:         'Войдите в аккаунт для настройки уведомлений',
 
-
         // ── Plural forms ──────────────────────────────────────────────────────────
         pluralQuote1:                   'цитата',
         pluralQuote2:                   'цитаты',
@@ -146,6 +144,7 @@ const TRANSLATIONS = {
         notifInterval6h:                'Каждые 6 часов',
         notifInterval12h:               'Каждые 12 часов',
         notifInterval24h:               'Раз в день',
+
         // ── General ───────────────────────────────────────────────────────────
         toastLoginRequired:             'Войдите в аккаунт для доступа к этому разделу',
         toastError:                     'Ошибка',
@@ -167,14 +166,17 @@ let currentLanguage = localStorage.getItem('epigraph_lang') || 'ru';
 function t(key, variables) {
     const dict = TRANSLATIONS[currentLanguage] || TRANSLATIONS['ru'];
     let string = dict[key];
+
     if (string === undefined) {
         console.warn(`[i18n] Missing translation key: "${key}" for language "${currentLanguage}"`);
         return key;
     }
+
     if (variables) {
         Object.entries(variables).forEach(([placeholder, value]) => {
             string = string.replaceAll(`{${placeholder}}`, value);
         });
     }
+
     return string;
 }
