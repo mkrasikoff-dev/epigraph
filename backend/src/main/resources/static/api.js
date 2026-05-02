@@ -1,0 +1,78 @@
+/**
+ * api.js — Backend communication layer for Epigraph.
+ *
+ * Depends on:
+ *   - API       {string}   — base quotes endpoint constant, defined in index.html
+ *   - authHeaders() {fn}   — returns request headers with auth token, defined in index.html (auth.js in future)
+ *
+ * Exposes a single global object `Api` with methods for CRUD operations on quotes.
+ */
+
+const Api = {
+
+    /**
+     * Fetches all quotes for the authenticated user.
+     * @returns {Promise<Object[]>} Array of raw quote objects from the server.
+     */
+    getAll: () =>
+        fetch(API, { headers: authHeaders() }).then(r => r.json()),
+
+    /**
+     * Creates a new quote on the backend.
+     * @param {Object} payload - Quote data (text, author, source, tags, fav, added).
+     * @returns {Promise<Response>}
+     */
+    create: (payload) =>
+        fetch(API, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(payload)
+        }),
+
+    /**
+     * Updates an existing quote by ID.
+     * @param {number|string} id - Quote identifier.
+     * @param {Object} payload - Updated quote data.
+     * @returns {Promise<Response>}
+     */
+    update: (id, payload) =>
+        fetch(`${API}/${id}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify(payload)
+        }),
+
+    /**
+     * Deletes a single quote by ID.
+     * @param {number|string} id - Quote identifier.
+     * @returns {Promise<Response>}
+     */
+    delete: (id) =>
+        fetch(`${API}/${id}`, { method: 'DELETE', headers: authHeaders() }),
+
+    /**
+     * Deletes all quotes for the authenticated user.
+     * @returns {Promise<Response>}
+     */
+    deleteAll: () =>
+        fetch(API, { method: 'DELETE', headers: authHeaders() })
+
+};
+
+/**
+ * Loads all user quotes from the backend and normalises their tags from a CSV
+ * string into an array. On failure, resets the local quotes array.
+ * @returns {Promise<void>}
+ */
+async function loadData() {
+    try {
+        const rawQuotes = await Api.getAll();
+        quotes = rawQuotes.map(q => ({
+            ...q,
+            tags: q.tags ? q.tags.split(',').filter(Boolean) : []
+        }));
+    } catch (e) {
+        console.error('Ошибка загрузки:', e);
+        quotes = [];
+    }
+}
