@@ -655,6 +655,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script src="/i18n.js"></script>
+<script src="/api.js"></script>
 <script>
 
     // =============================================================================
@@ -1186,38 +1187,6 @@
     // Overlay click closes modal block
     function handleAuthOverlayClick(e) {
         if (e.target === document.getElementById('auth-screen')) hideAuthModal();
-    }
-
-    // =============================================================================
-    // DATA / API
-    // Backend communication layer and initial data loading.
-    // =============================================================================
-
-    const Api = {
-        getAll: () => fetch(API, {headers: authHeaders()}).then(r => r.json()),
-        create: (payload) => fetch(API, {method: 'POST', headers: authHeaders(), body: JSON.stringify(payload)}),
-        update: (id, payload) => fetch(`${API}/${id}`, {
-            method: 'PUT',
-            headers: authHeaders(),
-            body: JSON.stringify(payload)
-        }),
-        delete: (id) => fetch(`${API}/${id}`, {method: 'DELETE', headers: authHeaders()}),
-        deleteAll: () => fetch(API, {method: 'DELETE', headers: authHeaders()})
-    };
-
-    /**
-     * Loads all user quotes from the backend and normalises their tags from a CSV
-     * string into an array. On failure, resets the local quotes array.
-     * @returns {Promise<void>}
-     */
-    async function loadData() {
-        try {
-            const rawQuotes = await Api.getAll();
-            quotes = rawQuotes.map(q => ({...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : []}));
-        } catch (e) {
-            console.error('Ошибка загрузки:', e);
-            quotes = [];
-        }
     }
 
     // =============================================================================
