@@ -2,34 +2,33 @@
  * quotes.js — Quote rendering, list, sort, favorites, add/edit/delete, and import/export for Epigraph.
  *
  * Depends on:
- *   - quotes           {Array}    — global mutable quotes array, defined in index.html CONSTANTS
- *   - currentFilter    {string}   — defined in index.html CONSTANTS
- *   - currentSort      {string}   — defined in index.html CONSTANTS
- *   - currentQodIndex  {number}   — defined in index.html CONSTANTS
- *   - editingId        {number}   — defined in index.html CONSTANTS
- *   - QOD_ANIMATION_DEBOUNCE_MS  {number} — defined in index.html CONSTANTS
- *   - FAVORITE_RERENDER_DELAY_MS {number} — defined in index.html CONSTANTS
- *   - GUEST_QUOTES     {Array}    — defined in index.html CONSTANTS
- *   - isGuest          {boolean}  — defined in auth.js
- *   - currentTags      {Array}    — defined in tags.js
- *   - Api              {Object}   — defined in api.js
- *   - renderTags()     {fn}       — defined in tags.js
- *   - renderEditTags() {fn}       — defined in tags.js
- *   - escHtml()        {fn}       — defined in index.html UTILITIES
- *   - formatQuoteAsText() {fn}    — defined in index.html UTILITIES
- *   - showModal()      {fn}       — defined in index.html MODAL
- *   - closeModal()     {fn}       — defined in index.html MODAL
- *   - toast()          {fn}       — defined in index.html TOAST
- *   - updateCharCounter()  {fn}   — defined in index.html UTILITIES
- *   - updateInputCounter() {fn}   — defined in index.html UTILITIES
- *   - t()              {fn}       — defined in i18n.js
+ * - quotes           {Array}    — global mutable quotes array, defined in index.html CONSTANTS
+ * - currentFilter    {string}   — defined in index.html CONSTANTS
+ * - currentSort      {string}   — defined in index.html CONSTANTS
+ * - currentQodIndex  {number}   — defined in index.html CONSTANTS
+ * - editingId        {number}   — defined in index.html CONSTANTS
+ * - QOD_ANIMATION_DEBOUNCE_MS  {number} — defined in index.html CONSTANTS
+ * - FAVORITE_RERENDER_DELAY_MS {number} — defined in index.html CONSTANTS
+ * - GUEST_QUOTES     {Array}    — defined in index.html CONSTANTS
+ * - isGuest          {boolean}  — defined in auth.js
+ * - currentTags      {Array}    — defined in tags.js
+ * - Api              {Object}   — defined in api.js
+ * - renderTags()     {fn}       — defined in tags.js
+ * - renderEditTags() {fn}       — defined in tags.js
+ * - escHtml()        {fn}       — defined in index.html UTILITIES
+ * - formatQuoteAsText() {fn}    — defined in index.html UTILITIES
+ * - showModal()      {fn}       — defined in index.html MODAL
+ * - closeModal()     {fn}       — defined in index.html MODAL
+ * - toast()          {fn}       — defined in index.html TOAST
+ * - updateCharCounter()  {fn}   — defined in index.html UTILITIES
+ * - updateInputCounter() {fn}   — defined in index.html UTILITIES
+ * - t()              {fn}       — defined in i18n.js
  */
 
 // =============================================================================
 // QUOTE OF THE DAY
 // Rendering, randomisation, copying, and favouriting for the QoD section.
 // =============================================================================
-
 /**
  * Returns a stable index for the Quote of the Day.
  * The selected quote id is persisted in sessionStorage keyed by today's date.
@@ -81,6 +80,7 @@ function renderQod(overrideIdx) {
         setQodActionsDisabled(true);
         return;
     }
+
     setQodActionsDisabled(false);
     const idx = overrideIdx !== undefined ? overrideIdx : getQodQuoteIndex();
     currentQodIndex = idx;
@@ -91,6 +91,7 @@ function renderQod(overrideIdx) {
     const textEl = document.getElementById('qod-text');
     textEl.style.opacity = '0';
     textEl.style.transform = 'translateY(6px)';
+
     setTimeout(() => {
         textEl.textContent = q.text;
         applyQodAdaptiveSize(q.text);
@@ -100,12 +101,15 @@ function renderQod(overrideIdx) {
         textEl.style.opacity = '1';
         textEl.style.transform = 'translateY(0)';
         updateFavQodButton();
+
         document.fonts.ready.then(() => {
             const section = document.querySelector('.qod-section');
             const fits = section.getBoundingClientRect().height <= (window.innerHeight - 57) + 2;
             document.body.classList.toggle('no-scroll', fits);
         });
+
     }, QOD_ANIMATION_DEBOUNCE_MS);
+
     document.getElementById('qod-progress').textContent = isGuest ? '' : t('qodProgress', {current: idx + 1, total: quotes.length});
 }
 
@@ -130,6 +134,7 @@ function applyQodAdaptiveSize(text) {
         {cls: 'qod-size-long', px: 960},
         {cls: 'qod-size-very-long', px: 1100},
     ];
+
     const fontSizes = [3.4, 2.8, 2.2, 1.8, 1.5];
 
     let chosenWidth = widths[widths.length - 1];
@@ -151,6 +156,7 @@ function applyQodAdaptiveSize(text) {
 
     const minFontSize = (chosenFont * 0.72).toFixed(2);
     const midFontSize = (chosenFont * 0.55).toFixed(2);
+
     el.style.fontSize = `clamp(${minFontSize}rem, ${midFontSize}rem + 2vw, ${chosenFont}rem)`;
 }
 
@@ -164,9 +170,12 @@ function setQodActionsDisabled(disabled) {
         {selector: '.qod-actions .btn-secondary:not(#btn-fav-qod)', msg: 'Сначала добавьте хотя бы одну цитату'},
         {selector: '#btn-fav-qod', msg: 'Сначала добавьте хотя бы одну цитату'},
     ];
+
     actions.forEach(({selector, msg}) => {
         const btn = document.querySelector(selector);
+
         if (!btn) return;
+
         if (disabled) {
             btn.dataset.disabledMsg = msg;
             btn.dataset.originalOnclick = btn.getAttribute('onclick') || '';
@@ -176,6 +185,7 @@ function setQodActionsDisabled(disabled) {
             if (btn.dataset.originalOnclick !== undefined) {
                 btn.setAttribute('onclick', btn.dataset.originalOnclick);
             }
+
             btn.classList.remove('btn-disabled-empty');
         }
     });
@@ -186,10 +196,13 @@ function setQodActionsDisabled(disabled) {
  */
 function randomQuote() {
     if (!quotes.length) return;
+
     let idx;
+
     do {
         idx = Math.floor(Math.random() * quotes.length);
     } while (idx === currentQodIndex && quotes.length > 1);
+
     renderQod(idx);
 }
 
@@ -200,6 +213,7 @@ function copyQod() {
     const q = quotes[currentQodIndex];
     if (!q) return;
     const text = formatQuoteAsText(q);
+
     navigator.clipboard.writeText(text)
         .then(() => toast(t('toastCopied')))
         .catch(() => toast(t('toastCopyError')));
@@ -214,9 +228,11 @@ async function favQod() {
         toast(t('toastLoginRequired'));
         return;
     }
+
     const q = quotes[currentQodIndex];
     if (!q) return;
     q.fav = !q.fav;
+
     try {
         await Api.update(q.id, {...q, tags: (q.tags || []).join(',')});
         updateFavQodButton();
@@ -232,7 +248,9 @@ async function favQod() {
 function updateFavQodButton() {
     const q = quotes[currentQodIndex];
     const btn = document.getElementById('btn-fav-qod');
+
     if (!btn || !q) return;
+
     const isFav = !!q.fav;
     btn.innerHTML = `
     <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" style="color:${isFav ? 'var(--color-gold)' : 'inherit'}">
@@ -247,15 +265,16 @@ function updateFavQodButton() {
 // QUOTES LIST
 // Filtering, search, and rendering for the list-of-all-quotes view.
 // =============================================================================
-
 /**
  * Renders the list view, applying the current search query and filter.
  */
 function renderList() {
     const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
     let filteredQuotes = quotes.filter(q => {
         if (currentFilter === 'fav' && !q.fav) return false;
         if (!query) return true;
+
         return (q.text + ' ' + (q.author || '') + ' ' + (q.source || '') + ' ' + (q.tags || []).join(' ')).toLowerCase().includes(query);
     });
 
@@ -264,6 +283,7 @@ function renderList() {
     const grid = document.getElementById('quotes-grid');
     const total = quotes.length;
     const favCount = quotes.filter(q => q.fav).length;
+
     document.getElementById('stats-bar').innerHTML =
         `<span>${t('statsTotal', {total: `<strong>${total}</strong>`})}</span><span>${t('statsFavorites', {count: `<strong>${favCount}</strong>`})}</span>`;
 
@@ -317,6 +337,7 @@ function markClippedCards() {
     document.querySelectorAll('.quote-card-text').forEach(el => {
         const wrap = el.closest('.quote-card-text-wrap');
         if (!wrap) return;
+
         wrap.classList.toggle('is-clipped', el.scrollHeight > el.clientHeight + 2);
     });
 }
@@ -352,8 +373,11 @@ function initExpandableCards() {
                 const h = c.querySelector('.quote-card-expand-hint');
                 if (h) h.textContent = t('expandHintOpen');
             });
+
             card.classList.add('is-expanded');
+
             if (hint) hint.textContent = t('expandHintClose');
+
             card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
         }
     });
@@ -375,7 +399,6 @@ function setFilter(filter, btn) {
 // SORT DROPDOWN
 // Custom pill-style sort control: open/close, selection, and persistence.
 // =============================================================================
-
 const SORT_LABELS = {
     date_desc: t('sortDateDesc'),
     date_asc: t('sortDateAsc'),
@@ -390,6 +413,7 @@ function toggleSortMenu() {
     const btn = document.getElementById('sort-btn');
     const menu = document.getElementById('sort-menu');
     const isOpen = menu.classList.contains('open');
+
     if (isOpen) {
         closeSortMenu();
     } else {
@@ -417,6 +441,7 @@ function closeSortMenu() {
  */
 function selectSort(value) {
     currentSort = value;
+
     try {
         localStorage.setItem('epigraph_sort', value);
     } catch (e) {
@@ -458,6 +483,7 @@ document.addEventListener('click', e => {
     if (!document.getElementById('sort-dropdown')?.contains(e.target)) {
         closeSortMenu();
     }
+
     if (!document.getElementById('notif-interval-dropdown')?.contains(e.target)) {
         closeNotifIntervalMenu();
     }
@@ -496,6 +522,7 @@ async function addQuote(e) {
     }
 
     const activeTagInput = document.querySelector('#tags-wrap .tag-input');
+
     if (activeTagInput) {
         const val = activeTagInput.value.trim();
         if (val && !currentTags.includes(val)) currentTags.push(val);
@@ -545,6 +572,7 @@ function resetForm() {
     renderTags();
 
     const textarea = document.getElementById('q-text');
+
     if (textarea) updateCharCounter(textarea, 'quoteTextCounter', 'addQuoteSubmitBtn');
 }
 
@@ -562,6 +590,7 @@ async function toggleFav(id) {
     const q = quotes.find(q => q.id === id);
     if (!q) return;
     q.fav = !q.fav;
+
     try {
         await Api.update(id, {...q, tags: (q.tags || []).join(',')});
 
@@ -573,12 +602,14 @@ async function toggleFav(id) {
 
         const favCount = quotes.filter(q => q.fav).length;
         const statsBar = document.getElementById('stats-bar');
+
         if (statsBar) {
             statsBar.innerHTML = `<span>${t('statsTotal', {total: `<strong>${quotes.length}</strong>`})}</span><span>${t('statsFavorites', {count: `<strong>${favCount}</strong>`})}</span>`;
         }
 
         if (currentFilter === 'fav' && !q.fav) {
             const card = btn.closest('.quote-card');
+
             if (card) {
                 card.style.transition = 'opacity 0.2s, transform 0.2s';
                 card.style.opacity = '0';
@@ -712,6 +743,7 @@ async function saveEditQuote() {
         const val = activeInput.value.trim();
         if (val && !editTags.includes(val)) editTags.push(val);
     }
+
     const tags = [...editTags];
 
     const payload = {
@@ -724,10 +756,12 @@ async function saveEditQuote() {
 
     try {
         const res = await Api.update(id, payload);
+
         if (!res.ok) {
             toast(t('toastQuoteUpdateError'), 'error');
             return;
         }
+
         Object.assign(q, {...payload, tags});
         closeModal();
         editingId = null;
@@ -746,6 +780,7 @@ async function saveEditQuote() {
 async function deleteQuote(id) {
     const q = quotes.find(q => q.id === id);
     if (!q) return;
+
     showModal(
         t('deleteModalTitle'),
         `<div class="modal-quote-text">${escHtml(q.text)}</div><div class="modal-quote-author">${escHtml(q.author || '')}</div>${t('deleteModalCannotUndo')}`,
@@ -779,13 +814,18 @@ async function deleteQuote(id) {
 async function importJSON(e) {
     const file = e.target.files[0];
     if (!file) return;
+
     try {
         const text = await file.text();
         const data = JSON.parse(text);
+
         if (!Array.isArray(data)) throw new Error(t('importExpectedArray'));
+
         let added = 0;
+
         for (const item of data) {
             if (!item.text) continue;
+
             const payload = {
                 text: item.text,
                 author: item.author || '',
@@ -794,6 +834,7 @@ async function importJSON(e) {
                 fav: false,
                 added: Date.now()
             };
+
             const res = await Api.create(payload);
             const saved = await res.json();
             saved.tags = saved.tags ? saved.tags.split(',').filter(Boolean) : [];
@@ -825,8 +866,10 @@ function exportJSON() {
 function copyAll() {
     const text = quotes.map(q => formatQuoteAsText(q)).join('\n\n');
     const btn = document.getElementById('copy-all-btn');
+
     navigator.clipboard.writeText(text).then(() => {
         toast(t('toastCopied'));
+
         if (btn) {
             const original = btn.innerHTML;
             btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> ${t('copiedButtonLabel')}`;

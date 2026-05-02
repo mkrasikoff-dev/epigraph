@@ -2,8 +2,8 @@
  * api.js — Backend communication layer for Epigraph.
  *
  * Depends on:
- *   - API       {string}   — base quotes endpoint constant, defined in index.html
- *   - authHeaders() {fn}   — returns request headers with auth token, defined in index.html (auth.js in future)
+ * - API {string} — base quotes endpoint constant, defined in index.html
+ * - authHeaders() {fn} — returns request headers with auth token, defined in index.html (auth.js in future)
  *
  * Exposes a single global object `Api` with methods for CRUD operations on quotes.
  */
@@ -61,7 +61,7 @@ const Api = {
 
 /**
  * Loads all user quotes from the backend and normalises their tags from a CSV
- * string into an array. On failure, resets the local quotes array.
+ * string into an array. On failure, the function resets the local quotes array.
  * @returns {Promise<void>}
  */
 async function loadData() {

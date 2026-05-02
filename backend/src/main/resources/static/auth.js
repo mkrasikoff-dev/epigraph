@@ -2,21 +2,20 @@
  * auth.js — Authentication state and UI for Epigraph.
  *
  * Depends on:
- *   - GUEST_QUOTES     {Array}    — preset quotes for guest mode, defined in index.html CONSTANTS
- *   - quotes           {Array}    — global mutable quotes array, defined in index.html CONSTANTS
- *   - currentQodIndex  {number}   — defined in index.html CONSTANTS
- *   - loadData()       {fn}       — defined in api.js
- *   - renderQod()      {fn}       — defined in quotes.js
- *   - switchView()     {fn}       — defined in index.html NAVIGATION
- *   - t()              {fn}       — defined in i18n.js
- *   - AUTH_API         {string}   — defined in index.html CONSTANTS
+ * - GUEST_QUOTES     {Array}    — preset quotes for guest mode, defined in index.html CONSTANTS
+ * - quotes           {Array}    — global mutable quotes array, defined in index.html CONSTANTS
+ * - currentQodIndex  {number}   — defined in index.html CONSTANTS
+ * - loadData()       {fn}       — defined in api.js
+ * - renderQod()      {fn}       — defined in quotes.js
+ * - switchView()     {fn}       — defined in index.html NAVIGATION
+ * - t()              {fn}       — defined in i18n.js
+ * - AUTH_API         {string}   — defined in index.html CONSTANTS
  */
 
 // =============================================================================
 // AUTH STATE
 // JWT token stored in localStorage, helpers to read/write/clear it.
 // =============================================================================
-
 function getToken() {
     try {
         return localStorage.getItem('epigraph_token');
@@ -50,7 +49,6 @@ function authHeaders() {
 // AUTH UI
 // The block responsible for authentication screens, modes, and session flow.
 // =============================================================================
-
 let authMode = 'login';
 let isGuest = true;
 
@@ -71,22 +69,29 @@ function hideLoadingOverlay() {
 function showGuestMode() {
     isGuest = true;
     quotes = GUEST_QUOTES;
+
     document.getElementById('logout-btn').style.display = 'none';
     document.getElementById('login-btn').style.display = '';
+
     ['list', 'add', 'settings'].forEach(id => {
         document.getElementById('tab-' + id)?.classList.add('guest-locked');
         document.getElementById('btn-fav-qod')?.classList.add('guest-locked');
     });
+
     const accountGroup = document.getElementById('settings-account-group');
+
     if (accountGroup) accountGroup.style.display = 'none';
+
     renderQod();
     hideLoadingOverlay();
 }
 
 function hideGuestMode() {
     isGuest = false;
+
     document.getElementById('logout-btn').style.display = '';
     document.getElementById('login-btn').style.display = 'none';
+
     ['list', 'add', 'settings'].forEach(id => {
         document.getElementById('tab-' + id)?.classList.remove('guest-locked');
         document.getElementById('btn-fav-qod')?.classList.remove('guest-locked');
@@ -110,6 +115,7 @@ function updateSettingsAccount() {
 
     const total = quotes.length;
     const favCount = quotes.filter(q => q.fav).length;
+
     document.getElementById('settings-account-stats').textContent =
         t('statsSummary', {total, word: pluralQuotes(total), favorites: favCount});
 }
@@ -120,9 +126,11 @@ function updateSettingsAccount() {
  */
 async function loadAppVersion() {
     const badge = document.getElementById('settings-version-badge');
+
     if (!badge) return;
 
     const cached = sessionStorage.getItem('epigraph_version');
+
     if (cached) {
         badge.textContent = cached;
         return;
@@ -130,7 +138,9 @@ async function loadAppVersion() {
 
     try {
         const response = await fetch('https://api.github.com/repos/mkrasikoff/epigraph/releases/latest');
+
         if (!response.ok) throw new Error('Failed to fetch release');
+
         const data = await response.json();
         const version = data.tag_name || 'v—';
         sessionStorage.setItem('epigraph_version', version);
@@ -148,8 +158,10 @@ async function loadAppVersion() {
 function pluralQuotes(n) {
     const mod10 = n % 10;
     const mod100 = n % 100;
+
     if (mod10 === 1 && mod100 !== 11) return t('pluralQuote1');
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return t('pluralQuote2');
+
     return t('pluralQuote5');
 }
 
@@ -247,11 +259,14 @@ async function authSubmit() {
                 errorEl.textContent = data.password;
                 return;
             }
+
             if (data.email) {
                 errorEl.textContent = t('authErrorInvalidEmailServer');
                 return;
             }
+
             errorEl.textContent = data.message || t('authErrorWrongCredentials');
+
             return;
         }
 
@@ -284,15 +299,18 @@ async function authSubmitRegister() {
         if (errorEl) errorEl.textContent = t('authErrorInvalidEmailDot');
         return;
     }
+
     if (!passwordRegex.test(password)) {
         if (errorEl) errorEl.textContent = t('authErrorPasswordPattern');
         return;
     }
+
     if (errorEl) errorEl.textContent = '';
 
     document.getElementById('auth-email').value = email;
     document.getElementById('auth-password').value = password;
     authMode = 'register';
+
     await authSubmit();
 }
 
