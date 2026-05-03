@@ -18,6 +18,15 @@ const Api = {
         fetch(API, { headers: authHeaders() }).then(r => r.json()),
 
     /**
+     * Fetches the Quote of the Day for the authenticated user from the backend.
+     * The backend is the single source of truth for QoD selection (Europe/Moscow date).
+     * @returns {Promise<Object|null>} Raw quote object, or null when the user has no quotes.
+     */
+    getQod: () =>
+        fetch(`${API}/qod`, { headers: authHeaders() })
+            .then(r => r.status === 204 ? null : r.json()),
+
+    /**
      * Creates a new quote on the backend.
      * @param {Object} payload - Quote data (text, author, source, tags, fav, added).
      * @returns {Promise<Response>}

@@ -79,7 +79,7 @@ function switchView(id) {
 
     if (id !== 'qod') document.body.classList.remove('no-scroll');
     if (id === 'list') renderList();
-    if (id === 'qod') renderQod();
+    if (id === 'qod') loadQod();
     if (id === 'add') renderTags();
     if (id === 'settings') {
         updateSettingsAccount();

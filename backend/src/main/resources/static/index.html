@@ -929,7 +929,10 @@
             const rawQuotes = await res.json();
             quotes = rawQuotes.map(q => ({...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : []}));
             hideGuestMode();
-            renderQod();
+
+            // Fetch QoD from backend — single source of truth.
+            await loadQod();
+
             initNotifications();
             hideLoadingOverlay();
         } catch (e) {

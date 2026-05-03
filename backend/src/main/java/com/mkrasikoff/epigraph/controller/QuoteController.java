@@ -43,9 +43,19 @@ public class QuoteController {
 
     @GetMapping("/qod")
     public ResponseEntity<Quote> getQod(@AuthenticationPrincipal Long userId) {
+        log.info("Fetching QOD for user");
+
         return service.getQod(userId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
+                .map(quote -> {
+                    log.info("QOD resolved: quoteId = {}", quote.getId());
+
+                    return ResponseEntity.ok(quote);
+                })
+                .orElseGet(() -> {
+                    log.info("No quotes found for user, returning 204");
+
+                    return ResponseEntity.noContent().build();
+                });
     }
 
     @PostMapping
