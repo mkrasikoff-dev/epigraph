@@ -5,15 +5,19 @@
 (function () {
     const themeToggleBtn = document.querySelector('[data-theme-toggle]');
     const htmlElement = document.documentElement;
+
     let currentTheme = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+
     try {
         const s = localStorage.getItem('theme');
         if (s) currentTheme = s;
     } catch (e) {
     }
+
     htmlElement.setAttribute('data-theme', currentTheme);
     updateThemeIcon(themeToggleBtn, currentTheme);
     updateThemeColorMeta(currentTheme);
+
     themeToggleBtn && themeToggleBtn.addEventListener('click', () => {
         currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
         htmlElement.setAttribute('data-theme', currentTheme);
@@ -32,6 +36,7 @@
      */
     function updateThemeIcon(btn, mode) {
         if (!btn) return;
+
         if (mode === 'dark') {
             btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
             btn.setAttribute('aria-label', 'Переключить на светлую тему');
@@ -56,7 +61,6 @@ function updateThemeColorMeta(mode) {
 // NAVIGATION
 // Logic for switching between the main application views.
 // =============================================================================
-
 /**
  * Switches the currently active view and tab, and triggers per-view rendering.
  * For quests block everyting except qod
@@ -98,7 +102,6 @@ function goToImport() {
 // MODAL
 // Modal dialog show/close helpers and overlay-click handling.
 // =============================================================================
-
 /**
  * Shows the shared modal dialog with the given title, body, and action buttons.
  * @param {string} title - Modal heading text.
@@ -110,6 +113,7 @@ function showModal(title, body, actions) {
     document.getElementById('modal-body').innerHTML = body;
     const actEl = document.getElementById('modal-actions');
     actEl.innerHTML = '';
+
     actions.forEach(a => {
         const btn = document.createElement('button');
         btn.className = a.cls;
@@ -119,6 +123,7 @@ function showModal(title, body, actions) {
         btn.addEventListener('click', a.action);
         actEl.appendChild(btn);
     });
+
     document.getElementById('modal').classList.add('open');
 }
 
@@ -145,6 +150,7 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('modal').classList.contains('open')) {
         closeModal();
     }
+
     // close login modal
     if (document.getElementById('auth-screen').classList.contains('visible')) {
         hideAuthModal();
@@ -157,7 +163,6 @@ document.addEventListener('keydown', e => {
 // TOAST
 // Transient notification helper.
 // =============================================================================
-
 /**
  * Displays a transient toast notification at the bottom-right of the screen.
  * @param {string} msg - Message to display.
@@ -166,10 +171,12 @@ document.addEventListener('keydown', e => {
 function toast(msg, type) {
     const wrap = document.getElementById('toast-wrap');
     const el = document.createElement('div');
+
     el.className = 'toast' + (type === 'error' ? ' toast--error' : '');
     el.textContent = msg;
     wrap.appendChild(el);
     requestAnimationFrame(() => el.classList.add('show'));
+
     setTimeout(() => {
         el.classList.remove('show');
         setTimeout(() => el.remove(), TOAST_FADE_DURATION_MS);
@@ -180,7 +187,6 @@ function toast(msg, type) {
 // UTILITIES
 // Small shared helpers used across multiple sections.
 // =============================================================================
-
 /**
  * Formats a quote object into a plain-text string suitable for copying.
  * Format: "text\n— author, «source»"
@@ -189,8 +195,10 @@ function toast(msg, type) {
  */
 function formatQuoteAsText(quote) {
     let result = quote.text;
+
     if (quote.author) result += '\n— ' + quote.author;
     if (quote.source) result += '\n«' + quote.source + '»';
+
     return result;
 }
 
@@ -220,12 +228,15 @@ function updateCharCounter(textarea, counterId, submitBtnId) {
     if (len > QUOTE_MAX_LENGTH) {
         counter.classList.add('is-over');
         if (submitBtn) submitBtn.disabled = true;
-    } else if (len === QUOTE_MAX_LENGTH) {
+    }
+    else if (len === QUOTE_MAX_LENGTH) {
         counter.classList.add('is-over');
-    } else if (len >= QUOTE_WARN_THRESHOLD) {
+    }
+    else if (len >= QUOTE_WARN_THRESHOLD) {
         counter.classList.add('is-warning');
         if (submitBtn) submitBtn.disabled = false;
-    } else {
+    }
+    else {
         if (submitBtn) submitBtn.disabled = false;
     }
 }
@@ -239,7 +250,9 @@ function updateCharCounter(textarea, counterId, submitBtnId) {
 function updateInputCounter(input, counterId, max) {
     const len = input.value.length;
     const counter = document.getElementById(counterId);
+
     if (!counter) return;
+
     counter.textContent = `${len} / ${max}`;
     counter.classList.toggle('is-warning', len >= max * 0.85);
     counter.classList.toggle('is-over', len >= max);

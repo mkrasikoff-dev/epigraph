@@ -4,7 +4,6 @@
 // Requires: VAPID keys on backend, HTTPS, and browser Notification permission.
 // iOS: only works when app is installed via Safari → Share → "На экран «Домой»".
 // =============================================================================
-
 /**
  * Converts a base64url VAPID public key string to a Uint8Array
  * required by pushManager.subscribe().
@@ -13,6 +12,7 @@ function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawData = atob(base64);
+
     return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
 }
 
@@ -22,6 +22,7 @@ function urlBase64ToUint8Array(base64String) {
  */
 async function getSwRegistration() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+
     try {
         const reg = await navigator.serviceWorker.register('/sw.js');
         await navigator.serviceWorker.ready;
@@ -37,6 +38,7 @@ async function getSwRegistration() {
  */
 async function getCurrentPushSubscription() {
     const reg = await navigator.serviceWorker?.getRegistration('/sw.js');
+
     return reg ? reg.pushManager.getSubscription() : null;
 }
 
@@ -50,6 +52,7 @@ async function getCurrentPushSubscription() {
  */
 async function subscribeToPush(intervalHours) {
     const reg = await getSwRegistration();
+
     if (!reg) {
         toast(t('toastPushNotSupported'));
         document.getElementById('notif-toggle').checked = false;
@@ -119,6 +122,7 @@ async function subscribeToPush(intervalHours) {
 async function unsubscribeFromPush() {
     try {
         const sub = await getCurrentPushSubscription();
+
         if (sub) {
             const endpoint = sub.endpoint;
             await sub.unsubscribe();
@@ -128,6 +132,7 @@ async function unsubscribeFromPush() {
                 body: JSON.stringify({endpoint})
             });
         }
+
         updateNotifUI(false);
         toast(t('toastPushDisabled'));
     } catch (e) {
@@ -163,6 +168,7 @@ function toggleNotifIntervalMenu() {
     const btn = document.getElementById('notif-interval-btn');
     const menu = document.getElementById('notif-interval-menu');
     const isOpen = menu.classList.contains('open');
+
     if (isOpen) {
         closeNotifIntervalMenu();
     } else {
@@ -188,10 +194,13 @@ function closeNotifIntervalMenu() {
 function selectNotifInterval(el) {
     const value = el.dataset.value;
     const label = document.getElementById('notif-interval-label');
+
     if (label) label.textContent = el.textContent.trim();
+
     document.querySelectorAll('#notif-interval-menu .sort-menu-item').forEach(item => {
         item.classList.toggle('active', item === el);
     });
+
     closeNotifIntervalMenu();
     handleNotifIntervalChange(value);
 }
@@ -235,7 +244,9 @@ async function initNotifications() {
     if (isIOS && !isStandalone) {
         // iOS Safari: push doesn't work without PWA — show hint, disable toggle
         if (iosHint) iosHint.style.display = '';
+
         const toggle = document.getElementById('notif-toggle');
+
         if (toggle) {
             toggle.disabled = true;
             toggle.closest('label').style.opacity = '0.4';
