@@ -345,6 +345,14 @@ async function authSubmitRegister() {
     authMode = 'register';
 
     await authSubmit();
+
+    // Forward any server-side error (e.g. duplicate email) to the visible register form error element
+    const mainError = document.getElementById('auth-error')?.textContent;
+
+    if (mainError && errorEl) {
+        errorEl.textContent = mainError;
+        document.getElementById('auth-error').textContent = '';
+    }
 }
 
 function loginWithGoogle() {
