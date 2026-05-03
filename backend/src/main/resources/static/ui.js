@@ -85,6 +85,13 @@ function switchView(id) {
         updateSettingsAccount();
         loadAppVersion();
     }
+
+    // Update URL hash to reflect the current section (enables back button and bookmarking)
+    const hashMap = { qod: '#today', list: '#all', add: '#add', settings: '#settings' };
+    const newHash = hashMap[id] || '#today';
+    if (window.location.hash !== newHash) {
+        window.history.pushState(null, '', newHash);
+    }
 }
 
 /**
