@@ -916,6 +916,8 @@
 
         if (!token) {
             showGuestMode();
+            // Guests can only see QoD — clear any hash that would open a locked section
+            window.history.replaceState(null, '', '#today');
             return;
         }
 
@@ -930,8 +932,8 @@
             quotes = rawQuotes.map(q => ({...q, tags: q.tags ? q.tags.split(',').filter(Boolean) : []}));
             hideGuestMode();
 
-            // Fetch QoD from backend — single source of truth.
-            await loadQod();
+            // Navigate to the section matching the URL hash (or default to QoD)
+            applyHashRoute();
 
             initNotifications();
             hideLoadingOverlay();
