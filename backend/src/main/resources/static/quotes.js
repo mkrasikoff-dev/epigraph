@@ -30,48 +30,22 @@
 // Rendering, randomisation, copying, and favouriting for the QoD section.
 // =============================================================================
 /**
- * Returns a stable index for the Quote of the Day.
- * The selected quote id is persisted in sessionStorage keyed by today's date.
- * This ensures the daily quote does not change when quotes are added or removed.
- * @returns {number} Index within the current quotes array, or 0 when empty.
+ * Returns the index of a quote in the local array by its ID.
+ * Used to locate the backend-selected QoD quote in the local quotes array.
+ * @param {number} id - Quote ID returned by the backend /api/quotes/qod endpoint.
+ * @returns {number} Index within quotes[], or 0 as fallback.
  */
-function getQodQuoteIndex() {
-    if (!quotes.length) return 0;
-
-    const today = new Date().toISOString().slice(0, 10);
-    const stored = (() => {
-        try {
-            return JSON.parse(sessionStorage.getItem('qod_selection'));
-        } catch {
-            return null;
-        }
-    })();
-
-    if (stored && stored.date === today) {
-        const idx = quotes.findIndex(q => q.id === stored.id);
-        if (idx !== -1) return idx;
-    }
-
-    let hash = 0;
-    for (let i = 0; i < today.length; i++) {
-        hash = (Math.imul(31, hash) + today.charCodeAt(i)) | 0;
-    }
-    const idx = Math.abs(hash) % quotes.length;
-
-    try {
-        sessionStorage.setItem('qod_selection', JSON.stringify({date: today, id: quotes[idx].id}));
-    } catch {
-        /* sessionStorage unavailable in some environments */
-    }
-
-    return idx;
+function getQodIndexById(id) {
+    const idx = quotes.findIndex(q => q.id === id);
+    return idx !== -1 ? idx : 0;
 }
 
 /**
  * Renders the Quote of the Day section.
- * @param {number} [overrideIdx] - Optional quote index to display instead of today's.
+ * Accepts either a backend-resolved quote object (preferred) or a fallback index.
+ * @param {Object|number} [qodOrIdx] - A full quote object from the backend, or a numeric index override.
  */
-function renderQod(overrideIdx) {
+function renderQod(qodOrIdx) {
     if (!quotes.length) {
         document.getElementById('qod-text').textContent = t('qodEmptyText');
         document.getElementById('qod-author').textContent = '';
@@ -82,7 +56,19 @@ function renderQod(overrideIdx) {
     }
 
     setQodActionsDisabled(false);
-    const idx = overrideIdx !== undefined ? overrideIdx : getQodQuoteIndex();
+
+    let idx;
+    if (qodOrIdx !== undefined && typeof qodOrIdx === 'object' && qodOrIdx !== null) {
+        // Backend-driven: locate the quote in the local array by ID
+        idx = getQodIndexById(qodOrIdx.id);
+    } else if (typeof qodOrIdx === 'number') {
+        // Numeric override (used by randomQuote() and swipe gestures)
+        idx = qodOrIdx;
+    } else {
+        // Fallback: pick index 0 (backend call should always provide a quote)
+        idx = 0;
+    }
+
     currentQodIndex = idx;
     const q = quotes[idx];
     const now = new Date();
