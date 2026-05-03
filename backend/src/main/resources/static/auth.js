@@ -150,6 +150,39 @@ async function loadAppVersion() {
     }
 }
 
+// =============================================================================
+// QUOTE OF THE DAY LOADER
+// Fetches QoD from the backend and caches the result in sessionStorage
+// to avoid redundant API calls within the same session.
+// =============================================================================
+/**
+ * Loads the Quote of the Day from the backend, using sessionStorage cache
+ * to avoid redundant requests within the same browser session.
+ * Falls back to renderQod(null) if the request fails.
+ */
+async function loadQod() {
+    const CACHE_KEY = 'epigraph_qod_id';
+
+    try {
+        const cachedId = sessionStorage.getItem(CACHE_KEY);
+        if (cachedId !== null) {
+            const quote = quotes.find(q => q.id === Number(cachedId)) || null;
+            renderQod(quote);
+            return;
+        }
+    } catch { /* corrupted cache — proceed to fetch */ }
+
+    try {
+        const qodQuote = await Api.getQod();
+        if (qodQuote) {
+            sessionStorage.setItem(CACHE_KEY, String(qodQuote.id));
+        }
+        renderQod(qodQuote);
+    } catch {
+        renderQod(null);
+    }
+}
+
 /**
  * Returns the correct Russian plural form for the word "цитата".
  * @param {number} n
