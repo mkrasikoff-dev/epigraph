@@ -28,6 +28,24 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: email, profile
 
+  # Email Verification
+  mail:
+    host: smtp.resend.com
+    port: 465
+    username: resend
+    password: ${RESEND_API_KEY}
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          auth: true
+
+# Email Verification
+app:
+  mail:
+    from: ${MAIL_FROM}
+
 # http -> https requests
 server:
   forward-headers-strategy: framework

@@ -37,6 +37,17 @@ const TRANSLATIONS = {
         authErrorInvalidEmailServer:    'Некорректный email',
         authErrorConnection:            'Ошибка соединения',
 
+        // Auth Email Verification
+        verifyTitle:          'Подтвердите email',
+        verifySubtitle:       'Мы отправили 6-значный код на {email}',
+        verifyCodeLabel:      'Код из письма',
+        verifySubmit:         'Подтвердить',
+        verifyErrorInvalidCode: 'Неверный или истёкший код',
+        verifyResendHint:     'Не пришло письмо?',
+        verifyResendLink:     'Отправить повторно',
+        verifyResendSuccess:  'Код отправлен повторно',
+        verifyResendError:    'Не удалось отправить код',
+
         // ── Navigation ────────────────────────────────────────────────────────
         navToday:                       'На сегодня',
         navMyQuotes:                    'Мои цитаты',
