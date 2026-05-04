@@ -379,7 +379,10 @@ async function authSubmitRegister() {
 
     // Call /register — on success (202) backend sent a code, show verification screen
     const btn = document.getElementById('auth-submit-reg-btn');
-    if (btn) { btn.disabled = true; btn.textContent = t('authLoading'); }
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.7s linear infinite;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
+    }
 
     try {
         const res = await fetch(AUTH_API + '/register', {
