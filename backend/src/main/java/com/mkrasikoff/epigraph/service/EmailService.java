@@ -40,7 +40,6 @@ public class EmailService {
                     Если вы не регистрировались — просто проигнорируйте это письмо.
                     """.formatted(code));
             mailSender.send(msg);
-            log.info("Verification email sent to {}", to);
         } catch (MailException e) {
             log.error("Failed to send verification email to {}: {}", to, e.getMessage());
             throw new RuntimeException("Не удалось отправить письмо. Попробуйте позже.");

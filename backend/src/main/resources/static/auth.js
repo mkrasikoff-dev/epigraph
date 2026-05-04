@@ -12,6 +12,9 @@
  * - AUTH_API         {string}   — defined in index.html CONSTANTS
  */
 
+// Cache the original register form HTML to restore it when user goes back from verify screen
+const _registerFormSnapshot = document.getElementById('auth-register-form-col')?.innerHTML;
+
 // =============================================================================
 // AUTH STATE
 // JWT token stored in localStorage, helpers to read/write/clear it.
@@ -378,7 +381,7 @@ async function authSubmitRegister() {
     authMode = 'register';
 
     // Call /register — on success (202) backend sent a code, show verification screen
-    const btn = document.getElementById('auth-submit-reg-btn');
+    const btn = document.getElementById('auth-submit-btn-reg');
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.7s linear infinite;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
@@ -431,6 +434,15 @@ function showVerifyScreen(email) {
     if (!container) return;
 
     container.innerHTML = `
+        <button onclick="showRegisterForm()"
+                style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);background:none;border:none;cursor:pointer;padding:0;margin-bottom:var(--space-1);align-self:flex-start"
+                onmouseover="this.style.color='var(--color-text)'"
+                onmouseout="this.style.color='var(--color-text-muted)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            ${t('verifyBack')}
+        </button>
         <div class="auth-register-top">
             <h2 class="auth-register-heading">${t('verifyTitle')}</h2>
             <p class="auth-register-sub">${t('verifySubtitle', { email })}</p>
@@ -440,7 +452,7 @@ function showVerifyScreen(email) {
             <input id="verify-code-input" class="auth-input" type="text"
                    inputmode="numeric" maxlength="6" placeholder="000000"
                    autocomplete="one-time-code"
-                   style="letter-spacing: 0.3em; font-size: var(--text-lg); text-align: center;">
+                   style="letter-spacing: 0.3em; font-size: var(--text-lg); text-align: center; padding-left: 0.3em;">
         </div>
         <p class="auth-error" id="verify-error"></p>
         <button class="btn-primary" id="verify-submit-btn" onclick="submitVerifyCode('${email}')">
@@ -453,6 +465,18 @@ function showVerifyScreen(email) {
     `;
 
     setTimeout(() => document.getElementById('verify-code-input')?.focus(), 100);
+}
+
+/**
+ * Restores the registration form from the original HTML snapshot.
+ * Used when the user clicks "Back" on the verify screen.
+ */
+function showRegisterForm() {
+    const container = document.getElementById('auth-register-form-col');
+
+    if (!container || !_registerFormSnapshot) return;
+
+    container.innerHTML = _registerFormSnapshot;
 }
 
 /**
