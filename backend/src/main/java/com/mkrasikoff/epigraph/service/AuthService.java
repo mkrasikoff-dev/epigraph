@@ -33,9 +33,13 @@ public class AuthService {
      */
     @Transactional
     public void register(String email, String rawPassword) {
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Этот email уже зарегистрирован");
-        }
+        userRepository.findByEmail(email).ifPresent(existing -> {
+            if (existing.isEmailVerified()) {
+                throw new IllegalArgumentException("Этот email уже зарегистрирован");
+            }
+            // Unverified user — delete and allow re-registration with a fresh code
+            userRepository.delete(existing);
+        });
 
         User user = new User();
         user.setEmail(email);

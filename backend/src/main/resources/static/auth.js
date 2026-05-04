@@ -425,7 +425,7 @@ function handleAuthOverlayClick(e) {
  */
 function showVerifyScreen(email) {
     // Reuse the auth modal — replace content with verification form
-    const container = document.getElementById('auth-form-container');
+    const container = document.getElementById('auth-register-form-col');
     if (!container) return;
 
     container.innerHTML = `
