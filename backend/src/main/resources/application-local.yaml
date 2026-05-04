@@ -51,9 +51,8 @@ app:
     subject: mailto:epigraph.support@icloud.com
 
   # Email Verification
-  app:
-    mail:
-      from: ${MAIL_FROM:noreply@epigraph.me}
+  mail:
+    from: ${MAIL_FROM:noreply@epigraph.me}
 
 # Logging: verbose for local development
 logging:

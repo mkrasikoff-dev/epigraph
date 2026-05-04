@@ -34,7 +34,10 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Registration attempt — email = {}", request.getEmail());
+
         authService.register(request.getEmail(), request.getPassword());
+
         log.info("Verification code sent — email = {}", request.getEmail());
     }
 
