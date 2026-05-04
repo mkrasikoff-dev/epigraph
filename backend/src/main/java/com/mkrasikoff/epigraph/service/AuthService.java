@@ -13,39 +13,79 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final QuoteService quoteService;
+    private final EmailVerificationService emailVerificationService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       QuoteService quoteService) {
+                       QuoteService quoteService,
+                       EmailVerificationService emailVerificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.quoteService = quoteService;
+        this.emailVerificationService = emailVerificationService;
     }
 
+    /**
+     * Initiates registration: saves an unverified user and sends a verification code.
+     * Does NOT return a JWT — the client must call verify() to complete registration.
+     */
     @Transactional
-    public String register(String email, String rawPassword) {
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Этот email уже зарегистрирован");
-        }
+    public void register(String email, String rawPassword) {
+        userRepository.findByEmail(email).ifPresent(existing -> {
+            if (existing.isEmailVerified()) {
+                throw new IllegalArgumentException("Этот email уже зарегистрирован");
+            }
+            // Unverified user — delete and allow re-registration with a fresh code
+            userRepository.delete(existing);
+        });
 
         User user = new User();
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setProvider("local");
         user.setCreatedAt(System.currentTimeMillis());
+        user.setEmailVerified(false);
+        userRepository.save(user);
 
-        userRepository.save(user); // userId генерируется здесь (IDENTITY strategy)
+        emailVerificationService.sendCode(email);
+    }
+
+    /**
+     * Completes registration: validates the code, marks the user as verified,
+     * creates default quotes, and returns a JWT.
+     */
+    @Transactional
+    public String verify(String email, String code) {
+        emailVerificationService.verifyCode(email, code);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+
+        user.setEmailVerified(true);
+        userRepository.save(user);
 
         quoteService.createDefaultQuotes(user.getId());
 
         return jwtService.generateToken(user.getId(), user.getEmail());
     }
 
+    /**
+     * Resends a verification code if the user exists and is not yet verified.
+     * Silently does nothing if the email is unknown — avoids user enumeration.
+     */
+    @Transactional
+    public void resendCode(String email) {
+        userRepository.findByEmail(email)
+                .filter(u -> !u.isEmailVerified())
+                .ifPresent(u -> emailVerificationService.sendCode(email));
+    }
+
     @Transactional(readOnly = true)
     public String login(String email, String rawPassword) {
         return userRepository.findByEmail(email)
+                .filter(User::isEmailVerified)
                 .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
                 .map(user -> jwtService.generateToken(user.getId(), user.getEmail()))
                 .orElse(null);

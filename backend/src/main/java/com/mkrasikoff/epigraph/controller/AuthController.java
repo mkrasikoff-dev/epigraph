@@ -4,6 +4,7 @@ import com.mkrasikoff.epigraph.dto.AuthRequest;
 import com.mkrasikoff.epigraph.dto.AuthResponse;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
 import com.mkrasikoff.epigraph.dto.RegisterRequest;
+import com.mkrasikoff.epigraph.dto.VerifyRequest;
 import com.mkrasikoff.epigraph.service.AuthService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -16,26 +17,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
-
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
+    private final AuthService authService;
 
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
-        String token = authService.register(request.getEmail(), request.getPassword());
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request.getEmail(), request.getPassword());
+        log.info("Verification code sent — email = {}", request.getEmail());
+    }
 
-        log.info("New user registered — email = {}", request.getEmail());
+    @PostMapping("/verify")
+    public ResponseEntity<?> verify(@Valid @RequestBody VerifyRequest request) {
+        try {
+            String token = authService.verify(request.getEmail(), request.getCode());
 
-        return new AuthResponse(token);
+            log.info("New user verified and registered — email = {}", request.getEmail());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void resend(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) return;
+
+        authService.resendCode(email);
+
+        log.info("Verification code resent — email = {}", email);
     }
 
     @PostMapping("/login")
