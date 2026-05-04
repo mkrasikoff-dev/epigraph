@@ -377,14 +377,31 @@ async function authSubmitRegister() {
     document.getElementById('auth-password').value = password;
     authMode = 'register';
 
-    await authSubmit();
+    // Call /register — on success (202) backend sent a code, show verification screen
+    const btn = document.getElementById('auth-submit-reg-btn');
+    if (btn) { btn.disabled = true; btn.textContent = t('authLoading'); }
 
-    // Forward any server-side error (e.g. duplicate email) to the visible register form error element
-    const mainError = document.getElementById('auth-error')?.textContent;
+    try {
+        const res = await fetch(AUTH_API + '/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
 
-    if (mainError && errorEl) {
-        errorEl.textContent = mainError;
-        document.getElementById('auth-error').textContent = '';
+        const data = res.status === 202 ? null : await res.json().catch(() => null);
+
+        if (!res.ok) {
+            if (errorEl) errorEl.textContent = data?.message || t('authErrorWrongCredentials');
+            return;
+        }
+
+        // Show the verification code input screen
+        showVerifyScreen(email);
+
+    } catch {
+        if (errorEl) errorEl.textContent = t('authErrorConnection');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = t('authSubmitRegister'); }
     }
 }
 
@@ -400,4 +417,104 @@ function logout() {
 
 function handleAuthOverlayClick(e) {
     if (e.target === document.getElementById('auth-screen')) hideAuthModal();
+}
+
+/**
+ * Shows the email verification screen after successful registration request.
+ * @param {string} email - The email address the code was sent to.
+ */
+function showVerifyScreen(email) {
+    // Reuse the auth modal — replace content with verification form
+    const container = document.getElementById('auth-form-container');
+    if (!container) return;
+
+    container.innerHTML = `
+        <h2 class="auth-title">${t('verifyTitle')}</h2>
+        <p class="auth-subtitle">${t('verifySubtitle', { email })}</p>
+        <div class="auth-field">
+            <label class="auth-label">${t('verifyCodeLabel')}</label>
+            <input id="verify-code-input" class="auth-input" type="text"
+                   inputmode="numeric" maxlength="6" placeholder="000000"
+                   autocomplete="one-time-code">
+        </div>
+        <p id="verify-error" class="auth-error"></p>
+        <button id="verify-submit-btn" class="auth-btn-primary" onclick="submitVerifyCode('${email}')">
+            ${t('verifySubmit')}
+        </button>
+        <p class="auth-hint">${t('verifyResendHint')} <a href="#" onclick="resendVerifyCode('${email}'); return false;">${t('verifyResendLink')}</a></p>
+    `;
+
+    // Auto-focus the code input
+    setTimeout(() => document.getElementById('verify-code-input')?.focus(), 100);
+}
+
+/**
+ * Submits the verification code to /api/auth/verify.
+ * On success, logs the user in and closes the auth modal.
+ * @param {string} email
+ */
+async function submitVerifyCode(email) {
+    const codeInput = document.getElementById('verify-code-input');
+    const errorEl = document.getElementById('verify-error');
+    const btn = document.getElementById('verify-submit-btn');
+    const code = codeInput?.value.trim();
+
+    if (!code || code.length !== 6) {
+        if (errorEl) errorEl.textContent = t('verifyErrorInvalidCode');
+        return;
+    }
+
+    if (errorEl) errorEl.textContent = '';
+    if (btn) { btn.disabled = true; btn.textContent = t('authLoading'); }
+
+    try {
+        const res = await fetch(AUTH_API + '/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, code })
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            if (errorEl) errorEl.textContent = data?.message || t('verifyErrorInvalidCode');
+            return;
+        }
+
+        // Registration complete — log the user in
+        setToken(data.token);
+        hideAuthModal();
+        hideGuestMode();
+        await loadData();
+        renderQod();
+
+    } catch {
+        if (errorEl) errorEl.textContent = t('authErrorConnection');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = t('verifySubmit'); }
+    }
+}
+
+/**
+ * Re-sends the verification code for the given email.
+ * @param {string} email
+ */
+async function resendVerifyCode(email) {
+    const errorEl = document.getElementById('verify-error');
+    try {
+        const res = await fetch(AUTH_API + '/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email,
+                password: document.getElementById('auth-password')?.value || '__resend__'
+            })
+        });
+        if (errorEl) {
+            errorEl.style.color = res.ok ? 'var(--color-accent)' : '';
+            errorEl.textContent = res.ok ? t('verifyResendSuccess') : t('verifyResendError');
+        }
+    } catch {
+        if (errorEl) errorEl.textContent = t('authErrorConnection');
+    }
 }

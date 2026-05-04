@@ -40,4 +40,11 @@ public class User {
 
     @Column(updatable = false)
     private Long createdAt;
+
+    /**
+     * False until the user confirms their email address.
+     * Google OAuth users are marked as verified immediately.
+     */
+    @Column(nullable = false)
+    private boolean emailVerified = true;
 }
