@@ -424,27 +424,31 @@ function handleAuthOverlayClick(e) {
  * @param {string} email - The email address the code was sent to.
  */
 function showVerifyScreen(email) {
-    // Reuse the auth modal — replace content with verification form
     const container = document.getElementById('auth-register-form-col');
     if (!container) return;
 
     container.innerHTML = `
-        <h2 class="auth-title">${t('verifyTitle')}</h2>
-        <p class="auth-subtitle">${t('verifySubtitle', { email })}</p>
+        <div class="auth-register-top">
+            <h2 class="auth-register-heading">${t('verifyTitle')}</h2>
+            <p class="auth-register-sub">${t('verifySubtitle', { email })}</p>
+        </div>
         <div class="auth-field">
-            <label class="auth-label">${t('verifyCodeLabel')}</label>
+            <label for="verify-code-input">${t('verifyCodeLabel')}</label>
             <input id="verify-code-input" class="auth-input" type="text"
                    inputmode="numeric" maxlength="6" placeholder="000000"
-                   autocomplete="one-time-code">
+                   autocomplete="one-time-code"
+                   style="letter-spacing: 0.3em; font-size: var(--text-lg); text-align: center;">
         </div>
-        <p id="verify-error" class="auth-error"></p>
-        <button id="verify-submit-btn" class="auth-btn-primary" onclick="submitVerifyCode('${email}')">
+        <p class="auth-error" id="verify-error"></p>
+        <button class="btn-primary" id="verify-submit-btn" onclick="submitVerifyCode('${email}')">
             ${t('verifySubmit')}
         </button>
-        <p class="auth-hint">${t('verifyResendHint')} <a href="#" onclick="resendVerifyCode('${email}'); return false;">${t('verifyResendLink')}</a></p>
+        <p class="auth-switch" style="text-align:center">
+            <span>${t('verifyResendHint')}</span>
+            <button onclick="resendVerifyCode('${email}')">${t('verifyResendLink')}</button>
+        </p>
     `;
 
-    // Auto-focus the code input
     setTimeout(() => document.getElementById('verify-code-input')?.focus(), 100);
 }
 
@@ -482,11 +486,12 @@ async function submitVerifyCode(email) {
         }
 
         // Registration complete — log the user in
+        sessionStorage.removeItem('epigraph_qod_id'); // clear any stale guest cache
         setToken(data.token);
         hideAuthModal();
         hideGuestMode();
         await loadData();
-        renderQod();
+        await loadQod();
 
     } catch {
         if (errorEl) errorEl.textContent = t('authErrorConnection');
@@ -501,17 +506,16 @@ async function submitVerifyCode(email) {
  */
 async function resendVerifyCode(email) {
     const errorEl = document.getElementById('verify-error');
+
     try {
-        const res = await fetch(AUTH_API + '/register', {
+        const res = await fetch(AUTH_API + '/resend', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email,
-                password: document.getElementById('auth-password')?.value || '__resend__'
-            })
+            body: JSON.stringify({ email })
         });
+
         if (errorEl) {
-            errorEl.style.color = res.ok ? 'var(--color-accent)' : '';
+            errorEl.style.color = res.ok ? 'var(--color-accent)' : 'var(--color-error)';
             errorEl.textContent = res.ok ? t('verifyResendSuccess') : t('verifyResendError');
         }
     } catch {

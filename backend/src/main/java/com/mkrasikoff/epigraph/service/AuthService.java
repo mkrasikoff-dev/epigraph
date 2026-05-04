@@ -71,6 +71,17 @@ public class AuthService {
         return jwtService.generateToken(user.getId(), user.getEmail());
     }
 
+    /**
+     * Resends a verification code if the user exists and is not yet verified.
+     * Silently does nothing if the email is unknown — avoids user enumeration.
+     */
+    @Transactional
+    public void resendCode(String email) {
+        userRepository.findByEmail(email)
+                .filter(u -> !u.isEmailVerified())
+                .ifPresent(u -> emailVerificationService.sendCode(email));
+    }
+
     @Transactional(readOnly = true)
     public String login(String email, String rawPassword) {
         return userRepository.findByEmail(email)
