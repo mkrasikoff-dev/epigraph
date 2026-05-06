@@ -28,19 +28,6 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: email, profile
 
-  # Email Verification
-  mail:
-    host: smtp.resend.com
-    port: 465
-    username: resend
-    password: ${RESEND_API_KEY}
-    properties:
-      mail:
-        smtp:
-          ssl:
-            enable: true
-          auth: true
-
 # Jwt Service
 app:
   jwt:
@@ -53,6 +40,8 @@ app:
   # Email Verification
   mail:
     from: ${MAIL_FROM:noreply@epigraph.me}
+  resend:
+    api-key: ${RESEND_API_KEY}
 
 # Logging: verbose for local development
 logging:
