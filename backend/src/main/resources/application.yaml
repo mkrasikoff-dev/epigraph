@@ -14,7 +14,7 @@ server:
 app:
   jwt:
     secret: ${JWT_SECRET}
-    expiration-ms: 86400000  # 24 часа
+    expiration-ms: 2592000000  # 30 days
   vapid:
     public-key: ${VAPID_PUBLIC_KEY:}
     private-key: ${VAPID_PRIVATE_KEY:}
