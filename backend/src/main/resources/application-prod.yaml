@@ -31,13 +31,13 @@ spring:
   # Email Verification
   mail:
     host: smtp.resend.com
-    port: 465
+    port: 587
     username: resend
     password: ${RESEND_API_KEY}
     properties:
       mail:
         smtp:
-          ssl:
+          starttls:
             enable: true
           auth: true
 
