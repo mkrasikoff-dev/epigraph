@@ -892,3 +892,51 @@ function confirmClear() {
         ]
     );
 }
+
+/**
+ * Shows a confirmation modal before deleting the account.
+ * Two-step confirmation — user must click twice to proceed.
+ */
+function confirmDeleteAccount() {
+    showModal(
+        'Удалить аккаунт?',
+        'Это действие необратимо. Все ваши цитаты и данные будут удалены навсегда.',
+        [
+            {
+                label: 'Отмена',
+                className: 'btn-secondary',
+                action: 'closeModal()'
+            },
+            {
+                label: 'Да, удалить',
+                className: 'btn-danger',
+                action: 'deleteAccount()'
+            }
+        ]
+    );
+}
+
+/**
+ * Sends DELETE /api/user/me request, clears local state, and redirects to home.
+ */
+async function deleteAccount() {
+    closeModal();
+    try {
+        const res = await fetch('/api/user/me', {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        if (!res.ok) throw new Error('Server error');
+
+        // Clear all local state
+        clearToken();
+        sessionStorage.clear();
+        quotes = [];
+
+        // Redirect to home (shows guest / landing page)
+        window.location.href = '/';
+    } catch (e) {
+        console.error('[deleteAccount] Failed:', e);
+        toast('Не удалось удалить аккаунт. Попробуйте позже.');
+    }
+}
