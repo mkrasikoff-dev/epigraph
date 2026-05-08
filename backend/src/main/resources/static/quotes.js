@@ -898,17 +898,17 @@ function confirmClear() {
  * Two-step confirmation — user must click twice to proceed.
  */
 function confirmDeleteAccount() {
-    Modal.showModal(
-        'Удалить аккаунт?',
-        'Это действие необратимо. Все ваши цитаты и данные будут удалены навсегда.',
+    showModal(
+        t('deleteAccountTitle'),
+        t('deleteAccountBody'),
         [
             {
-                label: 'Отмена',
+                label: t('cancelButton'),
                 cls: 'btn-secondary',
                 action: closeModal
             },
             {
-                label: 'Да, удалить',
+                label: t('deleteAccountButton'),
                 cls: 'btn-danger',
                 action: deleteAccount
             }
@@ -928,15 +928,13 @@ async function deleteAccount() {
         });
         if (!res.ok) throw new Error('Server error');
 
-        // Clear all local state
         clearToken();
         sessionStorage.clear();
         quotes = [];
 
-        // Redirect to home (shows guest / landing page)
         window.location.href = '/';
     } catch (e) {
         console.error('[deleteAccount] Failed:', e);
-        toast('Не удалось удалить аккаунт. Попробуйте позже.');
+        toast(t('deleteAccountToastError'));
     }
 }
