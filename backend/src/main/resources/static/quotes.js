@@ -872,25 +872,42 @@ function copyAll() {
  * Prompts the user for confirmation and deletes every quote.
  */
 function confirmClear() {
+    const phrase = t('deleteAllConfirmPhrase');
     showModal(
         t('deleteAllModalTitle'),
-        t('deleteAllModalBody', {count: quotes.length}),
-        [{
-            label: t('deleteAllButton'), cls: 'btn-danger', action: async () => {
-                try {
-                    await Api.deleteAll();
-                    quotes = [];
-                    renderList();
-                    closeModal();
-                    toast(t('toastAllQuotesDeleted'));
-                } catch (e) {
-                    toast(t('toastError'));
+        `${t('deleteAllModalBody', {count: quotes.length})}
+         <p style="margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)">
+             ${t('deleteConfirmHint')}<strong>${phrase}</strong>
+         </p>
+          <input id="delete-confirm-input" class="modal-confirm-input"
+                placeholder="${t('deleteAllConfirmPlaceholder')}"
+                oninput="document.getElementById('modal-delete-btn').disabled = this.value !== '${phrase}'">`,
+        [
+            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
+            {
+                label: t('deleteAllButton'),
+                cls: 'btn-danger',
+                id: 'modal-delete-btn',
+                action: async () => {
+                    try {
+                        await Api.deleteAll();
+                        quotes = [];
+                        renderList();
+                        closeModal();
+                        toast(t('toastAllQuotesDeleted'));
+                    } catch (e) {
+                        toast(t('toastError'));
+                    }
                 }
             }
-        },
-            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal}
         ]
     );
+
+    // Disable button until phrase is typed
+    setTimeout(() => {
+        const btn = document.getElementById('modal-delete-btn');
+        if (btn) btn.setAttribute('disabled', 'true');
+    }, 0);
 }
 
 /**
@@ -898,22 +915,32 @@ function confirmClear() {
  * Two-step confirmation — user must click twice to proceed.
  */
 function confirmDeleteAccount() {
+    const phrase = t('deleteAccountConfirmPhrase');
     showModal(
         t('deleteAccountTitle'),
-        t('deleteAccountBody'),
+        `${t('deleteAccountBody')}
+         <p style="margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)">
+             ${t('deleteConfirmHint')}<strong>${phrase}</strong>
+         </p>
+          <input id="delete-account-confirm-input" class="modal-confirm-input"
+                placeholder="${t('deleteAccountConfirmPlaceholder')}"
+                oninput="document.getElementById('modal-delete-account-btn').disabled = this.value !== '${phrase}'">`,
         [
-            {
-                label: t('cancelButton'),
-                cls: 'btn-secondary',
-                action: closeModal
-            },
+            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
             {
                 label: t('deleteAccountButton'),
                 cls: 'btn-danger',
+                id: 'modal-delete-account-btn',
                 action: deleteAccount
             }
         ]
     );
+
+    // Disable button until phrase is typed
+    setTimeout(() => {
+        const btn = document.getElementById('modal-delete-btn');
+        if (btn) btn.setAttribute('disabled', 'true');
+    }, 0);
 }
 
 /**

@@ -1556,6 +1556,30 @@ body.no-scroll {
     margin-bottom: var(--space-6);
 }
 
+/* Confirmation phrase input inside destructive modals */
+.modal-confirm-input {
+    width: 100%;
+    margin-top: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface-offset);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.modal-confirm-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.modal-confirm-input:focus {
+    border-color: var(--color-accent);
+}
+
 /* =============================================================================
 // EDIT MODAL
 // Form rendered inside the shared modal for editing an existing quote.
