@@ -898,19 +898,19 @@ function confirmClear() {
  * Two-step confirmation — user must click twice to proceed.
  */
 function confirmDeleteAccount() {
-    showModal(
+    Modal.showModal(
         'Удалить аккаунт?',
         'Это действие необратимо. Все ваши цитаты и данные будут удалены навсегда.',
         [
             {
                 label: 'Отмена',
-                className: 'btn-secondary',
-                action: 'closeModal()'
+                cls: 'btn-secondary',
+                action: closeModal
             },
             {
                 label: 'Да, удалить',
-                className: 'btn-danger',
-                action: 'deleteAccount()'
+                cls: 'btn-danger',
+                action: deleteAccount
             }
         ]
     );
