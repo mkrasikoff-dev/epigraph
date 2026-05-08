@@ -114,7 +114,7 @@ const TRANSLATIONS = {
         toastQuoteDeleted:              'Цитата удалена',
         toastDeleteError:               'Ошибка удаления',
 
-        // ── Delete all quotes modal ──────────────────────────────────────────────────
+        // ── Delete all quotes modal ───────────────────────────────────────────
         deleteAllModalTitle:            'Удалить все ваши цитаты?',
         deleteAllModalBody:             'Вы собираетесь удалить все {count} цитат. Это действие нельзя отменить.',
         deleteAllButton:                'Удалить всё',
@@ -125,6 +125,13 @@ const TRANSLATIONS = {
         deleteAccountBody:              'Это действие необратимо. Все ваши цитаты и данные будут удалены навсегда.',
         deleteAccountButton:            'Да, удалить',
         deleteAccountToastError:        'Не удалось удалить аккаунт. Попробуйте позже.',
+
+        // ── Delete confirm phrases ────────────────────────────────────────────
+        deleteAllConfirmPhrase:         'Я хочу удалить все цитаты',
+        deleteAllConfirmPlaceholder:    'Введите фразу для подтверждения',
+        deleteAccountConfirmPhrase:     'Я хочу удалить свой аккаунт',
+        deleteAccountConfirmPlaceholder:'Введите фразу для подтверждения',
+        deleteConfirmHint:              'Для подтверждения введите: ',
 
         // ── Import / Export ───────────────────────────────────────────────────
         importExpectedArray:            'Ожидается массив',
