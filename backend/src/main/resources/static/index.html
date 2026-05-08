@@ -599,12 +599,17 @@
                             <p>Безвозвратное удаление аккаунта и всех ваших данных.</p>
                         </div>
                         <button class="btn-danger" onclick="confirmDeleteAccount()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                                <line x1="18" y1="8" x2="23" y2="13"/>
-                                <line x1="23" y1="8" x2="18" y2="13"/>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <!-- Outer circle -->
+                                <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10"/>
+                                <!-- Head -->
+                                <circle cx="12" cy="9" r="3"/>
+                                <!-- Shoulders -->
+                                <path d="M6.5 19.5c0-3.038 2.462-5.5 5.5-5.5"/>
+                                <!-- Cross -->
+                                <line x1="17" y1="17" x2="21" y2="21"/>
+                                <line x1="21" y1="17" x2="17" y2="21"/>
                             </svg>
                             Удалить аккаунт
                         </button>
