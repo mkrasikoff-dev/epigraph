@@ -877,15 +877,26 @@ function confirmClear() {
         t('deleteAllModalTitle'),
         `${t('deleteAllModalBody', {count: quotes.length})}
          <p style="margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)">
-             ${t('deleteConfirmHint')}<strong>${phrase}</strong>
+             ${t('deleteConfirmHint')}<br><strong>${phrase}</strong>
          </p>
           <input id="delete-confirm-input" class="modal-confirm-input"
                 placeholder="${t('deleteAllConfirmPlaceholder')}"
-                oninput="document.getElementById('modal-delete-btn').disabled = this.value !== '${phrase}'">`,
+                                oninput="
+                    var btn = document.getElementById('modal-delete-btn');
+                    if (this.value === '${phrase}') {
+                        btn.removeAttribute('disabled');
+                        btn.style.opacity = '';
+                        btn.style.pointerEvents = '';
+                    } else {
+                        btn.setAttribute('disabled', 'true');
+                        btn.style.opacity = '0.45';
+                        btn.style.pointerEvents = 'none';
+                    }
+                ">`,
         [
             {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
             {
-                label: t('deleteAllButton'),
+                label: t('deleteAccountButton'),
                 cls: 'btn-danger',
                 id: 'modal-delete-btn',
                 action: async () => {
@@ -904,10 +915,14 @@ function confirmClear() {
     );
 
     // Disable button until phrase is typed
-    setTimeout(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
         const btn = document.getElementById('modal-delete-btn');
-        if (btn) btn.setAttribute('disabled', 'true');
-    }, 0);
+        if (btn) {
+            btn.setAttribute('disabled', 'true');
+            btn.style.opacity = '0.45';
+            btn.style.pointerEvents = 'none';
+        }
+    }));
 }
 
 /**
@@ -920,11 +935,22 @@ function confirmDeleteAccount() {
         t('deleteAccountTitle'),
         `${t('deleteAccountBody')}
          <p style="margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)">
-             ${t('deleteConfirmHint')}<strong>${phrase}</strong>
+             ${t('deleteConfirmHint')}<br><strong>${phrase}</strong>
          </p>
-          <input id="delete-account-confirm-input" class="modal-confirm-input"
+         <input id="delete-account-confirm-input" class="modal-confirm-input"
                 placeholder="${t('deleteAccountConfirmPlaceholder')}"
-                oninput="document.getElementById('modal-delete-account-btn').disabled = this.value !== '${phrase}'">`,
+                oninput="
+                    var btn = document.getElementById('modal-delete-account-btn');
+                    if (this.value === '${phrase}') {
+                        btn.removeAttribute('disabled');
+                        btn.style.opacity = '';
+                        btn.style.pointerEvents = '';
+                    } else {
+                        btn.setAttribute('disabled', 'true');
+                        btn.style.opacity = '0.45';
+                        btn.style.pointerEvents = 'none';
+                    }
+                ">`,
         [
             {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
             {
@@ -936,11 +962,15 @@ function confirmDeleteAccount() {
         ]
     );
 
-    // Disable button until phrase is typed
-    setTimeout(() => {
-        const btn = document.getElementById('modal-delete-btn');
-        if (btn) btn.setAttribute('disabled', 'true');
-    }, 0);
+    // Disable immediately after modal renders — no setTimeout needed
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        const btn = document.getElementById('modal-delete-account-btn');
+        if (btn) {
+            btn.setAttribute('disabled', 'true');
+            btn.style.opacity = '0.45';
+            btn.style.pointerEvents = 'none';
+        }
+    }));
 }
 
 /**

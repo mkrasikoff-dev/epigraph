@@ -293,7 +293,8 @@ header {
     background: var(--color-primary-hover);
 }
 
-.btn-primary:disabled {
+.btn-primary:disabled,
+.btn-danger:disabled {
     opacity: 0.45;
     cursor: not-allowed;
     pointer-events: none;
@@ -1565,7 +1566,7 @@ body.no-scroll {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     color: var(--color-text);
-    font-size: var(--text-sm);
+    font-size: 16px; /* Prevents iOS auto-zoom on focus (requires min 16px) */
     font-family: var(--font-body);
     outline: none;
     transition: border-color 0.15s;
