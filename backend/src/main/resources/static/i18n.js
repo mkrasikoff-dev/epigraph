@@ -131,7 +131,7 @@ const TRANSLATIONS = {
         deleteAllConfirmPlaceholder:    'Введите фразу для подтверждения',
         deleteAccountConfirmPhrase:     'Я хочу удалить свой аккаунт',
         deleteAccountConfirmPlaceholder:'Введите фразу для подтверждения',
-        deleteConfirmHint:              'Для подтверждения введите: ',
+        deleteConfirmHint:              'Для подтверждения введите:',
 
         // ── Import / Export ───────────────────────────────────────────────────
         importExpectedArray:            'Ожидается массив',
