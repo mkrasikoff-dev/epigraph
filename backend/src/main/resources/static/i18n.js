@@ -49,6 +49,25 @@ const TRANSLATIONS = {
         verifyResendError:      'Не удалось отправить код',
         verifyBack:             'Назад',
 
+        // ── Change password ───────────────────────────────────────────────────
+        changePasswordTitle:              'Сменить пароль',
+        changePasswordSettingsDesc:       'Установить или изменить пароль для входа по email.',
+        changePasswordButton:             'Сменить пароль',
+        changePasswordCurrent:            'Текущий пароль',
+        changePasswordNew:                'Новый пароль',
+        changePasswordConfirm:            'Подтвердите новый пароль',
+        changePasswordCurrentPlaceholder: 'Ваш текущий пароль',
+        changePasswordNewPlaceholder:     'Минимум 8 символов',
+        changePasswordConfirmPlaceholder: 'Повторите новый пароль',
+        changePasswordSubmit:             'Сохранить',
+        changePasswordSuccess:            'Пароль успешно изменён',
+        changePasswordErrorMismatch:      'Пароли не совпадают',
+        changePasswordErrorWrong:         'Неверный текущий пароль',
+        changePasswordErrorSame:          'Новый пароль совпадает с текущим',
+        changePasswordSetTitle:           'Установить пароль',
+        changePasswordSetDesc:            'Добавьте пароль для входа через email в дополнение к Google.',
+        changePasswordSetSubmit:          'Установить пароль',
+
         // ── Navigation ────────────────────────────────────────────────────────
         navToday:                       'На сегодня',
         navMyQuotes:                    'Мои цитаты',

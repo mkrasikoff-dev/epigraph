@@ -995,3 +995,104 @@ async function deleteAccount() {
         toast(t('deleteAccountToastError'));
     }
 }
+
+/**
+ * Opens the change/set password modal.
+ * Google users see "Set password" (no current password field).
+ * Local users see "Change password" (must enter current password first).
+ */
+function showChangePasswordModal() {
+    // Detect provider from settings label (already rendered)
+    const isGoogleUser = document.getElementById('settings-change-password-title')
+        .textContent === t('changePasswordSetTitle');
+
+    const currentPasswordField = isGoogleUser ? '' : `
+        <div class="auth-field" style="margin-bottom:var(--space-3)">
+            <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
+                ${t('changePasswordCurrent')}
+            </label>
+            <input id="cp-current" type="password" class="modal-confirm-input"
+                   style="margin-top:var(--space-1)"
+                   placeholder="${t('changePasswordCurrentPlaceholder')}"
+                   autocomplete="current-password">
+        </div>`;
+
+    showModal(
+        isGoogleUser ? t('changePasswordSetTitle') : t('changePasswordTitle'),
+        `${currentPasswordField}
+         <div class="auth-field" style="margin-bottom:var(--space-3)">
+             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
+                 ${t('changePasswordNew')}
+             </label>
+             <input id="cp-new" type="password" class="modal-confirm-input"
+                    style="margin-top:var(--space-1)"
+                    placeholder="${t('changePasswordNewPlaceholder')}"
+                    autocomplete="new-password">
+         </div>
+         <div class="auth-field" style="margin-bottom:0">
+             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
+                 ${t('changePasswordConfirm')}
+             </label>
+             <input id="cp-confirm" type="password" class="modal-confirm-input"
+                    style="margin-top:var(--space-1)"
+                    placeholder="${t('changePasswordConfirmPlaceholder')}"
+                    autocomplete="new-password">
+         </div>
+            <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
+            color:var(--color-toast-error-text);min-height:1.2em"></p>`,
+        [
+            {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
+            {
+                label: isGoogleUser ? t('changePasswordSetSubmit') : t('changePasswordSubmit'),
+                cls: 'btn-primary',
+                id: 'cp-submit-btn',
+                action: () => submitChangePassword(isGoogleUser)
+            }
+        ]
+    );
+}
+
+/**
+ * Submits the change/set password request.
+ * @param {boolean} isGoogleUser - true if user has no current password.
+ */
+async function submitChangePassword(isGoogleUser) {
+    const currentPw = isGoogleUser ? null : document.getElementById('cp-current')?.value;
+    const newPw = document.getElementById('cp-new')?.value;
+    const confirmPw = document.getElementById('cp-confirm')?.value;
+    const errorEl = document.getElementById('cp-error');
+    const btn = document.getElementById('cp-submit-btn');
+
+    if (newPw !== confirmPw) {
+        if (errorEl) errorEl.textContent = t('changePasswordErrorMismatch');
+        return;
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+        const body = { newPassword: newPw };
+        if (!isGoogleUser) body.currentPassword = currentPw;
+
+        const res = await fetch('/api/user/me/password', {
+            method: 'PATCH',
+            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorWrong');
+            return;
+        }
+
+        closeModal();
+        toast(t('changePasswordSuccess'));
+
+    } catch {
+        if (errorEl) errorEl.textContent = t('authErrorConnection');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
