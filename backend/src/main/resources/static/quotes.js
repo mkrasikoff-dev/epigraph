@@ -997,30 +997,13 @@ async function deleteAccount() {
 }
 
 /**
- * Opens the change/set password modal.
- * Google users see "Set password" (no current password field).
- * Local users see "Change password" (must enter current password first).
+ * Opens the change-password modal.
+ * Shows two fields: new password and confirm new password.
  */
 function showChangePasswordModal() {
-    // Detect provider from settings label (already rendered)
-    const isGoogleUser = document.getElementById('settings-change-password-title')
-        .textContent === t('changePasswordSetTitle');
-
-    const currentPasswordField = isGoogleUser ? '' : `
-        <div class="auth-field" style="margin-bottom:var(--space-3)">
-            <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
-                ${t('changePasswordCurrent')}
-            </label>
-            <input id="cp-current" type="password" class="modal-confirm-input"
-                   style="margin-top:var(--space-1)"
-                   placeholder="${t('changePasswordCurrentPlaceholder')}"
-                   autocomplete="current-password">
-        </div>`;
-
     showModal(
-        isGoogleUser ? t('changePasswordSetTitle') : t('changePasswordTitle'),
-        `${currentPasswordField}
-         <div class="auth-field" style="margin-bottom:var(--space-3)">
+        t('changePasswordTitle'),
+        `<div class="auth-field" style="margin-bottom:var(--space-3)">
              <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
                  ${t('changePasswordNew')}
              </label>
@@ -1038,26 +1021,25 @@ function showChangePasswordModal() {
                     placeholder="${t('changePasswordConfirmPlaceholder')}"
                     autocomplete="new-password">
          </div>
-            <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
-            color:var(--color-toast-error-text);min-height:1.2em"></p>`,
+         <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
+         color:var(--color-toast-error-text);min-height:1.2em"></p>`,
         [
             {label: t('cancelButton'), cls: 'btn-secondary', action: closeModal},
             {
-                label: isGoogleUser ? t('changePasswordSetSubmit') : t('changePasswordSubmit'),
+                label: t('changePasswordSubmit'),
                 cls: 'btn-primary',
                 id: 'cp-submit-btn',
-                action: () => submitChangePassword(isGoogleUser)
+                action: submitChangePassword
             }
         ]
     );
 }
 
 /**
- * Submits the change/set password request.
- * @param {boolean} isGoogleUser - true if user has no current password.
+ * Submits the new-password request. No current password required —
+ * account recovery is handled by the forgot-password flow.
  */
-async function submitChangePassword(isGoogleUser) {
-    const currentPw = isGoogleUser ? null : document.getElementById('cp-current')?.value;
+async function submitChangePassword() {
     const newPw = document.getElementById('cp-new')?.value;
     const confirmPw = document.getElementById('cp-confirm')?.value;
     const errorEl = document.getElementById('cp-error');
@@ -1071,19 +1053,16 @@ async function submitChangePassword(isGoogleUser) {
     if (btn) btn.disabled = true;
 
     try {
-        const body = { newPassword: newPw };
-        if (!isGoogleUser) body.currentPassword = currentPw;
-
         const res = await fetch('/api/user/me/password', {
             method: 'PATCH',
             headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ newPassword: newPw })
         });
 
         const data = await res.json().catch(() => null);
 
         if (!res.ok) {
-            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorWrong');
+            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorMismatch');
             return;
         }
 

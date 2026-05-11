@@ -23,32 +23,17 @@ public class UserService {
     }
 
     /**
-     * Changes or sets the user's password.
-     * Local users must provide the correct current password.
-     * Google users (no password) can set one directly.
+     * Sets the user's password.
+     * No current-password check — account recovery is handled by the
+     * forgot-password / email-verification flow. After this call the
+     * user can always log in locally, so provider is normalised to "local".
      */
     @Transactional
-    public void changePassword(Long userId, String currentPassword, String newPassword) {
+    public void changePassword(Long userId, String newPassword) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
-        boolean hasPassword = user.getPassword() != null;
-
-        if (hasPassword) {
-            if (currentPassword == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
-                throw new IllegalArgumentException("Неверный текущий пароль");
-            }
-
-            if (passwordEncoder.matches(newPassword, user.getPassword())) {
-                throw new IllegalArgumentException("Новый пароль совпадает с текущим");
-            }
-        }
-
         user.setPassword(passwordEncoder.encode(newPassword));
-
-        // If Google user sets a password — also enable local login
-        if (!hasPassword) {
-            user.setProvider("local");
-        }
+        user.setProvider("local");
 
         userRepository.save(user);
     }
