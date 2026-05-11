@@ -122,11 +122,10 @@ function updateSettingsAccount() {
     document.getElementById('settings-account-stats').textContent =
         t('statsSummary', {total, word: pluralQuotes(total), favorites: favCount});
 
-    // Update change-password item based on provider
-    const isGoogle = data.provider === 'google';
-    document.getElementById('settings-change-password-title').textContent = isGoogle ? t('changePasswordSetTitle') : t('changePasswordTitle');
-    document.getElementById('settings-change-password-desc').textContent = isGoogle ? t('changePasswordSetDesc') : t('changePasswordSettingsDesc');
-    document.getElementById('settings-change-password-btn-label').textContent = isGoogle ? t('changePasswordSetSubmit') : t('changePasswordButton');
+    // Update change-password item — same wording for all users
+    document.getElementById('settings-change-password-title').textContent = t('changePasswordTitle');
+    document.getElementById('settings-change-password-desc').textContent = t('changePasswordSettingsDesc');
+    document.getElementById('settings-change-password-btn-label').textContent = t('changePasswordButton');
 }
 
 /**
