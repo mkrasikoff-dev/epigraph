@@ -46,7 +46,7 @@ public class UserController {
     public ResponseEntity<?> changePassword(@AuthenticationPrincipal Long userId,
                                             @Valid @RequestBody ChangePasswordRequest request) {
         try {
-            userService.changePassword(userId, request.getCurrentPassword(), request.getNewPassword());
+            userService.changePassword(userId, request.getNewPassword());
             log.info("Password changed — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse("Пароль успешно изменён"));
