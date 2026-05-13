@@ -1,7 +1,9 @@
 package com.mkrasikoff.epigraph.controller;
 
+import com.mkrasikoff.epigraph.dto.AuthResponse;
 import com.mkrasikoff.epigraph.dto.ChangePasswordRequest;
 import com.mkrasikoff.epigraph.dto.ErrorResponse;
+import com.mkrasikoff.epigraph.service.JwtService;
 import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -23,9 +27,11 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
+    private final JwtService jwtService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtService jwtService) {
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     /**
@@ -50,6 +56,39 @@ public class UserController {
             log.info("Password changed — userId = {}", userId);
 
             return ResponseEntity.ok(new ErrorResponse("Пароль успешно изменён"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Resets the user's password using a short-lived reset token from the email link.
+     * Returns a new session JWT so the user is immediately logged in after reset.
+     */
+    @PatchMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String resetToken = body.get("resetToken");
+        String newPassword = body.get("newPassword");
+
+        if (resetToken == null || resetToken.isBlank() || newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Некорректный запрос"));
+        }
+
+        if (!jwtService.isResetTokenValid(resetToken)) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Ссылка недействительна или истекла"));
+        }
+
+        try {
+            Long userId = jwtService.extractUserId(resetToken);
+            userService.changePassword(userId, newPassword);
+
+            // Return a fresh session token so the user is logged in immediately
+            String sessionToken = jwtService.generateToken(userId,
+                    userService.getEmailByUserId(userId));
+
+            log.info("Password reset completed via email link — userId = {}", userId);
+
+            return ResponseEntity.ok(new AuthResponse(sessionToken));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }

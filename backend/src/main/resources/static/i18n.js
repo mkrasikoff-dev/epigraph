@@ -68,6 +68,17 @@ const TRANSLATIONS = {
         changePasswordSetDesc:            'Добавьте пароль для входа через email в дополнение к Google.',
         changePasswordSetSubmit:          'Установить пароль',
 
+        // ── Forgot password ──────────────────────────────────────────────────────
+        forgotPasswordLink:               'Забыли пароль?',
+        forgotPasswordTitle:              'Восстановление пароля',
+        forgotPasswordDesc:               'Введите email — мы пришлём ссылку для смены пароля.',
+        forgotPasswordEmailLabel:         'Email',
+        forgotPasswordSubmit:             'Отправить ссылку',
+        forgotPasswordSuccess:            'Ссылка отправлена. Проверьте почту.',
+        forgotPasswordSuccessHint:        'Если аккаунт с этим email существует, письмо придёт в течение минуты.',
+        forgotPasswordBack:               'Назад к входу',
+        forgotPasswordErrorNotFound:      'Аккаунт с таким email не найден',
+
         // ── Navigation ────────────────────────────────────────────────────────
         navToday:                       'На сегодня',
         navMyQuotes:                    'Мои цитаты',

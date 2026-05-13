@@ -554,3 +554,220 @@ async function resendVerifyCode(email) {
         if (errorEl) errorEl.textContent = t('authErrorConnection');
     }
 }
+
+/**
+ * Replaces the login form with a "forgot password" email input.
+ */
+function showForgotPasswordForm() {
+    const screen = document.getElementById('auth-screen');
+    // Save the login form state to restore on Back
+    _forgotPasswordReturnFn = restoreLoginForm;
+
+    // Hide login-mode elements
+    document.getElementById('auth-login-header')?.style.setProperty('display', 'none');
+    document.getElementById('auth-subtitle').style.display = 'none';
+    document.querySelector('#auth-screen .auth-switch').style.display = 'none';
+    document.getElementById('auth-forgot-btn').style.display = 'none';
+
+    const loginFields = screen.querySelector('.auth-field');
+    const forgotContainer = document.getElementById('auth-forgot-container');
+
+    // Inject the forgot-password panel just before the first .auth-field
+    const panel = document.createElement('div');
+    panel.id = 'auth-forgot-panel';
+    panel.innerHTML = `
+        <button onclick="hideForgotPasswordForm()"
+                style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-muted);background:none;border:none;cursor:pointer;padding:0;margin-bottom:var(--space-4)"
+                onmouseover="this.style.color='var(--color-text)'"
+                onmouseout="this.style.color='var(--color-text-muted)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            ${t('forgotPasswordBack')}
+        </button>
+        <div style="margin-bottom:var(--space-5)">
+            <h2 style="font-size:var(--text-lg);font-weight:600;margin-bottom:var(--space-1)">${t('forgotPasswordTitle')}</h2>
+            <p style="font-size:var(--text-sm);color:var(--color-text-muted)">${t('forgotPasswordDesc')}</p>
+        </div>
+        <div class="auth-field">
+            <label for="forgot-email-input">${t('forgotPasswordEmailLabel')}</label>
+            <input id="forgot-email-input" class="auth-input" type="email"
+                   placeholder="you@example.com" autocomplete="email">
+        </div>
+        <p id="forgot-error" class="auth-error"></p>
+        <button class="btn-primary" id="forgot-submit-btn" onclick="submitForgotPassword()">
+            ${t('forgotPasswordSubmit')}
+        </button>
+    `;
+
+    // Hide original login fields
+    screen.querySelectorAll('.auth-field, .auth-error, #auth-submit-btn, .auth-divider, .btn-google').forEach(el => {
+        el.dataset.forgotHidden = 'true';
+        el.style.display = 'none';
+    });
+
+    screen.querySelector('.auth-card').insertBefore(panel, screen.querySelector('.auth-field'));
+    setTimeout(() => document.getElementById('forgot-email-input')?.focus(), 100);
+}
+
+/**
+ * Restores the login form after "Забыли пароль?" panel is dismissed.
+ */
+function hideForgotPasswordForm() {
+    document.getElementById('auth-forgot-panel')?.remove();
+
+    // Restore hidden elements
+    document.querySelectorAll('[data-forgot-hidden="true"]').forEach(el => {
+        el.style.display = '';
+        delete el.dataset.forgotHidden;
+    });
+
+    document.getElementById('auth-login-header')?.style.removeProperty('display');
+    document.getElementById('auth-subtitle').style.display = '';
+    document.querySelector('#auth-screen .auth-switch').style.display = '';
+    document.getElementById('auth-forgot-btn').style.display = '';
+}
+
+/**
+ * Sends a password-reset email request to the backend.
+ */
+async function submitForgotPassword() {
+    const emailInput = document.getElementById('forgot-email-input');
+    const errorEl = document.getElementById('forgot-error');
+    const btn = document.getElementById('forgot-submit-btn');
+    const email = emailInput?.value.trim();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email)) {
+        errorEl.textContent = t('authErrorInvalidEmail');
+        return;
+    }
+
+    errorEl.textContent = '';
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.7s linear infinite;flex-shrink:0"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${t('authLoading')}`;
+
+    try {
+        // Always returns 202 regardless of whether email exists — no enumeration
+        await fetch(AUTH_API + '/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        // Show success state regardless of actual result
+        errorEl.style.color = 'var(--color-accent)';
+        errorEl.textContent = t('forgotPasswordSuccessHint');
+        btn.style.display = 'none';
+        emailInput.disabled = true;
+
+    } catch {
+        errorEl.style.color = '';
+        errorEl.textContent = t('authErrorConnection');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = t('forgotPasswordSubmit');
+    }
+}
+
+/**
+ * Checks for a password-reset token in the URL query string.
+ * If found, navigates to Settings and opens the change-password modal.
+ * Called during app init, after the user is authenticated via the reset token.
+ */
+async function handleResetTokenFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const resetToken = params.get('reset');
+    if (!resetToken) return false;
+
+    // Clean up the URL immediately
+    window.history.replaceState({}, document.title, window.location.hash || '/');
+
+    // Show a modal to collect the new password, then POST to /api/user/reset-password
+    showModal(
+        t('changePasswordTitle'),
+        `<div class="auth-field" style="margin-bottom:var(--space-3)">
+             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
+                 ${t('changePasswordNew')}
+             </label>
+             <input id="cp-new" type="password" class="modal-confirm-input"
+                    style="margin-top:var(--space-1)"
+                    placeholder="${t('changePasswordNewPlaceholder')}"
+                    autocomplete="new-password">
+         </div>
+         <div class="auth-field" style="margin-bottom:0">
+             <label style="font-size:var(--text-sm);color:var(--color-text-muted)">
+                 ${t('changePasswordConfirm')}
+             </label>
+             <input id="cp-confirm" type="password" class="modal-confirm-input"
+                    style="margin-top:var(--space-1)"
+                    placeholder="${t('changePasswordConfirmPlaceholder')}"
+                    autocomplete="new-password">
+         </div>
+         <p id="cp-error" style="margin-top:var(--space-3);font-size:var(--text-sm);
+         color:var(--color-toast-error-text);min-height:1.2em"></p>`,
+        [
+            {
+                label: t('changePasswordSubmit'),
+                cls: 'btn-primary',
+                id: 'cp-submit-btn',
+                action: () => submitPasswordReset(resetToken)
+            }
+        ]
+    );
+
+    return true;
+}
+
+/**
+ * Submits the new password using the email-link reset token.
+ * On success, logs the user in with the returned session JWT.
+ */
+async function submitPasswordReset(resetToken) {
+    const newPw = document.getElementById('cp-new')?.value;
+    const confirmPw = document.getElementById('cp-confirm')?.value;
+    const errorEl = document.getElementById('cp-error');
+    const btn = document.getElementById('cp-submit-btn');
+
+    if (newPw !== confirmPw) {
+        if (errorEl) errorEl.textContent = t('changePasswordErrorMismatch');
+        return;
+    }
+
+    const passwordRegex = /^(?=.*[A-Za-zА-Яа-яЁё])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(newPw)) {
+        if (errorEl) errorEl.textContent = t('authErrorPasswordPattern');
+        return;
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/user/reset-password', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resetToken, newPassword: newPw })
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            if (errorEl) errorEl.textContent = data?.message || t('changePasswordErrorMismatch');
+            return;
+        }
+
+        // Log the user in with the session token returned by the backend
+        setToken(data.token);
+        closeModal();
+        hideAuthModal();
+        hideGuestMode();
+        await loadData();
+        switchView('settings');
+        toast(t('changePasswordSuccess'));
+
+    } catch {
+        if (errorEl) errorEl.textContent = t('authErrorConnection');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
