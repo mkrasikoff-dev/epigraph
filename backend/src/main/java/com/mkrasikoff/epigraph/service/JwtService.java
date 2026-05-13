@@ -19,6 +19,8 @@ public class JwtService {
     @Value("${app.jwt.expiration-ms}")
     private long expirationMs;
 
+    private static final long RESET_EXPIRATION_MS = 30 * 60 * 1000L; // 30 minutes
+
     public String generateToken(Long userId, String email) {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
@@ -27,6 +29,33 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    /**
+     * Generates a short-lived password-reset token.
+     * The token carries the user's ID as subject and a "purpose" claim
+     * so it can be distinguished from a regular session token.
+     */
+    public String generateResetToken(Long userId) {
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .claim("purpose", "password-reset")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + RESET_EXPIRATION_MS))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    /**
+     * Returns true only when the token is valid AND carries purpose=password-reset.
+     */
+    public boolean isResetTokenValid(String token) {
+        try {
+            Claims claims = getClaims(token);
+            return "password-reset".equals(claims.get("purpose", String.class));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public Long extractUserId(String token) {

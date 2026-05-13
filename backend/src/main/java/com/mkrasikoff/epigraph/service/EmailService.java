@@ -60,4 +60,41 @@ public class EmailService {
             throw new RuntimeException("Не удалось отправить письмо. Попробуйте позже.");
         }
     }
+
+    /**
+     * Sends a password-reset link via Resend HTTP API.
+     */
+    public void sendPasswordResetLink(String to, String resetLink) {
+        Map<String, Object> body = Map.of(
+                "from", from,
+                "to", new String[]{to},
+                "subject", "Сброс пароля Epigraph",
+                "text", """
+                    Вы запросили смену пароля в Epigraph.
+                    
+                    Перейдите по ссылке, чтобы установить новый пароль:
+                    %s
+                    
+                    Ссылка действительна 30 минут.
+                    Если вы не запрашивали смену пароля — просто проигнорируйте это письмо.
+                    """.formatted(resetLink)
+        );
+
+        try {
+            restClient.post()
+                    .uri(RESEND_API_URL)
+                    .header("Authorization", "Bearer " + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.info("Password reset email sent to {}", to);
+
+        } catch (Exception e) {
+            log.error("Failed to send password reset email to {}: {}", to, e.getMessage());
+
+            throw new RuntimeException("Не удалось отправить письмо. Попробуйте позже.");
+        }
+    }
 }

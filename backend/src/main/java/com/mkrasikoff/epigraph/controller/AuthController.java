@@ -6,6 +6,7 @@ import com.mkrasikoff.epigraph.dto.ErrorResponse;
 import com.mkrasikoff.epigraph.dto.RegisterRequest;
 import com.mkrasikoff.epigraph.dto.VerifyRequest;
 import com.mkrasikoff.epigraph.service.AuthService;
+import com.mkrasikoff.epigraph.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,11 @@ public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthService authService;
+    private final UserService userService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     @PostMapping("/register")
@@ -78,5 +81,20 @@ public class AuthController {
         log.info("User logged in — email = {}", request.getEmail());
 
         return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    /**
+     * Initiates a password-reset flow: sends a reset link to the given email.
+     * Always returns 202 to avoid leaking whether the email is registered.
+     */
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) return;
+
+        userService.initiatePasswordReset(email);
+
+        log.info("Password reset requested — email = {}", email);
     }
 }

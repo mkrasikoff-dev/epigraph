@@ -28,8 +28,10 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: email, profile
 
-# Email Verification
 app:
+  base-url: https://epigraph.me
+
+  # Email Verification
   mail:
     from: ${MAIL_FROM}
   resend:
