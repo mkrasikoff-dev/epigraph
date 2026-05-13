@@ -28,8 +28,10 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: email, profile
 
-# Jwt Service
 app:
+  base-url: http://localhost:8080
+
+  # Jwt Service
   jwt:
     secret: dGhpcy1pcy1hLXZlcnktc2VjcmV0LWtleS1mb3ItZXBpZ3JhcGgtYXBw
   vapid:

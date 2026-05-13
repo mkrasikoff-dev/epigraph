@@ -2,6 +2,7 @@ package com.mkrasikoff.epigraph.service;
 
 import com.mkrasikoff.epigraph.model.User;
 import com.mkrasikoff.epigraph.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,12 +10,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -36,5 +47,28 @@ public class UserService {
         user.setProvider("local");
 
         userRepository.save(user);
+    }
+
+    /**
+     * Initiates the password-reset flow: generates a short-lived reset token,
+     * builds the reset link, and sends it to the user's email.
+     * Silently does nothing when the email is unknown — avoids user enumeration.
+     */
+    @Transactional(readOnly = true)
+    public void initiatePasswordReset(String email) {
+        userRepository.findByEmail(email)
+                .filter(User::isEmailVerified)
+                .ifPresent(user -> {
+                    String token = jwtService.generateResetToken(user.getId());
+                    String link = baseUrl + "/?reset=" + token;
+                    emailService.sendPasswordResetLink(email, link);
+                });
+    }
+
+    @Transactional(readOnly = true)
+    public String getEmailByUserId(Long userId) {
+        return userRepository.findById(userId)
+                .map(User::getEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
     }
 }

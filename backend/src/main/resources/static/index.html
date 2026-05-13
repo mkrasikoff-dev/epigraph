@@ -168,6 +168,16 @@
 
         <p class="auth-error" id="auth-error"></p>
 
+        <p style="text-align:right;margin-top:calc(-1*var(--space-2));margin-bottom:var(--space-1)">
+            <button id="auth-forgot-btn"
+                    onclick="showForgotPasswordForm()"
+                    style="font-size:var(--text-xs);color:var(--color-text-muted);background:none;border:none;cursor:pointer;padding:0"
+                    onmouseover="this.style.color='var(--color-text)'"
+                    onmouseout="this.style.color='var(--color-text-muted)'">
+                Забыли пароль?
+            </button>
+        </p>
+
         <button class="btn-primary" id="auth-submit-btn" onclick="authSubmit()">Войти</button>
 
         <div class="auth-divider">или</div>
@@ -931,6 +941,15 @@
             setToken(urlToken);
             // Remove token from URL
             window.history.replaceState({}, document.title, '/');
+        }
+
+        // If password-reset link — handle before normal auth flow
+        const resetHandled = await handleResetTokenFromUrl();
+        if (resetHandled) {
+            // The modal is open, show guest mode in background and wait
+            showGuestMode();
+            window.history.replaceState(null, '', '#today');
+            return;
         }
 
         const token = getToken();
