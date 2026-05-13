@@ -559,20 +559,39 @@ async function resendVerifyCode(email) {
  * Replaces the login form with a "forgot password" email input.
  */
 function showForgotPasswordForm() {
-    const screen = document.getElementById('auth-screen');
-    // Save the login form state to restore on Back
-    _forgotPasswordReturnFn = restoreLoginForm;
-
-    // Hide login-mode elements
+    // Hide login-mode elements — scoped strictly to the login form, not the register panel
     document.getElementById('auth-login-header')?.style.setProperty('display', 'none');
     document.getElementById('auth-subtitle').style.display = 'none';
     document.querySelector('#auth-screen .auth-switch').style.display = 'none';
     document.getElementById('auth-forgot-btn').style.display = 'none';
 
-    const loginFields = screen.querySelector('.auth-field');
-    const forgotContainer = document.getElementById('auth-forgot-container');
+    // The login form elements sit directly inside .auth-card (not inside auth-register-form-col)
+    // Select them by ID to avoid accidentally touching the register panel
+    const loginOnlyIds = ['auth-email', 'auth-password', 'auth-password-hint',
+        'auth-error', 'auth-submit-btn'];
+    loginOnlyIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.dataset.forgotHidden = 'true'; el.style.display = 'none'; }
+    });
 
-    // Inject the forgot-password panel just before the first .auth-field
+    // Also hide the wrapping .auth-field divs that contain the login inputs
+    // (they are direct children of .auth-card, not inside auth-register-form-col)
+    document.querySelectorAll('#auth-screen > div.auth-card > .auth-field').forEach(el => {
+        el.dataset.forgotHidden = 'true';
+        el.style.display = 'none';
+    });
+
+    // Hide divider and Google button that belong to the login column
+    ['auth-divider', 'btn-google'].forEach(cls => {
+        // Only the direct-child ones, not those inside auth-register-form-col
+        const card = document.querySelector('#auth-screen .auth-card');
+        card.querySelectorAll(':scope > .auth-divider, :scope > .btn-google').forEach(el => {
+            el.dataset.forgotHidden = 'true';
+            el.style.display = 'none';
+        });
+    });
+
+    // Inject the forgot-password panel
     const panel = document.createElement('div');
     panel.id = 'auth-forgot-panel';
     panel.innerHTML = `
@@ -600,13 +619,16 @@ function showForgotPasswordForm() {
         </button>
     `;
 
-    // Hide original login fields
-    screen.querySelectorAll('.auth-field, .auth-error, #auth-submit-btn, .auth-divider, .btn-google').forEach(el => {
-        el.dataset.forgotHidden = 'true';
-        el.style.display = 'none';
-    });
+    // Append after the login header, before the login fields
+    const card = document.querySelector('#auth-screen .auth-card');
+    const loginHeader = document.getElementById('auth-login-header');
+    // Insert after auth-login-header (or at the top of card if header not found)
+    if (loginHeader && loginHeader.nextSibling) {
+        card.insertBefore(panel, loginHeader.nextSibling);
+    } else {
+        card.prepend(panel);
+    }
 
-    screen.querySelector('.auth-card').insertBefore(panel, screen.querySelector('.auth-field'));
     setTimeout(() => document.getElementById('forgot-email-input')?.focus(), 100);
 }
 
@@ -616,16 +638,15 @@ function showForgotPasswordForm() {
 function hideForgotPasswordForm() {
     document.getElementById('auth-forgot-panel')?.remove();
 
-    // Restore hidden elements
     document.querySelectorAll('[data-forgot-hidden="true"]').forEach(el => {
         el.style.display = '';
         delete el.dataset.forgotHidden;
     });
 
     document.getElementById('auth-login-header')?.style.removeProperty('display');
-    document.getElementById('auth-subtitle').style.display = '';
-    document.querySelector('#auth-screen .auth-switch').style.display = '';
-    document.getElementById('auth-forgot-btn').style.display = '';
+    document.getElementById('auth-subtitle').style.removeProperty('display');
+    document.querySelector('#auth-screen .auth-switch')?.style.removeProperty('display');
+    document.getElementById('auth-forgot-btn').style.removeProperty('display');
 }
 
 /**
